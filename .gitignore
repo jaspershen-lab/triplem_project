@@ -47,3 +47,31 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+2_data
+2_data/
+
+4_manuscript
+4_manuscript/
+
+5_summary
+5_summary/
+
+##ignore large files in 3_data_analsyis
+3_data_analysis/demo/HILIC_pos/QC_MSMS_NCE25_pos.mgf
+3_data_analysis/gtex/RNAAgeData/all_samples/salivary_gland/all.RData
+3_data_analysis/gtex/RNAAgeData/Caucasian/breast/all.RData
+3_data_analysis/gtex/RNAAgeData/Caucasian/pituitary/all.RData
+3_data_analysis/gut_microbiome/data_preparation/expression_data.xlsx
+3_data_analysis/nasal_microbiome/data_preparation/expression_data.xlsx
+3_data_analysis/oral_microbiome/data_preparation/expression_data.xlsx
+3_data_analysis/plasma_lipidomics/data_preparation/cluster_1/network.pdf
+3_data_analysis/plasma_lipidomics/data_preparation/cor_data
+3_data_analysis/plasma_lipidomics/data_preparation/object
+3_data_analysis/plasma_lipidomics/data_preparation/temp_data.txt
+3_data_analysis/plasma_metabolomics/data_preparation/metabolite/expression_data.xlsx
+3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object
+3_data_analysis/plasma_metabolomics/data_preparation/peak/object_corss_section
+3_data_analysis/plasma_transcriptome/data_preparation/expression_data
+3_data_analysis/plasma_transcriptome/data_preparation/object
+3_data_analysis/skin_microbiome/data_preparation/expression_data.xlsx
