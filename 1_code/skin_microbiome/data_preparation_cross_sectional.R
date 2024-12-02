@@ -4,11 +4,11 @@ no_function()
 setwd(r4projects::get_project_wd())
 rm(list = ls())
 
-source("1_code/100-tools.R")
+# source("1-code/100-tools.R")
 library(tidyverse)
 library(tidymass)
 
-setwd("3_data_analysis/gut_microbiome/data_preparation/")
+setwd("3_data_analysis/skin_microbiome/data_preparation/")
 
 load("object")
 
