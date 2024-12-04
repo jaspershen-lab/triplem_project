@@ -1,0 +1,8 @@
+"metric","value"
+"Number of samples",84
+"Number of microbiome features",208
+"Number of metabolites",50
+"Mean R² across all metabolites",-0.287584157613241
+"Median R² across all metabolites",-0.28935818617354
+"Number of metabolites with R² > 0.1",0
+"Number of metabolites with p < 0.05",0
