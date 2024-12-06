@@ -106,4 +106,4 @@ metabolomics_temp_object@expression_data <- expression_data
 microbiome_data<-gut_temp_object@expression_data
 metabolite_data<-metabolomics_temp_object@expression_data
 # 运行预测（自动使用并行计算）
-results <- analyze_metabolite_ev(microbiome_data, metabolite_data[1:20,])
+results_2 <- analyze_metabolite_ev(microbiome_data = microbiome_data[30:60,],metabolite_data =metabolite_data[1:30,],n_cores = 10  # 指定使用的核心数)

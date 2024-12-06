@@ -8,6 +8,34 @@ library(progress)    # 进度条
 
 # preprocess_data和calculate_r2函数保持不变
 
+preprocess_data <- function(microbiome_data, metabolite_data) {
+  # 获取样本ID
+  micro_samples <- colnames(microbiome_data)
+  meta_samples <- colnames(metabolite_data)
+  
+  # 检查样本ID
+  message("Initial sample counts:")
+  message(sprintf("Microbiome samples: %d", length(micro_samples)))
+  message(sprintf("Metabolite samples: %d", length(meta_samples)))
+  
+  # 找出共同样本
+  common_samples <- intersect(micro_samples, meta_samples)
+  message(sprintf("Common samples: %d", length(common_samples)))
+  
+  # 提取共同样本的数据
+  microbiome_matched <- microbiome_data[, common_samples]
+  metabolite_matched <- metabolite_data[, common_samples]
+  
+  return(list(
+    microbiome = microbiome_matched,
+    metabolite = metabolite_matched,
+    common_samples = common_samples
+  ))
+}
+
+calculate_r2 <- function(actual, predicted) {
+  1 - sum((actual - predicted)^2) / sum((actual - mean(actual))^2)
+}
 # 修改single_cv函数，添加种子参数
 single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
   # 如果提供了种子，设置随机种子
@@ -81,9 +109,9 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
   
   # GBDT参数
   gbdt_params <- list(
-    n.trees = 30,          
+    n.trees = 50,          
     interaction.depth = 10,
-    shrinkage = 0.1,
+    shrinkage = 0.01,
     n.minobsinnode = 10,
     bag.fraction = 0.5,
     train.fraction = 0.8
