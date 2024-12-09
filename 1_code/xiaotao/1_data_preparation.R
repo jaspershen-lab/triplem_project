@@ -56,6 +56,8 @@ what = "mean_intensity",
 group_by = "subject_id") %>% 
 microbiomedataset::convert2mass_dataset()
 
+dim(object_cross_section)
+
 save(object_cross_section, file = "object_cross_section.rda")
 
 
