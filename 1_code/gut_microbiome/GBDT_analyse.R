@@ -8,7 +8,7 @@ library(tidymass)
 library(plyr)
 library(microbiomedataset)
 ###load("data)
-load("3_data_analysis/nasal_microbiome/data_preparation/object_cross_section")
+load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
 gut_object<-object_cross_section
 
@@ -16,9 +16,9 @@ load("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cro
 
 metabolomics_object<-object_cross_section
 
-dir.create("3_data_analysis/nasal_microbiome/spearman/cross_section/",recursive = TRUE)
+dir.create("3_data_analysis/gut_microbiome/GBDT/cross_section/",recursive = TRUE)
 
-setwd("3_data_analysis/nasal_microbiome/spearman/cross_section/")
+setwd("3_data_analysis/gut_microbiome/GBDT/cross_section/")
 
 
 
@@ -106,4 +106,9 @@ metabolomics_temp_object@expression_data <- expression_data
 microbiome_data<-gut_temp_object@expression_data
 metabolite_data<-metabolomics_temp_object@expression_data
 # 运行预测（自动使用并行计算）
-results_2 <- analyze_metabolite_ev(microbiome_data = microbiome_data[30:60,],metabolite_data =metabolite_data[1:30,],n_cores = 10  # 指定使用的核心数)
+
+
+
+
+
+results <- analyze_metabolite_ev(microbiome_data = microbiome_data[30:60,],metabolite_data =metabolite_data[1:30,],n_cores = 10  )
