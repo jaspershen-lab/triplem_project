@@ -90,3 +90,12 @@ rsconnect/
 3_data_analysis/plasma_metabolomics/data_preparation/peak/object_corss_section
 3_data_analysis/plasma_metabolomics/data_preparation/peak/object_cross_section.rda
 >>>>>>> 5ec4e257578445d48c677a5d1360a474bc33bdfa
+3_data_analysis/gut_microbiome/data_preparation/expression_data.xlsx
+3_data_analysis/nasal_microbiome/data_preparation/expression_data.xlsx
+3_data_analysis/oral_microbiome/data_preparation/expression_data.xlsx
+3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results
+3_data_analysis/plasma_metabolomics/data_preparation/metabolite/expression_data.xlsx
+3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object
+3_data_analysis/plasma_metabolomics/data_preparation/peak/object_corss_section
+3_data_analysis/plasma_metabolomics/data_preparation/peak/object_cross_section.rda
+3_data_analysis/skin_microbiome/data_preparation/expression_data.xlsx
