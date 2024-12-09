@@ -1,5 +1,5 @@
 no_source()
-
+setwd(r4projects::get_project_wd())
 library(tidyverse)
 rm(list = ls())
 
