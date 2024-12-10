@@ -18,6 +18,7 @@ GBDT_R2[,]
 #GBDT_R2<-subset(GBDT_R2,r2_mean>0.1)
 
 
+
 # 载入必要的包
 library(ggplot2)
 library(dplyr)
@@ -49,7 +50,7 @@ plot_data <- GBDT_R2 %>%
   mutate(
     class_size = n(),
     # 只为Indoles and derivatives类中显著的代谢物添加标签
-    label = ifelse(HMDB.Class == "Indoles and derivatives" & r2_mean >= 0.1, 
+    label = ifelse(HMDB.Class == "Indoles and derivatives" & r2_mean >= 0.05, 
                    HMDB.Name, "")
   ) %>%
   ungroup() %>%
@@ -57,7 +58,7 @@ plot_data <- GBDT_R2 %>%
   # 按HMDB.Class排序
   arrange(HMDB.Class) %>%
   # 添加显著性标记
-  mutate(significant = ifelse(r2_mean >= 0.1, "significant", "not_significant"))
+  mutate(significant = ifelse(r2_mean >= 0.05, "significant", "not_significant"))
 
 # 为每个代谢物分配序号
 plot_data$metabolite_sort <- 1:nrow(plot_data)
@@ -139,11 +140,11 @@ p <- p +
     force = 10,
     max.overlaps = Inf
   ) +
-  scale_shape_manual(values = c("FALSE" = 16, "TRUE" = 17)) +
+  scale_shape_manual(values = c("FALSE" = 16, "TRUE" = 17,"NA"=16)) +
   scale_size(range = c(2, 2)) +
   # 添加参考线
   geom_hline(
-    yintercept = 0.1,
+    yintercept = 0.05,
     color = 'gray',
     linetype = 2,
     size = 1

@@ -39,3 +39,14 @@ lm_adjust <-
       rownames(expression_data)
     new_expression_data
   }
+
+
+
+
+
+body_site_color = c(
+  "gut" = "#edd064",
+  "skin" = "#f2ccac",
+  "oral" = "#a1d5b9",
+  "nasal" = "#a17db4"
+)
