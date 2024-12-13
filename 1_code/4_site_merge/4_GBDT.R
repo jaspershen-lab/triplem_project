@@ -424,3 +424,58 @@ library(RColorBrewer)
   
   four_site_GBDT_R2<-cbind(gut_GBDT_results_R2,oral_GBDT_results_R2$oral,skin_GBDT_results_R2$skin,nasal_GBDT_results_R2$nasal)
   colnames(four_site_GBDT_R2)<-c("metabolite","gut","oral","skin","nasal")
+  
+  
+  rownames(four_site_GBDT_R2)<-four_site_GBDT_R2$metabolite
+  four_site_GBDT_R2<-four_site_GBDT_R2[,-1]
+  
+  four_site_GBDT_R2[four_site_GBDT_R2 < 0.05] <- 0
+  
+  four_site_GBDT_R2<-four_site_GBDT_R2[rowSums(four_site_GBDT_R2)>0,]
+  
+  # 首先加载必要的包
+  library(ComplexHeatmap)
+  library(circlize)  # 用于颜色映射
+  
+
+  # 将数据框转换为矩阵
+  mat <- as.matrix(four_site_GBDT_R2)
+  
+  # 设置颜色映射
+  # 使用蓝色到红色的渐变色
+  col_fun = colorRamp2(
+    breaks = c(min(mat), 0, max(mat)),
+    colors = c("blue", "white", "red")
+  )
+  
+  # 创建热图
+  heatmap <- Heatmap(
+    mat,
+    name = "值",  # 图例标题
+    
+    # 颜色设置
+    col = col_fun1,
+    
+    # 聚类设置
+    cluster_rows = TRUE,
+    cluster_columns = TRUE,
+,
+    
+    # 行列名称设置
+    show_row_names = FALSE,
+    show_column_names = TRUE,
+    
+    # 热图标题
+    column_title = "热图标题",
+    
+    # 图例设置
+    heatmap_legend_param = list(
+      title = "值",
+      title_position = "leftcenter-rot",
+      legend_height = unit(4, "cm")
+    )
+  )
+  
+  # 绘制热图
+  draw(heatmap)
+  
