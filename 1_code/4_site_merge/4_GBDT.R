@@ -389,3 +389,38 @@ library(RColorBrewer)
   
   # 使用示例:
   results <- analyze_metabolite_distribution(df, metabolite_annotation)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+##  814个代谢物的热图
+  
+
+  gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
+  oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
+  skin_GBDT_results<-readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
+  nasal_GBDT_results<-readRDS("../../3_data_analysis/nasal_microbiome/GBDT/cross_section/nasal_GBDT_results")
+  gut_GBDT_results_R2<-gut_GBDT_results$summary[,c(1,2)]
+  colnames(gut_GBDT_results_R2)<-c("metabolite","gut")
+  
+  
+  oral_GBDT_results_R2<-oral_GBDT_results$summary[,c(1,2)]
+  colnames(oral_GBDT_results_R2)<-c("metabolite","oral")
+  
+  
+  skin_GBDT_results_R2<-skin_GBDT_results$summary[,c(1,2)]
+  colnames(skin_GBDT_results_R2)<-c("metabolite","skin")
+  
+  
+  nasal_GBDT_results_R2<-nasal_GBDT_results$summary[,c(1,2)]
+  colnames(nasal_GBDT_results_R2)<-c("metabolite","nasal")
+  
+  
+  
+  four_site_GBDT_R2<-cbind(gut_GBDT_results_R2,oral_GBDT_results_R2$oral,skin_GBDT_results_R2$skin,nasal_GBDT_results_R2$nasal)
+  colnames(four_site_GBDT_R2)<-c("metabolite","gut","oral","skin","nasal")
