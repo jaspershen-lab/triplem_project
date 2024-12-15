@@ -111,3 +111,84 @@ results = metabolite_class_enrichment(
   class_column='HMDB.Class',
   metabolite_column='variable_id'
 )
+
+
+
+results<-subset(results,P_value<1)
+
+results$site<-"gut"
+
+results_gut<-results
+
+
+
+results = metabolite_class_enrichment(
+  significant_metabolites=rownames(four_site_GBDT_R2_oral),
+  all_metabolites_df=metabolite_annotation_set,
+  class_column='HMDB.Class',
+  metabolite_column='variable_id'
+)
+
+
+
+results<-subset(results,P_value<1)
+
+results$site<-"oral"
+
+results_oral<-results
+
+
+results = metabolite_class_enrichment(
+  significant_metabolites=rownames(four_site_GBDT_R2_skin),
+  all_metabolites_df=metabolite_annotation_set,
+  class_column='HMDB.Class',
+  metabolite_column='variable_id'
+)
+
+
+
+results<-subset(results,P_value<1)
+
+results$site<-"skin"
+
+results_skin<-results
+
+
+results = metabolite_class_enrichment(
+  significant_metabolites=rownames(four_site_GBDT_R2_nasal),
+  all_metabolites_df=metabolite_annotation_set,
+  class_column='HMDB.Class',
+  metabolite_column='variable_id'
+)
+
+
+
+results<-subset(results,P_value<1)
+
+results$site<-"nasal"
+
+results_nasal<-results
+
+
+results_all<-rbind(results_gut,results_oral,results_skin,results_nasal)
+
+
+results_all<-subset(results_all,HMDB.Class%in%c("Benzene and substituted derivatives","Carboxylic acids and derivatives","Fatty Acyls","Glycerophospholipids","Indoles and derivatives","Organooxygen compounds","Steroids and steroid derivatives")
+)
+
+
+
+
+### 
+
+ggplot(results_all, aes(x = HMDB.Class, y = Significant_in_class)) +
+  geom_bar(stat = "identity", aes(fill=site)) +
+  theme_minimal() +facet_wrap(~site,nrow = 1)+coord_flip()+theme_light()+
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 14,family = "Helvetica"),
+    axis.title = element_text(size = 14,family = "Helvetica"),
+    axis.text.x = element_text(family = "Helvetica") , # 如果组名较长，可以倾斜x轴标签
+    axis.ticks.length = unit(0.25, "cm"),  # 增加刻度线长度
+    axis.ticks = element_line(linewidth = 0.8)  # 增加刻度线粗细
+  )+scale_fill_manual(values = body_site_color)
