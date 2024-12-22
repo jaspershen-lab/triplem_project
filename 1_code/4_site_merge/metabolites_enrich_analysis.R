@@ -325,9 +325,21 @@ library(ggsci)
 library(igraph)
 library(ggraph)
 
-ggraph(graph = ggraph_data,
-       layout = 'lgl',
-       circular = F)+
+
+layout_in_circles <- function(g, group=1) {
+  layout <- lapply(split(V(g), group), function(x) {
+    layout_in_circle(induced_subgraph(g,x))
+  })
+  layout <- Map(`*`, layout, seq_along(layout))
+  x <- matrix(0, nrow=vcount(g), ncol=2)
+  split(x, group) <- layout
+  x
+}
+
+
+
+
+ggraph(ggraph_data, layout=layout_in_circles(ggraph_data, group=vertices$type))+
   geom_edge_link(aes(edge_color = color),
                  edge_alpha = 0.8,
                  arrow = arrow(type = "closed",
@@ -341,7 +353,7 @@ ggraph(graph = ggraph_data,
                   alpha = .75)+
   
   geom_node_text(aes(x = x,
-                     y = y-0.5 ,
+                     y = y+0.1 ,
                      label  = show_name),
                  size = 3)+
   theme_void()+
