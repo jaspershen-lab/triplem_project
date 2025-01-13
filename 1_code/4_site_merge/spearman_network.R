@@ -3,7 +3,7 @@ setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
 setwd("1_code/4_site_merge/")
 
-
+library(readxl)
 ###load("data)
 load("../../3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
@@ -417,6 +417,8 @@ filtered_degrees <- degree(filtered_graph)
 V(filtered_graph)$degree <- filtered_degrees
 V(filtered_graph)$show_label <- filtered_nodes$show_label
 # 创建ggraph可视化
+
+library(ggraph)
 ggraph(filtered_graph, layout = "stress") +
   # 添加边
   geom_edge_link(aes(edge_alpha = abs(Correlation),

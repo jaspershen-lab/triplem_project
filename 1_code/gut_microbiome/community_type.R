@@ -90,8 +90,8 @@ for (k in seq(ncol(fitted(best)))) {
     mutate(OTU = factor(OTU, levels = unique(OTU))) %>%
     # Only show the most important drivers
     filter(abs(value) > quantile(abs(value), 0.8))     
-  
-  p <- ggplot(d, aes(x = OTU, y = value)) +
+  d<-merge(d,data.frame(gut_object@variable_info),by.x="OTU",by.y="variable_id")
+  p <- ggplot(d, aes(x = Genus, y = value)) +
     geom_bar(stat = "identity") +
     coord_flip() +
     labs(title = paste("Top drivers: community type", k))
