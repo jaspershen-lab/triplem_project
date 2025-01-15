@@ -221,31 +221,6 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data,
   ))
 }
 
-# 添加新的预测函数
-predict_metabolite <- function(model_file, new_data) {
-  # 加载模型信息
-  model_info <- readRDS(model_file)
-  
-  # 确保输入数据包含所需的特征
-  required_features <- model_info$selected_features
-  missing_features <- setdiff(required_features, colnames(new_data))
-  
-  if (length(missing_features) > 0) {
-    stop("Missing required features: ", paste(missing_features, collapse = ", "))
-  }
-  
-  # 选择需要的特征并确保顺序正确
-  new_data <- new_data[, required_features, drop = FALSE]
-  
-  # 进行预测
-  predictions <- predict(model_info$model, new_data, n.trees = model_info$parameters$n.trees)
-  
-  return(list(
-    predictions = predictions,
-    model_performance = model_info$performance,
-    feature_importance = model_info$feature_importance
-  ))
-}
 
 # 使用示例:
 # results <- analyze_metabolite_ev(
@@ -259,8 +234,3 @@ predict_metabolite <- function(model_file, new_data) {
 #   rho_threshold = 0.1
 # )
 #
-# # 预测新样本
-new_predictions <- predict_metabolite(
-  "metabolite_models/m", 
-   new_microbiome_data
- )

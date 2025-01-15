@@ -232,13 +232,6 @@ results <- analyze_metabolite_ev(
 
 
 
-new_predictions <- predict_metabolite(
-  "metabolite_models/M182T470_2_POS_HILIC_model.rds", 
-  data.frame(t(MetaCardis_metagenomic))
-)
-
-
-cor.test(new_predictions$predictions,MetaCardis_metabolome$Met00172,method = "pearson")
 
 
 
@@ -320,33 +313,44 @@ predictions_df<-merge(predictions_df,metabolite_annotation,by="variable_id")
 
 metabolites_name<-unique(predictions_df$HMDB)
 
-for (i in metabolites_name){
-  
-  predictions_data<-subset(predictions_df,HMDB==i)[,2:1147]
-  predictions_data<-colSums(predictions_data)
-  
-  obersered_sample_name<-subset(MetaCardis_metabome_annotation,HMDB==i)
-  obersered_sample_name<-obersered_sample_name$Met_ID
-  for (z in obersered_sample_name){
-    
-    obersered_data<-MetaCardis_metabolome[,z]
-    
-    merge_data<-rbind(predictions_data,obersered_data)
-    merge_data<-data.frame(t(merge_data))
-    colnames(merge_data)<-c("predictions","obersered")
-    
-    merge_data<-na.omit(merge_data)
-    
-    results_cor<-cor.test(merge_data$predictions,merge_data$obersered)
-    
-    results_cor<-data.frame(results_cor$p.value,results_cor$estimate)
-    
-    results_cor$HMDB_Name<-i
-    
-  }
-  
-  results_cor_name<-rbind(results_cor_name,results_cor)
-  
-}
+# 预先分配结果数据框，避免重复rbind
+results_cor_name <- data.frame(
+  p.value = numeric(0),
+  estimate = numeric(0),
+  HMDB_Name = character(0)
+)
 
+# 使用lapply替代for循环来提高性能
+results_cor_name <- do.call(rbind, lapply(metabolites_name, function(i) {
+  # 提取预测数据并计算列和
+  predictions_data <- colSums(subset(predictions_df, HMDB == i)[, 2:1147])
+  
+  # 获取观察样本名称
+  observed_sample_names <- subset(MetaCardis_metabome_annotation, HMDB == i)$Met_ID
+  
+  # 对每个观察样本进行相关性分析
+  do.call(rbind, lapply(observed_sample_names, function(z) {
+    # 获取观察数据
+    observed_data <- MetaCardis_metabolome[, z]
+    
+    # 合并数据并转置
+    merge_data <- data.frame(
+      predictions = predictions_data,
+      observed = observed_data
+    )
+    
+    # 移除NA值
+    merge_data <- na.omit(merge_data)
+    
+    # 计算相关性
+    cor_result <- cor.test(merge_data$predictions, merge_data$observed)
+    
+    # 返回结果数据框
+    data.frame(
+      p.value = cor_result$p.value,
+      estimate = cor_result$estimate,
+      HMDB_Name = i
+    )
+  }))
+}))
 
