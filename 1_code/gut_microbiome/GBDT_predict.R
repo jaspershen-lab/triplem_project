@@ -64,7 +64,7 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data,
   gbdt_params <- list(
     n.trees = 50,
     interaction.depth = 10,
-    shrinkage = 0.01,
+    shrinkage = 0.03,
     n.minobsinnode = 8,
     bag.fraction = 0.8,
     train.fraction = 0.8
@@ -223,14 +223,14 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data,
 
 
 # 使用示例:
-# results <- analyze_metabolite_ev(
-#   microbiome_data, 
-#   metabolite_data,
-#   model_save_dir = "metabolite_models",
-#   do_feature_selection = TRUE,
-#   correlation_method = "spearman",
-#   p_threshold = 0.05,
-#   p_adjust_method = "none",
-#   rho_threshold = 0.1
-# )
-#
+ results <- analyze_metabolite_ev(
+   microbiome_data, 
+   metabolite_data,
+   model_save_dir = "metabolite_models",
+   do_feature_selection = TRUE,
+   correlation_method = "spearman",
+   p_threshold = 0.05,
+   p_adjust_method = "none",
+   rho_threshold = 0.1
+ )
+

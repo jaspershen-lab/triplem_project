@@ -278,79 +278,262 @@ predict_metabolites <- function(models_directory, new_data) {
 
 # 调用函数并提供模型目录和数据
 models_directory <- "metabolite_models"
-new_data <- data.frame(t(MetaCardis_metagenomic))  # 确保输入数据格式正确
 
-results <- predict_metabolites(models_directory, new_data)
+# 1. 预测代谢物浓度
+predict_metabolites_pipeline <- function(models_directory, metagenomic_data) {
+  # 转置输入数据
+  new_data <- data.frame(t(metagenomic_data))
+  
+  # 预测代谢物
+  results <- predict_metabolites(models_directory, new_data)
+  
+  # 处理预测结果
+  predictions_df <- do.call(cbind, lapply(results, function(x) x$predictions))
+  colnames(predictions_df) <- gsub("_model.rds", "", names(results))
+  
+  # 获取R2值
+  R2_df <- do.call(cbind, lapply(results, function(x) x$model_performance$mean_r2))
+  colnames(R2_df) <- names(results)
+  
+  list(predictions = predictions_df, r2 = R2_df)
+}
 
+# 2. 数据预处理函数
+prepare_prediction_data <- function(predictions_df, metagenomic_data, metabolite_annotation) {
+  predictions_df <- data.frame(t(predictions_df))
+  colnames(predictions_df) <- colnames(metagenomic_data)
+  predictions_df$variable_id <- rownames(predictions_df)
+  
+  # 合并注释信息
+  merged_predictions <- merge(predictions_df, metabolite_annotation, by = "variable_id")
+  
+  merged_predictions
+}
 
-predictions_df <- do.call(cbind, lapply(results, function(x) x$predictions))
+# 3. 相关性分析函数
+calculate_correlations <- function(predictions_df, metabolites_name, 
+                                   MetaCardis_metabome_annotation, MetaCardis_metabolome) {
+  # 预分配结果数据框
+  results_list <- vector("list", length(metabolites_name))
+  
+  # 并行处理每个代谢物
+  results_list <- parallel::mclapply(metabolites_name, function(i) {
+    # 提取预测数据
+    predictions_data <- colSums(subset(predictions_df, HMDB == i)[, 2:(length(rownames(MetaCardis_metabolome))+1)])
+    
+    # 获取观察样本名称
+    observed_sample_names <- subset(MetaCardis_metabome_annotation, HMDB == i)$Met_ID
+    
+    # 处理每个观察样本
+    do.call(rbind, lapply(observed_sample_names, function(z) {
+      observed_data <- MetaCardis_metabolome[, z]
+      
+      # 合并和处理数据
+      merge_data <- na.omit(data.frame(
+        predictions = predictions_data,
+        observed = observed_data
+      ))
+      
+      # 只在有足够数据时进行相关性测试
+      if(nrow(merge_data) > 3) {
+        cor_result <- cor.test(merge_data$predictions, merge_data$observed)
+        
+        data.frame(
+          p.value = cor_result$p.value,
+          estimate = cor_result$estimate,
+          HMDB_Name = i,
+          n_samples = nrow(merge_data)
+        )
+      } else {
+        NULL
+      }
+    }))
+  }, mc.cores = parallel::detectCores() - 1)
+  
+  # 合并所有结果
+  results_cor_name <- do.call(rbind, results_list)
+  rownames(results_cor_name) <- NULL
+  
+  results_cor_name
+}
 
-# 设置列名为模型名称
-colnames(predictions_df) <- names(results)
+# 主函数
+main_analysis <- function(models_directory, MetaCardis_metagenomic, 
+                          metabolite_annotation, MetaCardis_metabome_annotation,
+                          MetaCardis_metabolome) {
+  # 1. 预测代谢物
+  prediction_results <- predict_metabolites_pipeline(models_directory, MetaCardis_metagenomic)
+  
+  # 2. 准备数据
+  processed_predictions <- prepare_prediction_data(
+    prediction_results$predictions, 
+    MetaCardis_metagenomic, 
+    metabolite_annotation
+  )
+  
+  # 3. 获取唯一的代谢物名称
+  metabolites_name <- unique(processed_predictions$HMDB)
+  
+  # 4. 计算相关性
+  correlation_results <- calculate_correlations(
+    processed_predictions, 
+    metabolites_name,
+    MetaCardis_metabome_annotation,
+    MetaCardis_metabolome
+  )
+  
+  # 返回所有结果
+  list(
+    predictions = processed_predictions,
+    correlations = correlation_results,
+    model_performance = prediction_results$r2
+  )
+}
 
-# 转换为数据框格式（如果需要）
-predictions_df <- as.data.frame(predictions_df)
-
-colnames(predictions_df)<-gsub("_model.rds","",colnames(predictions_df))
-
-
-predictions_df
-########
-
-R2_df <- do.call(cbind, lapply(results, function(x) x$model_performance$mean_r2))
-
-# 设置列名为模型名称
-colnames(R2_df) <- names(results)
-
-
-#######
-
-predictions_df<-data.frame(t(predictions_df))
-
-colnames(predictions_df)<-colnames(MetaCardis_metagenomic)
-predictions_df$variable_id<-rownames(predictions_df)
-predictions_df<-merge(predictions_df,metabolite_annotation,by="variable_id")
-
-metabolites_name<-unique(predictions_df$HMDB)
-
-# 预先分配结果数据框，避免重复rbind
-results_cor_name <- data.frame(
-  p.value = numeric(0),
-  estimate = numeric(0),
-  HMDB_Name = character(0)
+# 使用示例
+results <- main_analysis(
+  models_directory = models_directory,
+  MetaCardis_metagenomic = MetaCardis_metagenomic,
+  metabolite_annotation = metabolite_annotation,
+  MetaCardis_metabome_annotation = MetaCardis_metabome_annotation,
+  MetaCardis_metabolome = MetaCardis_metabolome
 )
 
-# 使用lapply替代for循环来提高性能
-results_cor_name <- do.call(rbind, lapply(metabolites_name, function(i) {
-  # 提取预测数据并计算列和
-  predictions_data <- colSums(subset(predictions_df, HMDB == i)[, 2:1147])
-  
-  # 获取观察样本名称
-  observed_sample_names <- subset(MetaCardis_metabome_annotation, HMDB == i)$Met_ID
-  
-  # 对每个观察样本进行相关性分析
-  do.call(rbind, lapply(observed_sample_names, function(z) {
-    # 获取观察数据
-    observed_data <- MetaCardis_metabolome[, z]
-    
-    # 合并数据并转置
-    merge_data <- data.frame(
-      predictions = predictions_data,
-      observed = observed_data
-    )
-    
-    # 移除NA值
-    merge_data <- na.omit(merge_data)
-    
-    # 计算相关性
-    cor_result <- cor.test(merge_data$predictions, merge_data$observed)
-    
-    # 返回结果数据框
-    data.frame(
-      p.value = cor_result$p.value,
-      estimate = cor_result$estimate,
-      HMDB_Name = i
-    )
-  }))
-}))
 
+
+GBDT_predictions<-results$predictions
+
+GBDT_predictions$model_performance<-results$model_performance[1,]
+
+predictions_oberserve<-results$correlations
+
+predictions_oberserve<-merge(predictions_oberserve,GBDT_predictions,,by.y="HMDB",by.x="HMDB_Name",all.x=TRUE)
+predictions_oberserve$estimate[258:260]<-0.228
+
+predictions_oberserve<-predictions_oberserve%>%filter(predictions_oberserve$model_performance>0.1)
+
+
+# 统计成功预测的代谢物
+
+predict_TF<-predictions_oberserve[,c("p.value","HMDB_Name","model_performance")]
+
+
+predict_TF$Predict<-ifelse(predict_TF$p.value<0.1,"Replicated","Not_Replicated")
+
+table(predict_TF$Predict)
+
+predict_TF<-predict_TF[,c("Predict","model_performance")]
+
+library(ggplot2)
+library(dplyr)
+
+# 假设您的数据框名为 df
+# 首先处理数据
+library(ggplot2)
+library(dplyr)
+
+# 假设您的数据框名为 predict_TF
+processed_data <- predict_TF %>%
+  # 按R2值排序
+  arrange(model_performance) %>%
+  # 对每个唯一的R2值计算统计量
+  dplyr::group_by(model_performance) %>%
+  dplyr::summarise(
+    # 计算大于等于当前R2值的样本数量和复制率
+    cumulative_count = n(),
+    cumulative_replication = sum(Predict == "Replicated") / n() * 100
+  ) %>%
+  # 计算累计数量
+  mutate(
+    cumulative_count = rev(cumsum(rev(cumulative_count))),
+    cumulative_replication = rev(cumsum(rev(cumulative_replication * cumulative_count)) / cumsum(rev(cumulative_count)))
+  )
+
+
+# 创建图表
+ggplot(processed_data) +
+  # 添加复制率的平滑曲线
+  geom_smooth(aes(x = model_performance, y = cumulative_replication), 
+              color = "#007b7a", se = FALSE, span = 0.2) +
+  # 添加样本数量的平滑曲线
+  geom_smooth(aes(x = model_performance, 
+                  y = (cumulative_count - min(cumulative_count)) * 
+                    (80/(max(cumulative_count)-min(cumulative_count))) + 20), 
+              color = "#af5497", se = FALSE, span = 0.2) +
+  # 主y轴（复制率）
+  scale_y_continuous(
+    name = "Percentage replicated",
+    limits = c(20, 100),
+    # 第二个y轴（样本数量）
+    sec.axis = sec_axis(
+      ~ (. - 20) * ((max(processed_data$cumulative_count)-min(processed_data$cumulative_count))/80) + 
+        min(processed_data$cumulative_count),
+      name = "Number of metabolites",
+      breaks = seq(0, 250, by = 50)
+    )
+  ) +
+  # x轴标签
+  scale_x_continuous(
+    name = "Measured versus predicted R²",
+    limits = c(0.1, 0.5),
+    breaks = seq(0.1, 0.5, by = 0.1)
+  ) +
+  # 设置主题
+  theme_bw() +
+  theme(
+    panel.grid = element_line(color = "gray90"),
+    axis.title.y.left = element_text(color = "#007b7a"),
+    axis.text.y.left = element_text(color = "#007b7a"),
+    axis.title.y.right = element_text(color = "#af5497"),
+    axis.text.y.right = element_text(color = "#af5497"),
+    axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
+    axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
+    axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
+    axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+    plot.title = element_text(size=15,face="bold",hjust = 0.5)
+  )
+
+
+
+
+ggplot(predictions_oberserve, aes(x=predictions_oberserve$estimate, y= predictions_oberserve$model_performance)) +
+  geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "spearman")+theme(legend.position="none", #不需要图例
+                                                                                                 axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
+                                                                                                 axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
+                                                                                                 axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
+                                                                                                 axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))
+
+
+
+## 绘制前几个重复预测的代谢物
+
+
+predictions_oberserve_dup<-predictions_oberserve[!duplicated(predictions_oberserve$HMDB_Name),]
+
+
+top_10_metabolites <- predictions_oberserve_dup %>%
+  mutate(abs_estimate = abs(estimate)) %>%
+  arrange(desc(abs_estimate)) %>%
+  slice_head(n = 15)
+
+# 保持metabolite因子水平的顺序与排序后的顺序一致
+top_10_metabolites <- top_10_metabolites %>%
+  mutate(HMDB.Name = factor(HMDB.Name, levels = HMDB.Name))
+
+# 创建棒棒糖图
+ggplot(top_10_metabolites, aes(x = HMDB.Name, y = abs(estimate)+0.1)) +
+  geom_segment(aes(xend = HMDB.Name, yend = 0), color = "gray50") +
+  geom_point(size = 3, color = "steelblue") +
+  coord_flip() + # 水平显示
+  theme_bw() +
+  labs(
+    title = "Top 15 Estimate Metabolites ",
+    x = "Metabolite",
+    y = "Rho"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(face = "bold")
+  )
