@@ -50,3 +50,25 @@ body_site_color = c(
   "oral" = "#a1d5b9",
   "nasal" = "#a17db4"
 )
+
+
+iris_color = c(
+  "IR" = "#bf3f7c",
+  "IS" = "#46c1be",
+  "Unknown" = "#546672"
+)
+
+
+sex_color <-
+  c(
+    "Female" = wesanderson::wes_palettes$Rushmore1[3],
+    "Male" = wesanderson::wes_palettes$Rushmore1[1]
+  )
+
+ethnicity_color <-
+  c(
+    "Caucasian" = wesanderson::wes_palettes$Darjeeling2[1],
+    "Asian" = wesanderson::wes_palettes$Darjeeling2[2],
+    "Hispanics" = wesanderson::wes_palettes$Darjeeling2[3],
+    "Black" = wesanderson::wes_palettes$Darjeeling2[4]
+  )

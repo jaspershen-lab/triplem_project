@@ -1,4 +1,3 @@
-# load data
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
@@ -6,6 +5,8 @@ source("1_code/mantel_Procrustes_code.R")
 library(tidyverse)
 library(tidymass)
 library(readxl)
+
+
 ###load("data)
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
@@ -109,47 +110,36 @@ metabolomics_temp_object@expression_data <- expression_data
 
 
 
+## 
+
+gut_microbiome<-data.frame(t(gut_expression_data),check.names = FALSE)
+
+colnames(gut_microbiome)<-gut_temp_object@variable_info$Genus
+gut_microbiome$sample_id<-rownames(gut_microbiome)
 
 
-gut_data <- gut_temp_object@expression_data 
-metabolome_data <- metabolomics_temp_object@expression_data
+plasma_metabolome<-data.frame(t(expression_data),check.names = FALSE)
+plasma_metabolome$sample_id<-rownames(plasma_metabolome)
 
-metabolomics_class<-metabolomics_class%>%filter(HMDB.Source.Microbial=="TRUE")
-metabolome_data<-metabolome_data[metabolomics_class$variable_id,]
-sample_info <- metabolomics_temp_object@sample_info
-rownames(sample_info)<-sample_info$sample_id
-# 1. 筛选显著相关的代谢物
-selection_results <- select_significant_metabolites(
-  gut_microbiome = gut_data,
-  metabolome = metabolome_data,
-  cor_threshold = 0.3,
-  p_threshold = 0.05
-)
 
-# 2. 可视化代谢物筛选结果
-metabolite_plot <- plot_metabolite_selection(selection_results,metabolomics_class = metabolomics_class)
 
-gut_data<-gut_data
+sample_info_mm<-sample_info%>%
+  full_join(gut_microbiome, by = "sample_id") %>%
+  full_join(plasma_metabolome, by = "sample_id") 
 
-# 3. 分析关联
-results <- analyze_associations(
-  gut_microbiome = gut_data[,], 
-  metabolome = metabolome_data,
-  selected_metabolites = selection_results$significant_metabolites,
-  metadata =  sample_info  # 包含IRIS列的元数据
-)
 
-# 4. 绘制结果
-plots <- plot_associations(results)
+sample_info_mm<-subset(sample_info_mm,!IRIS=="IS")
 
-distance<-plots$distances$data
-distance<-cbind(distance,gut_temp_object@sample_info[,15:22])
-distance<-subset(distance,diabetes_class=="Prediabetic")
-ggplot(distance, aes(x=distance$adjusted_age, y= coinertia_distance)) +
+ggplot(sample_info_mm, aes(x=adjusted_age, y= M263T353_NEG_HILIC)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
   geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", #不需要图例
                                                                                                 axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
                                                                                                 axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
                                                                                                 axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
                                                                                                 axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
-                                                                                                plot.title = element_text(size=15,face="bold",hjust = 0.5))
+                                                                                                plot.title = element_text(size=15,face="bold",hjust = 0.5))+
+  labs(title = "Phenylacetylglutamine",
+       y = "Standar Adundance",
+       x = "Age")+ylim(c(-2,2.5))
+
+
