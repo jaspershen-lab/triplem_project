@@ -169,7 +169,6 @@ head(metab_loadings)
 
 
 
-distances<- 1 - (distances - min(distances)) / (max(distances) - min(distances))
 
 a<-cbind(gut_temp_object@sample_info,distances)
 
@@ -182,6 +181,58 @@ ggplot(a, aes(x=adjusted_age, y= distances)) +
                                                                                                 axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+ylab("MMC")+xlab("Age")+xlim(c(33,70))
 
+
+
+### 绘制最重要的细菌、代谢物
+
+
+micro_loadings<-subset(micro_loadings,CS1<(-0.1))
+metab_loadings<-subset(metab_loadings,RS1<(-0.1))
+
+
+micro_loadings <- merge(micro_loadings, data.frame(gut_temp_object@variable_info), by = "row.names")
+
+row.names(metabolomics_Microbial)<-metabolomics_Microbial$variable_id
+
+
+metab_loadings$variable_id<-row.names(metab_loadings)
+metab_loadings <- merge(metab_loadings, metabolomics_Microbial, by = "variable_id")
+
+metab_loadings <- arrange(metab_loadings, RS1,decreasing=TRUE)
+metab_loadings$HMDB.Name<-factor(metab_loadings$HMDB.Name,levels = unique(metab_loadings$HMDB.Name))
+p1<-ggplot(metab_loadings, aes(x = HMDB.Name, y = abs(RS1))) +
+  geom_segment(aes(xend = HMDB.Name, yend = 0), color = "gray50") +
+  geom_point(size = 3, color = "steelblue") +
+  coord_flip() + # 水平显示
+  theme_bw() +
+  labs(
+    title = "Top Estimate Metabolites ",
+    x = "Metabolites",
+    y = "Loadings"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(face = "bold")
+  )
+
+
+micro_loadings <- arrange(micro_loadings, CS1,decreasing=TRUE)
+micro_loadings$Genus<-factor(micro_loadings$Genus,levels = unique(micro_loadings$Genus))
+
+p2<-ggplot(micro_loadings, aes(x = Genus, y = abs(CS1))) +
+  geom_segment(aes(xend = Genus, yend = 0), color = "gray50") +
+  geom_point(size = 3, color = "steelblue") +
+  coord_flip() + # 水平显示
+  theme_bw() +
+  labs(
+    title = "Top Estimate Microbiome ",
+    x = "Genus",
+    y = "Loadings"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(face = "bold")
+  )
 
 
 
