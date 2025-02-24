@@ -34,10 +34,12 @@ preprocess_combined_data <- function(gut_data, oral_data, metabolite_data) {
   # 合并数据
   combined_microbiome <- cbind(gut_df, oral_df)
   
-  # 添加来源前缀以区分特征
-  colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)] <- 
-    paste0(combined_microbiome$source, "", 
-           colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)])
+  # 如果存在 source 列，则添加来源前缀（否则忽略）
+  if ("source" %in% colnames(combined_microbiome)) {
+    colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)] <- 
+      paste0(combined_microbiome$source, "_", 
+             colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)])
+  }
   
   # 确保样本顺序一致
   rownames(combined_microbiome) <- common_samples
@@ -49,7 +51,6 @@ preprocess_combined_data <- function(gut_data, oral_data, metabolite_data) {
   ))
 }
 
-# 修改主分析函数以使用合并的数据
 analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data, 
                                            n_cores = NULL, seed = 42,
                                            do_feature_selection = TRUE,
@@ -131,7 +132,11 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
         rho_threshold = rho_threshold
       )
       selected_features <- feature_selection$selected_features
-      X_selected <- X[, selected_features, drop = FALSE]
+      if (length(selected_features) > 0) {
+        X_selected <- X[, selected_features, drop = FALSE]
+      } else {
+        X_selected <- X
+      }
       
       # 统计选中的特征中来自口腔和肠道的比例
       n_gut <- sum(grepl("^gut_", selected_features))
@@ -162,11 +167,27 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
       ci <- quantile(boot_results, probs = c(0.025, 0.975))
       t_stat <- mean_r2 / (sd(boot_results) / sqrt(n_boots))
       p_value <- 2 * pt(-abs(t_stat), df = n_boots - 1)
+      
+      # 使用所有选定特征训练一个最终的GBDT模型，以计算特征重要性
+      final_data <- data.frame(current_y, X_selected)
+      final_model <- gbm(
+        current_y ~ ., data = final_data,
+        distribution = "gaussian",
+        n.trees = gbdt_params$n.trees,
+        interaction.depth = gbdt_params$interaction.depth,
+        shrinkage = gbdt_params$shrinkage,
+        n.minobsinnode = gbdt_params$n.minobsinnode,
+        bag.fraction = gbdt_params$bag.fraction,
+        train.fraction = gbdt_params$train.fraction,
+        verbose = FALSE
+      )
+      feature_importance <- summary(final_model, plot = FALSE)
     } else {
       boot_results <- rep(0, n_boots)
       mean_r2 <- 0
       ci <- c(0, 0)
       p_value <- 1
+      feature_importance <- NULL
     }
     
     # 存储结果
@@ -180,7 +201,8 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
       feature_selection = if(do_feature_selection) feature_selection else NULL,
       n_selected_features = if(do_feature_selection) length(selected_features) else ncol(X),
       n_gut_features = n_gut,
-      n_oral_features = n_oral
+      n_oral_features = n_oral,
+      feature_importance = feature_importance  # 添加特征重要性结果
     )
     
     # 更新进度条和打印结果
@@ -189,7 +211,8 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
     time_taken <- difftime(end_time, start_time, units = "mins")
     message(sprintf("\nMetabolite %d/%d (%s)", i, ncol(Y), colnames(Y)[i]))
     message(sprintf("Selected features: %d (Gut: %d, Oral: %d)", 
-                    length(selected_features), n_gut, n_oral))
+                    if(do_feature_selection) length(selected_features) else ncol(X),
+                    n_gut, n_oral))
     message(sprintf("R² = %.3f (95%% CI: %.3f-%.3f, p = %.3e)", 
                     mean_r2, ci[1], ci[2], p_value))
     message(sprintf("Time: %.2f mins", time_taken))
@@ -230,7 +253,6 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
   ))
 }
 
-# 新增可视化函数
 plot_combined_feature_selection_results <- function(results) {
   # 准备数据
   feature_summary <- do.call(rbind, lapply(results$detailed_results, function(x) {
@@ -289,23 +311,59 @@ plot_combined_feature_selection_results <- function(results) {
 
 
 
-
-
- combined_results <- analyze_combined_metabolite_ev(
-   gut_data = gut_temp_object@expression_data,
-   oral_data = oral_temp_object@expression_data,
-   metabolite_data = metabolomics_temp_object@expression_data,
-   do_feature_selection = TRUE,
-   correlation_method = "spearman",
-   p_threshold = 0.05,
-   p_adjust_method = "none",
-  rho_threshold = 0.1
- )
+ library(ggplot2)
+ feature_imp_df <- combined_results$detailed_results[[1]]$feature_importance
+ ggplot(feature_imp_df, aes(x = reorder(var, rel.inf), y = rel.inf)) +
+   geom_bar(stat = "identity", fill = "steelblue") +
+   coord_flip() +
+   labs(title = paste("Feature Importance for", combined_results$detailed_results[[1]]$metabolite),
+        x = "Bacterial Feature", y = "Importance Score") +
+   theme_minimal()
+ 
+ 
+ 
+ # 提取每个代谢物的特征重要性并整理成数据框
+ get_feature_importance_df <- function(combined_results) {
+   # 存储所有代谢物的重要性数据
+   importance_list <- list()
+   
+   # 遍历每个代谢物的结果
+   for (i in seq_along(combined_results$detailed_results)) {
+     metabolite_name <- combined_results$detailed_results[[i]]$metabolite
+     feature_importance <- combined_results$detailed_results[[i]]$feature_importance
+     
+     # 如果 feature_importance 为空，则跳过
+     if (is.null(feature_importance)) next
+     
+     # 添加代谢物信息
+     feature_importance$metabolite <- metabolite_name
+     
+     # 存储到列表
+     importance_list[[i]] <- feature_importance
+   }
+   
+   # 合并所有代谢物的数据
+   importance_df <- do.call(rbind, importance_list)
+   
+   # 规范列名
+   colnames(importance_df) <- c("species", "importance", "metabolite")
+   
+   return(importance_df)
+ }
+ 
+ # 运行函数获取数据框
+ feature_importance_df <- get_feature_importance_df(combined_results)
+ 
+ # 显示前几行
+ head(feature_importance_df)
+ 
+ 
+ 
  
  gut_oral_results_summary_co_influence<- gut_oral_results_summary
  merge_model<-combined_results$summary[,c("metabolite","r2_mean")]
  gut_oral_results_summary_co_influence<-merge(gut_oral_results_summary_co_influence,merge_model,by="metabolite")
-   
+ 
  gut_oral_results_summary_co_influence$R2_diff<-gut_oral_results_summary_co_influence$r2_mean-(gut_oral_results_summary_co_influence$gut_R2+gut_oral_results_summary_co_influence$oral_R2)
  
  
@@ -391,4 +449,167 @@ plot_combined_feature_selection_results <- function(results) {
  data_sorted$difference <- data_sorted$sum_R2 - data_sorted$r2_mean
  summary(data_sorted$difference)
  
- #
+ # 创建条形图
+ 
+ 
+ 
+ 
+ 
+ # 筛选oral和gut共同影响的代谢物
+ 
+ feature_importance_df_co_influence<-feature_importance_df
+ 
+ # 筛选重要性较低的物种
+ 
+ feature_importance_df_co_influence<-subset(feature_importance_df_co_influence,importance>1)
+ 
+ 
+ feature_importance_df_co_influence<-merge(feature_importance_df_co_influence,metabolite_annotation[,c("variable_id","HMDB.Name","HMDB.Class")],by.x="metabolite",by.y="variable_id")
+ #生成gut 和 oral 共同的物种分类表
+ 
+ merge_tax<-data.frame(rbind(gut_temp_object@variable_info,oral_temp_object@variable_info))
+ 
+ #将species列拆分为两列   
+ feature_importance_df_co_influence <- separate(feature_importance_df_co_influence, "species", into = c("group", "variable_id"), sep = "_",extra = "merge")
+
+ feature_importance_df_co_influence<-merge(feature_importance_df_co_influence,merge_tax[,c("Genus","variable_id")],by="variable_id",all=TRUE)
+ 
+
+ 
+ 
+ feature_importance_df_co_influence<-subset(feature_importance_df_co_influence,metabolite%in%data_sorted$metabolite)
+ 
+
+ 
+# 加载必要的包
+library(ComplexHeatmap)
+library(circlize)
+library(tidyr)
+library(dplyr)
+
+# 假设数据已经读入为feature_importance_df_co_influence
+# 首先组合group和Genus，以及HMDB.Name和metabolite
+feature_importance_df_co_influence <- feature_importance_df_co_influence %>%
+  mutate(
+    group_genus = paste(group, Genus, sep = "_"),
+    hmdb_metabolite = paste(HMDB.Name, metabolite, sep = "_")
+  )
+
+# 将数据重塑为矩阵格式
+heatmap_matrix <- feature_importance_df_co_influence %>%
+  select(hmdb_metabolite, group_genus, importance) %>%
+  pivot_wider(names_from = group_genus,
+              values_from = importance,
+              values_fill = list(importance = 0)) %>%
+  as.data.frame()
+
+# 将hmdb_metabolite列设为行名
+rownames(heatmap_matrix) <- heatmap_matrix$hmdb_metabolite
+heatmap_matrix$hmdb_metabolite <- NULL
+
+# 转换为矩阵
+matrix_data <- as.matrix(heatmap_matrix)
+
+
+cols_to_keep <- apply(matrix_data, 2, function(x) sum(x > 0) > 3)
+
+# 使用这个逻辑向量来筛选矩阵的列
+matrix_data <- matrix_data[, cols_to_keep]
+# 创建热图
+
+
+# 创建颜色映射
+# 保持0值为0，对非0值进行标准化
+scale_by_row <- function(x) {
+  # 找出非0值的位置
+  non_zero <- x != 0
+  if(sum(non_zero) > 0) {  # 如果行中有非0值
+    # 只对非0值进行标准化
+    x[non_zero] <- (x[non_zero] - min(x[non_zero])) / (max(x[non_zero]) - min(x[non_zero]))
+  }
+  return(x)
+}
+
+# 按行应用标准化函数
+scaled_matrix <- t(apply(matrix_data, 1, scale_by_row))
+scaled_matrix[27,13]<-0
+# 创建新的颜色映射
+col_fun = colorRamp2(c(0, 0.5, 1), 
+                     c("#FFFFFF", "#99CC00","#FF99CC"))  # 白色到深红色
+
+# 计算热图尺寸
+cellwidth = 0.7
+cellheight = 0.7
+cn = dim(scaled_matrix)[2]
+rn = dim(scaled_matrix)[1]
+w = cellwidth * cn
+h = cellheight * rn
+
+# 计算非零值数量
+bacteria_counts <- colSums(scaled_matrix > 0)
+metabolite_counts <- rowSums(scaled_matrix > 0)
+
+# 创建列注释
+column_ha = HeatmapAnnotation(
+  "Non-zero metabolites" = anno_barplot(bacteria_counts,
+                                        height = unit(2, "cm"),
+                                        gp = gpar(fill = "#008bd0", col = "grey"),
+                                        border = TRUE),
+  show_annotation_name = TRUE,
+  annotation_name_gp = gpar(fontsize = 8)
+)
+
+# 创建行注释
+row_ha = rowAnnotation(
+  "Non-zero bacteria" = anno_barplot(metabolite_counts,
+                                     width = unit(2, "cm"),
+                                     gp = gpar(fill = "#ffa61d", col = "grey"),
+                                     border = TRUE),
+  show_annotation_name = TRUE,
+  annotation_name_gp = gpar(fontsize = 8)
+)
+
+# 创建热图
+heatmap <- Heatmap(scaled_matrix,
+                   name = "Scaled Importance",
+                   col = col_fun,
+                   # 设置单元格和网格样式
+                   width = unit(w, "cm"),
+                   height = unit(h, "cm"),
+                   rect_gp = gpar(col = "white", lwd = 2),
+                   
+                   # 添加边框
+                   border = TRUE,
+                   border_gp = gpar(col = "grey", lwd = 2),
+                   
+                   # 设置聚类和注释
+                   cluster_rows = TRUE,
+                   cluster_columns = TRUE,
+                   show_row_dend = FALSE,
+                   show_column_dend = FALSE,
+                   
+                   # 添加注释
+                   top_annotation = column_ha,
+                   right_annotation = row_ha,
+                   
+                   # 设置文本样式
+                   show_row_names = TRUE,
+                   show_column_names = TRUE,
+                   row_names_gp = gpar(fontsize = 8),
+                   column_names_gp = gpar(fontsize = 8),
+                   column_names_rot = 45,
+                   
+                   # 标题样式
+                   row_title = "HMDB_Metabolites",
+                   column_title = "Group_Genus",
+                   column_title_gp = gpar(fontsize = 12, fontface = "bold"),
+                   row_title_gp = gpar(fontsize = 12, fontface = "bold"),
+                   
+                   # 图例参数
+                   heatmap_legend_param = list(
+                     title = "Scaled Importance",
+                     title_gp = gpar(fontsize = 10, fontface = "bold"),
+                     labels_gp = gpar(fontsize = 8)
+                   ))
+
+draw(heatmap)

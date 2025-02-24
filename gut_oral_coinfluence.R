@@ -529,7 +529,7 @@ gut_results<-results
 
 
 ###load("data)
-load("3_data_analysis/oral_microbiome/data_preparation/object_cross_section")
+load("../../3_data_analysis//oral_microbiome/data_preparation/object_cross_section")
 
 oral_object<-object_cross_section
 
