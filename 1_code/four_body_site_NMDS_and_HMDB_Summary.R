@@ -414,15 +414,24 @@ ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = Site,color=Site)) +
 library(ggplot2)
 library(dplyr)
 
-class_counts <- as.data.frame(table(metabolite_annotation$HMDB.Class))
-colnames(class_counts) <- c("HMDB.Class", "Count")
-class_counts <- class_counts[order(-class_counts$Count), ]
+class_counts <- as.data.frame(table(metabolite_annotation$HMDB.Class,metabolite_annotation$HMDB.Source.Microbial))
+colnames(class_counts) <- c("HMDB.Class","HMDB.Source.Microbial", "Count")
+
 
 class_counts<-subset(class_counts,!(HMDB.Class=="NA"))
+class_counts<-subset(class_counts,!(HMDB.Source.Microbial=="NA"))
 class_counts<-subset(class_counts,Count>=5)
-# 创建条形图
-ggplot(class_counts, aes(x = reorder(HMDB.Class, Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "#D9D56E") +
+
+total_by_class <- aggregate(Count ~ HMDB.Class, data = class_counts, sum)
+# 按总计数从小到大排序
+class_order <- total_by_class$HMDB.Class[order(total_by_class$Count)]
+# 将 HMDB.Class 转换为有序因子
+class_counts$HMDB.Class <- factor(class_counts$HMDB.Class, levels = class_order)
+
+# 然后绘图
+ggplot(class_counts, aes(x = HMDB.Class, y = Count, fill=HMDB.Source.Microbial)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("#597c8b", "#b36a6f"))+
   coord_flip() +
   labs(x = "HMDB.Class", y = "Counts") +
   theme_minimal() +
@@ -431,4 +440,45 @@ ggplot(class_counts, aes(x = reorder(HMDB.Class, Count), y = Count)) +
     panel.grid.minor = element_blank(),
     axis.text = element_text(size = 12)
   )
+### 来源维恩图
 
+
+metabolite_annotation_Source<-metabolite_annotation[,29:31]
+
+metabolite_annotation_Source<-subset(metabolite_annotation_Source,!(HMDB.Source.Endogenous=="NA"))
+metabolite_annotation_Source<-subset(metabolite_annotation_Source,!(HMDB.Source.Food=="NA"))
+metabolite_annotation_Source<-subset(metabolite_annotation_Source,!(HMDB.Source.Microbial=="NA"))
+
+
+library(ggVennDiagram)
+library(ggplot2)
+
+# Assuming your data is already loaded as metabolite_annotation
+# If not, use the following code to read it (replace with your file path)
+# metabolite_annotation <- read.csv("path_to_your_file.csv", stringsAsFactors = FALSE)
+
+# Create lists of metabolites for each source
+endogenous_metabolites <- rownames(metabolite_annotation)[metabolite_annotation$HMDB.Source.Endogenous == TRUE]
+food_metabolites <- rownames(metabolite_annotation)[metabolite_annotation$HMDB.Source.Food == TRUE]
+microbial_metabolites <- rownames(metabolite_annotation)[metabolite_annotation$HMDB.Source.Microbial == TRUE]
+
+# Create a list for the Venn diagram
+venn_list <- list(
+  Endogenous = endogenous_metabolites,
+  Food = food_metabolites,
+  Microbial = microbial_metabolites
+)
+
+# Create the Venn diagram
+venn_plot <- ggVennDiagram(venn_list, 
+                           label = "count",
+                           category.names = c("Endogenous", "Food", "Microbial"))
+
+# Customize the plot
+venn_plot <- venn_plot + 
+  scale_fill_gradient(low = "#F4FAFE", high = "#4981BF") +
+  theme(legend.position = "none") +
+  labs(title = "Distribution of Metabolite Sources",
+       caption = "Data source: metabolite_annotation")
+
+# Display the plot
