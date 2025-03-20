@@ -369,7 +369,8 @@ ggplot(data=as.data.frame(direction_counts), aes(x=Var1, y=Freq,fill=Var1)) +
   geom_bar(stat="identity") +
   labs(x="Direction", y="Counts") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle=45, hjust=1,size=14),
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle=45, hjust=1,size=14),
         axis.text.y = element_text(size=12))+scale_fill_manual(values = c("#Edd064","#a1d5b9"))
 
 
@@ -477,4 +478,101 @@ webshot2::webshot(
 
 
 # 获取中介效应中对应元素的相关性
+colnames(bidirectional_mediation_results_sig_oral_gut_metabolite)[9:11]<-c("Oral","Gut","Metabolite")
 
+
+
+
+calculate_correlations <- function(gut_data, oral_data, metabolome_data, 
+                                   mediation_results) {
+  
+  # 创建一个空的列表来存储结果
+  correlation_results <- list()
+  
+  # 对mediation_results的每一行进行循环
+  for (i in 1:nrow(mediation_results)) {
+    # 获取当前行的特征名称
+    gut_feature <- mediation_results$gut_feature[i]
+    oral_feature <- mediation_results$oral_feature[i]
+    metabolite_feature <- mediation_results$metabolite[i]
+    
+    # 提取相应的数据
+    gut_values <- gut_data[gut_feature, ]
+    oral_values <- oral_data[oral_feature, ]
+    metabolite_values <- metabolome_data[metabolite_feature, ]
+    
+    # 确保所有数据都是数值型
+    gut_values <- as.numeric(gut_values)
+    oral_values <- as.numeric(oral_values)
+    metabolite_values <- as.numeric(metabolite_values)
+    
+    # 创建一个组合数据框，只包含有完整观测的样本
+    combined_data <- data.frame(
+      gut = gut_values,
+      oral = oral_values,
+      metabolite = metabolite_values
+    )
+    
+    # 移除含有NA的行
+    combined_data <- na.omit(combined_data)
+    
+    # 如果有足够的数据点来计算相关性
+    if (nrow(combined_data) >= 3) {
+      # 计算Pearson相关系数
+      cor_gut_oral <- cor.test(combined_data$gut, combined_data$oral, method = "spearman")
+      cor_gut_metabolite <- cor.test(combined_data$gut, combined_data$metabolite, method = "spearman")
+      cor_oral_metabolite <- cor.test(combined_data$oral, combined_data$metabolite, method = "spearman")
+      
+      # 存储结果
+      result <- data.frame(
+        Mediation_Row = i,
+        Gut_Feature = gut_feature,
+        Oral_Feature = oral_feature,
+        Metabolite_Feature = metabolite_feature,
+        Gut_Oral_Cor = cor_gut_oral$estimate,
+        Gut_Oral_Pvalue = cor_gut_oral$p.value,
+        Gut_Metabolite_Cor = cor_gut_metabolite$estimate,
+        Gut_Metabolite_Pvalue = cor_gut_metabolite$p.value,
+        Oral_Metabolite_Cor = cor_oral_metabolite$estimate,
+        Oral_Metabolite_Pvalue = cor_oral_metabolite$p.value,
+        Sample_Size = nrow(combined_data)
+      )
+      
+      # 添加到结果列表
+      correlation_results[[i]] <- result
+    } else {
+      # 如果数据点不足，添加一个包含NA的行
+      result <- data.frame(
+        Mediation_Row = i,
+        Gut_Feature = gut_feature,
+        Oral_Feature = oral_feature,
+        Metabolite_Feature = metabolite_feature,
+        Gut_Oral_Cor = NA,
+        Gut_Oral_Pvalue = NA,
+        Gut_Metabolite_Cor = NA,
+        Gut_Metabolite_Pvalue = NA,
+        Oral_Metabolite_Cor = NA,
+        Oral_Metabolite_Pvalue = NA,
+        Sample_Size = nrow(combined_data)
+      )
+      
+      # 添加到结果列表
+      correlation_results[[i]] <- result
+    }
+  }
+  
+  # 将所有结果合并成一个数据框
+  final_results <- do.call(rbind, correlation_results)
+  
+  return(final_results)
+}
+
+# 调用函数计算相关性
+correlation_results <- calculate_correlations(
+  gut_data, 
+  oral_data, 
+  metabolome_data, 
+  bidirectional_mediation_results_sig_oral_gut_metabolite
+)
+
+bidirectional_mediation_results_sig_oral_gut_metabolite<-cbind(bidirectional_mediation_results_sig_oral_gut_metabolite,correlation_results[,5:10])
