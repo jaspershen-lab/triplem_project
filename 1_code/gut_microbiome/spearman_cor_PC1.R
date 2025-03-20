@@ -244,3 +244,109 @@ cor_plot %>%
   geom_point(color = "#79AF97FF", show.legend = FALSE,size = 3) +
   geom_smooth(color = "#79AF97FF", method = "lm",show.legend = FALSE) +
   labs(x = "Normalized abundance of Eremococcus", y = "PC1")+theme_base 
+
+
+
+
+
+
+
+# 继续您的分析，在原代码基础上添加代谢物PCA与微生物种贡献可视化
+
+# 获取代谢物PCA结果
+# 已有: metabolomics_pca_object
+
+# 获取PCA坐标数据
+pca_data <- as.data.frame(metabolomics_pca_object$x[, 1:2])
+
+# 获取PC1和PC2的解释方差比例
+pc1_var <- round(metabolomics_pca_object$sdev[1]^2 / sum(metabolomics_pca_object$sdev^2) * 100, 1)
+pc2_var <- round(metabolomics_pca_object$sdev[2]^2 / sum(metabolomics_pca_object$sdev^2) * 100, 1)
+
+# 从前20个微生物中选择相关性绝对值最高的前5个
+top5_bacteria <- genus_top30_mete %>%
+  arrange(desc(abs(rho))) %>%
+  slice_head(n = 5)
+
+# 创建包含这5个微生物的数据框，用于envfit分析
+top5_bacteria_data <- gut_matrix[share_index, top5_bacteria$row_name, drop = FALSE]
+colnames(top5_bacteria_data) <- top5_bacteria$Genus
+
+# 检查数据
+cat("代谢物PCA数据维度:", dim(pca_data), "\n")
+cat("前5微生物数据维度:", dim(top5_bacteria_data), "\n")
+cat("共有样本数:", length(share_index), "\n")
+
+# 确保行名匹配
+
+pca_data<-pca_data[rownames(top5_bacteria_data),]
+# 使用envfit函数计算微生物对PCA的贡献
+library(vegan)
+env_fit <- envfit(pca_data, top5_bacteria_data, perm = 999)
+
+# 获取envfit的坐标用于绘图
+env_arrows <- scores(env_fit, "vectors") * sqrt(env_fit$vectors$r) * 2 # 缩放因子
+env_arrows_df <- as.data.frame(env_arrows)
+env_arrows_df$Genus <- rownames(env_arrows_df)
+
+# 从genus_top30_mete获取门信息
+env_arrows_df <- merge(env_arrows_df, 
+                       top5_bacteria[, c("row_name", "Genus", "Phylum")], 
+                       by = "Genus", 
+                       all.x = TRUE)
+
+# 绘制PCA图，添加微生物贡献向量
+library(ggplot2)
+library(ggrepel)
+
+# 定义门水平的颜色方案（如果phylum_color未定义）
+if(!exists("phylum_color")) {
+  phylum_color <- setNames(
+    c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF"),
+    unique(env_arrows_df$Phylum)
+  )
+}
+
+# 创建PCA散点图
+p <- ggplot(pca_data, aes(x = PC1, y = PC2)) +
+  geom_point(color = "#00BFC4", size = 3, alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50", alpha = 0.5) +
+  # 添加微生物贡献向量箭头
+  geom_segment(data = env_arrows_df, 
+               aes(x = 0, y = 0, xend = PC1*8, yend = PC2*8),
+               arrow = arrow(length = unit(0.25, "cm")), 
+               size = 1) +
+  # 添加箭头标签
+  geom_text_repel(data = env_arrows_df, 
+                  aes(x = PC1*8, y = PC2*8, label = Genus),
+                  fontface = "italic",
+                  size = 4,
+                  box.padding = 0.5,
+                  point.padding = 0.5,
+                  segment.color = "grey50") +
+  # 添加坐标轴标签
+  labs(
+    title = "Metabolome PCA",
+    x = paste0("PC1 (", pc1_var, "%)"),
+    y = paste0("PC2 (", pc2_var, "%)"),
+    color = "门 (Phylum)"
+  ) +
+  # 设置颜色
+  scale_color_manual(values = phylum_color) +
+  # 主题设置
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    legend.position = "right"
+  )
+
+
+
+
+
+

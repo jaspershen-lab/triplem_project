@@ -5,10 +5,6 @@ gut_oral_interaction<-load("combined_results_with_interactions")
 
 
 
-
-
-
-
 # 2. 分位数分割图 - 根据一个菌群的分位数来展示另一个菌群与代谢物的关系
 plot_microbe_interaction_quantile <- function(gut_data, oral_data, metabolite_data,
                                               gut_feature, oral_feature, metabolite,

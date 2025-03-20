@@ -6,6 +6,7 @@ source("1_code/mantel_Procrustes_code.R")
 library(tidyverse)
 library(tidymass)
 library(readxl)
+library(ade4)
 ###load("data)
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
@@ -152,4 +153,4 @@ ggplot(distance, aes(x=distance$adjusted_age, y= coinertia_distance)) +
                                                                                                 axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
                                                                                                 axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
                                                                                                 axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
-                                                                                                plot.title = element_text(size=15,face="bold",hjust = 0.5))
+                                                                                                plot.title = element_text(size=15,face="bold",hjust = 0.5))+xlim(c(33,70))

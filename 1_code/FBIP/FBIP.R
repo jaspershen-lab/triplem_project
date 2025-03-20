@@ -551,3 +551,7 @@ ggplot(predictions_oberserve, aes(x=predictions_data_oberserve_data$HMDB0011743,
                                                                                                  axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
                                                                                                  plot.title = element_text(size=15,face="bold",hjust = 0.5))
 
+
+
+
+
