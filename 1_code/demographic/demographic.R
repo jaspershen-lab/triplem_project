@@ -309,4 +309,100 @@ colnames(alpha_diversity)<-c("gut","oral","skin","nasal")
 
 
 
+# 将不透明度设置为0.7（相当于30%的透明度）
+alpha_value = 0.7
 
+# 定义四个部位的颜色
+microbiome_colors <- c(
+  "gut" = "#D55E00",    # 深红色
+  "oral" = "#CC79A7",   # 粉色
+  "skin" = "#0072B2",   # 深蓝色
+  "nasal" = "#009E73"   # 绿色
+)
+
+# 创建注释对象
+ha = columnAnnotation(
+  # 连续型人口统计学变量
+  Age = anno_barplot(demographic_data$adjusted_age, 
+                     gp = gpar(fill = scales::alpha("#E69F00", alpha_value)),
+                     border = TRUE,
+                     width = unit(2, "cm")),
+  BMI = anno_barplot(demographic_data$BMI,
+                     gp = gpar(fill = scales::alpha("#56B4E9", alpha_value)),
+                     border = TRUE,
+                     width = unit(2, "cm")),
+  
+  # 添加四个部位的alpha多样性棒棒糖图
+  `Gut Shannon` = anno_barplot(
+    alpha_diversity$gut,
+    gp = gpar(fill = scales::alpha(microbiome_colors["gut"], alpha_value)),
+    border = TRUE,
+    width = unit(2, "cm")
+  ),
+  
+  `Oral Shannon` = anno_barplot(
+    alpha_diversity$oral,
+    gp = gpar(fill = scales::alpha(microbiome_colors["oral"], alpha_value)),
+    border = TRUE,
+    width = unit(2, "cm")
+  ),
+  
+  `Skin Shannon` = anno_barplot(
+    alpha_diversity$skin,
+    gp = gpar(fill = scales::alpha(microbiome_colors["skin"], alpha_value)),
+    border = TRUE,
+    width = unit(2, "cm")
+  ),
+  
+  `Nasal Shannon` = anno_barplot(
+    alpha_diversity$nasal,
+    gp = gpar(fill = scales::alpha(microbiome_colors["nasal"], alpha_value)),
+    border = TRUE,
+    width = unit(2, "cm")
+  ),
+  
+  border = TRUE,
+  # 分类型变量
+  IRIS = demographic_data$IRIS,
+  Gender = demographic_data$Gender,
+  Ethnicity = demographic_data$Ethnicity,
+  
+  # 设置分类变量的颜色，添加透明度
+  col = list(
+    IRIS = mapply(function(x) scales::alpha(x, alpha_value), iris_color, USE.NAMES = TRUE),
+    Gender = mapply(function(x) scales::alpha(x, alpha_value), sex_color, USE.NAMES = TRUE),
+    Ethnicity = mapply(function(x) scales::alpha(x, alpha_value), ethnicity_color, USE.NAMES = TRUE)
+  ),
+  
+  # 设置注释的样式
+  annotation_name_gp = gpar(fontsize = 10),
+  annotation_name_side = "left",
+  simple_anno_size = unit(0.5, "cm"),
+  
+  # 添加图例
+  show_legend = TRUE,
+  annotation_legend_param = list(
+    IRIS = list(title = "IRIS"),
+    Gender = list(title = "Gender"),
+    Ethnicity = list(title = "Ethnicity")
+  ),
+  
+  # 设置列间距
+  gap = unit(c(2, 2, 2, 2, 2, 2, 1, 1, 1), "mm")  # 在各列之间添加间距
+)
+
+# 创建一个空矩阵用于绘制热图
+mat = matrix(0, nrow = 1, ncol = nrow(demographic_data))
+
+# 创建并绘制热图，禁用聚类
+ht = Heatmap(mat,
+             top_annotation = ha,
+             show_row_names = FALSE,
+             show_column_names = FALSE,
+             show_heatmap_legend = FALSE,
+             cluster_rows = FALSE,    # 禁用行聚类
+             cluster_columns = FALSE, # 禁用列聚类
+             height = unit(0.2, "cm"))   # 设置整体高度
+
+# 绘制并设置图例位置
+draw(ht, annotation_legend_side = "bottom")
