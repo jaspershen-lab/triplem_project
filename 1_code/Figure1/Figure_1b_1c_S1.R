@@ -403,6 +403,7 @@ nmds_plot<-ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = Site,color=Site)) +
     legend.text = element_text(size = 12),
     panel.grid.minor = element_blank()
   )
+nmds_plot
 ggsave("../../4_manuscript/Figures/Figure_1/figure_1c.pdf", plot=nmds_plot, width=7, height=6, units="in")
 
 ## 统计代谢物检测的种类
@@ -430,18 +431,18 @@ class_counts$HMDB.Class <- factor(class_counts$HMDB.Class, levels = class_order)
 p<-ggplot(class_counts, aes(x = HMDB.Class, y = Count, fill=HMDB.Source.Microbial)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(values = c("#3d95d2", "#f16147"))+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
   coord_flip() +
-  labs(x = "HMDB.Class", y = "Counts") +
-  theme_minimal() +
+  labs(x = "Metabolite class", y = "Metabolite number") +
+  theme_bw() +
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor = element_blank(),
     axis.text = element_text(size = 12)
   )
-
-ggsave("../../4_manuscript/Figures/Figure_1/figure_1b.pdf", plot=p, width=7, height=6, units="in")
+p
+ggsave("../../4_manuscript/Figures/Figure_1/figure_1b.pdf", plot=p, width=7, height=7, units="in")
 ### 来源维恩图
-
 
 metabolite_annotation_Source<-metabolite_annotation[,29:31]
 
@@ -480,6 +481,8 @@ venn_plot <- venn_plot +
   theme(legend.position = "none") +
   labs(title = "Distribution of Metabolite Sources",
        caption = "Data source: metabolite_annotation")
+
+venn_plot
 
 # Display the plot
 ggsave("../../4_manuscript/Figures/Figure_1/figure_s1_venn.pdf", plot=venn_plot, width=5, height=5, units="in")
