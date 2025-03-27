@@ -527,17 +527,52 @@ library(ggridges)
 
 
 # Data preparation
+# Data preparation
 ridge_data <- results %>%
-  # If needed, ensure Site is a factor with desired order
+  # Ensure Site is a factor with desired order
   mutate(
     Site = factor(Site, levels = c("gut", "oral", "skin", "nasal")),
     # Add significance flag
     is_significant = Adjusted_P_value < 0.05
   )
 
+# Perform statistical tests comparing gut to each other site
+# Store p-values from comparisons
+site_comparisons <- data.frame(
+  Site = character(),
+  p_value = numeric(),
+  significance = character()
+)
 
+# Get unique sites excluding gut
+other_sites <- c("oral", "skin", "nasal")
 
-# Create ridge plot
+# Run Wilcoxon tests comparing gut vs each other site
+for (site in other_sites) {
+  gut_data <- ridge_data$Rho[ridge_data$Site == "gut"]
+  site_data <- ridge_data$Rho[ridge_data$Site == site]
+  
+  # Perform the test on absolute values
+  test_result <- wilcox.test(abs(gut_data), abs(site_data))
+  
+  # Determine significance symbol
+  sig_symbol <- if(test_result$p.value < 0.001) "***"
+  else if(test_result$p.value < 0.01) "**"
+  else if(test_result$p.value < 0.05) "*"
+  else "ns"
+  
+  # Add to results
+  site_comparisons <- rbind(site_comparisons, data.frame(
+    Site = site,
+    p_value = test_result$p.value,
+    significance = sig_symbol
+  ))
+}
+
+# Find the maximum x value for positioning the annotations
+max_x <- max(abs(ridge_data$Rho))
+
+# Create ridge plot with significance markers
 p1 <- ggplot(ridge_data, aes(x = abs(Rho), y = Site, fill = Site)) +
   # Add density ridges
   geom_density_ridges(
@@ -548,14 +583,22 @@ p1 <- ggplot(ridge_data, aes(x = abs(Rho), y = Site, fill = Site)) +
     quantile_lines = TRUE,
     quantiles = 1
   ) +
+  # Add significance markers
+  geom_text(
+    data = site_comparisons,
+    aes(x = max_x * 0.95, y = Site, label = significance),
+    hjust = 0,
+    size = 5,
+    fontface = "bold"
+  ) +
   # Customize colors
   scale_fill_manual(values = site_colors) +
-
   labs(
     title = "",
     subtitle = "",
     x = "Spearman Correlation Coefficient (Rho)",
-    y = NULL
+    y = NULL,
+    caption = "Significance vs gut: * p < 0.05, ** p < 0.01, *** p < 0.001, ns: not significant"
   ) +
   # Customize theme
   theme_ridges(center_axis_labels = TRUE) +
@@ -567,7 +610,6 @@ p1 <- ggplot(ridge_data, aes(x = abs(Rho), y = Site, fill = Site)) +
     axis.text.y = element_text(size = 14),
     plot.caption = element_text(hjust = 0, size = 8)
   )
-
 
 
 

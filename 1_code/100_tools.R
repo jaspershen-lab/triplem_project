@@ -40,7 +40,7 @@ lm_adjust <-
     new_expression_data
   }
 
-
+adonis_r2_micro<-c(0.2512,0.1521,0.0912,0.1322)
 
 
 
@@ -72,3 +72,42 @@ ethnicity_color <-
     "Hispanics" = wesanderson::wes_palettes$Darjeeling2[3],
     "Black" = wesanderson::wes_palettes$Darjeeling2[4]
   )
+
+
+
+microbiome_genus_filt <- function(gut_microbiome_table, gut_microbiome_tax, prevalence) {
+  # 计算原始表中的列数
+  sample_num <- length(colnames(gut_microbiome_table))
+  
+  # 将tax数据的前6列绑定到microbiome表上
+  gut_microbiome_table <- cbind(gut_microbiome_table, gut_microbiome_tax[, 1:6])
+  
+  # 使用aggregate函数按Genus对数据进行聚合求和
+  gut_microbiome_table <- aggregate(gut_microbiome_table[, 1:sample_num], 
+                                    by = list(gut_microbiome_table$Genus), 
+                                    sum)
+  
+  # 设置行名为Genus名
+  row.names(gut_microbiome_table) <- gut_microbiome_table$Group.1
+  
+  # 移除由aggregate自动创建的'Group.1'列
+  gut_microbiome_table <- gut_microbiome_table[, -1]
+  
+  # 转置微生物组表，以便进行OTU存在性分析
+  gut_microbiome_table <- t(gut_microbiome_table)
+  
+  # 计算每个OTU的存在性
+  otu_presence <- colSums(gut_microbiome_table > 0)
+  
+  # 计算存在性阈值
+  threshold <- prevalence * sample_num
+  
+  # 基于阈值过滤OTU
+  gut_microbiome_table <- gut_microbiome_table[, otu_presence >= threshold]
+  
+  # 将处理后的表转换为数据框
+  gut_microbiome_table <- data.frame(gut_microbiome_table)
+  
+  # 返回处理后的表
+  return(gut_microbiome_table)
+}

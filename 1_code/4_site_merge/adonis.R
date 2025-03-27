@@ -1,3 +1,4 @@
+
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
@@ -5,7 +6,7 @@ source("1_code/mantel_Procrustes_code.R")
 library(tidyverse)
 library(tidymass)
 library(readxl)
-
+library(compositions)
 
 ## load data
 ### for gut microbiome
@@ -172,11 +173,11 @@ MM_adonis <- function(gut_microbiome_table, expression_data_metabolome) {
 ## load data
 library(readxl)
 
-expression_data_metabolome <- read_excel("2_data/iPOP-project/3_data_analysis/plasma_metabolomics/data_preparation/metabolite/expression_data.xlsx")
+expression_data_metabolome <- read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/expression_data.xlsx")
 
-sample_info_metabolome <- data.frame(read_excel("2_data/iPOP-project/3_data_analysis/plasma_metabolomics/data_preparation/metabolite/sample_info.xlsx"))
+sample_info_metabolome <- data.frame(read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/sample_info.xlsx"))
 
-variable_info_metabolome <- data.frame(read_excel("2_data/iPOP-project/3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info.xlsx"))
+variable_info_metabolome <- data.frame(read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info.xlsx"))
 
 
 row.names(expression_data_metabolome)<-variable_info_metabolome$variable_id
@@ -242,9 +243,6 @@ adonis_r2$adonis_r2<-format(adonis_r2$adonis_r2, digits =3, scientific = FALSE)
 
 
 
-
-
-
 adonis_r2_micro<-c(0.2512,0.1521,0.0912,0.1322)
 
 name<-c("gut","oral","nasal","skin")
@@ -262,6 +260,9 @@ adonis_r2_micro$group<-"Microbial"
 adonis_r2_all<-rbind(adonis_r2_micro,adonis_r2)
 
 adonis_r2_all$bodysite<-factor(adonis_r2_all$bodysite,levels = c("gut","oral","skin","nasal"))
+saveRDS(adonis_r2_all, file = "./3_data_analysis/4_site_merge/adonis_r2_all.rds")
+
+
 
 library(ggpattern)
 adonis_r2_all$adonis_r2<-as.numeric(adonis_r2_all$adonis_r2)
