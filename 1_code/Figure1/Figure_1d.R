@@ -8,24 +8,28 @@ library(readxl)
 ###load("data)
 load("../../3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
-gut_object<-object_cross_section
+gut_object <- object_cross_section
 
-load("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
+load(
+  "../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section"
+)
 
-metabolomics_object<-object_cross_section
+metabolomics_object <- object_cross_section
 
 
 load("../../3_data_analysis/oral_microbiome/data_preparation/object_cross_section")
 
-oral_object<-object_cross_section
+oral_object <- object_cross_section
 
 load("../../3_data_analysis/skin_microbiome/data_preparation/object_cross_section")
 
-skin_object<-object_cross_section
+skin_object <- object_cross_section
 
 load("../../3_data_analysis/nasal_microbiome/data_preparation/object_cross_section")
-nasal_object<-object_cross_section
-metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+nasal_object <- object_cross_section
+metabolite_annotation <- read_excel(
+  "../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
+)
 ####only remain the genus level
 library(microbiomedataset)
 
@@ -51,9 +55,6 @@ gut_object <-
 gut_object <-
   gut_object %>%
   transform2relative_intensity()
-
-
-
 
 
 
@@ -158,17 +159,17 @@ nasal_object <-
 
 # 读取四个不同区域的微生物组数据
 # 假设文件路径为当前工作目录
-gut_genus<-gut_object@expression_data
-rownames(gut_genus)<-gut_object@variable_info$Genus
+gut_genus <- gut_object@expression_data
+rownames(gut_genus) <- gut_object@variable_info$Genus
 
-oral_genus<-oral_object@expression_data
-rownames(oral_genus)<-oral_object@variable_info$Genus
+oral_genus <- oral_object@expression_data
+rownames(oral_genus) <- oral_object@variable_info$Genus
 
-skin_genus<-skin_object@expression_data
-rownames(skin_genus)<-skin_object@variable_info$Genus
+skin_genus <- skin_object@expression_data
+rownames(skin_genus) <- skin_object@variable_info$Genus
 
-nasal_genus<-nasal_object@expression_data
-rownames(nasal_genus)<-nasal_object@variable_info$Genus
+nasal_genus <- nasal_object@expression_data
+rownames(nasal_genus) <- nasal_object@variable_info$Genus
 
 # 加载必要的R包
 library(vegan)      # 用于计算生态距离和NMDS
@@ -199,18 +200,35 @@ rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
 # 创建样本类型标记
-gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
-                         Subject = sub("_gut$", "", rownames(gut_t)))
-oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
-                          Subject = sub("_oral$", "", rownames(oral_t)))
-skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin", 
-                          Subject = sub("_skin$", "", rownames(skin_t)))
-nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
-                           Subject = sub("_nasal$", "", rownames(nasal_t)))
+gut_labels <- data.frame(
+  Sample = rownames(gut_t),
+  Site = "Gut",
+  Subject = sub("_gut$", "", rownames(gut_t))
+)
+oral_labels <- data.frame(
+  Sample = rownames(oral_t),
+  Site = "Oral",
+  Subject = sub("_oral$", "", rownames(oral_t))
+)
+skin_labels <- data.frame(
+  Sample = rownames(skin_t),
+  Site = "Skin",
+  Subject = sub("_skin$", "", rownames(skin_t))
+)
+nasal_labels <- data.frame(
+  Sample = rownames(nasal_t),
+  Site = "Nasal",
+  Subject = sub("_nasal$", "", rownames(nasal_t))
+)
 
 # 合并所有物种
 # 首先确保所有表格有相同的物种列
-all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
+all_species <- unique(c(
+  colnames(gut_t),
+  colnames(oral_t),
+  colnames(skin_t),
+  colnames(nasal_t)
+))
 
 # 修改填充缺失物种的函数，避免索引错误
 fill_missing_species <- function(df, all_species) {
@@ -281,9 +299,7 @@ for (site in site_list) {
   core_prevalence <- 0.5   # 在至少50%的样本中出现
   
   # 计算核心分类群
-  core_taxa <- core_members(site_samples, 
-                            detection = core_detection, 
-                            prevalence = core_prevalence)
+  core_taxa <- core_members(site_samples, detection = core_detection, prevalence = core_prevalence)
   
   # 如果核心物种超过10个，只取丰度最高的10个
   if (length(core_taxa) > 10) {
@@ -298,7 +314,7 @@ for (site in site_list) {
   core_taxa_results[[site]] <- core_taxa
   
   # 打印结果
-  cat("\n", site, "核心物种 (", length(core_taxa), "):\n", sep="")
+  cat("\n", site, "核心物种 (", length(core_taxa), "):\n", sep = "")
   print(core_taxa)
 }
 
@@ -309,43 +325,48 @@ cat("\n总共识别出", length(all_core_taxa), "个核心物种\n")
 #------------------------ 第二部分：使用plot_core可视化 ------------------------#
 library(RColorBrewer)
 # 创建一个函数来绘制每个位点的核心物种图
-plot_site_core <- function(physeq, site, core_taxa) {
-  # 筛选特定位点的样本
-  site_samples <- subset_samples(physeq, Site == site)
-  
-  # 转换为相对丰度
-  site_samples_rel <- site_samples
-  
-  # 只保留该位点的核心物种
-  site_samples_rel <- prune_taxa(all_core_taxa, site_samples_rel)
-  
-  
-  prevalences <- seq(.05, 1, .02)
-  
-  detections <- round(10^seq(log10(0.0001), log10(.2), length = 30), 3)
-  
-  # Also define gray color palette
-  gray <- rev(brewer.pal(5, "RdBu"))
-  
-  # 使用plot_core函数绘图
-  # 这将创建一个热图显示核心物种在不同检测和流行阈值下的存在情况
-  p <- plot_core(site_samples_rel,
-                 plot.type = "heatmap", 
-                 colours = gray,
-                 prevalences = prevalences, 
-                 taxa.order = rev(all_core_taxa),
-                 detections = detections) +
-    labs(x = "Detection Threshold\n(Relative Abundance (%))") +
+plot_site_core <-
+  function(physeq, site, core_taxa) {
+    # 筛选特定位点的样本
+    site_samples <- subset_samples(physeq, Site == site)
     
-    #Adjusts axis text size and legend bar height
-    theme(axis.text.y= element_text(size=14, face="italic"),
-          axis.text.x.bottom=element_text(size=8),
-          axis.title = element_text(size=10),
-          legend.text = element_text(size=8),
-          legend.title = element_text(size=10))
-  
-  return(p)
-}
+    # 转换为相对丰度
+    site_samples_rel <- site_samples
+    
+    # 只保留该位点的核心物种
+    site_samples_rel <- prune_taxa(all_core_taxa, site_samples_rel)
+    
+    
+    prevalences <- seq(.05, 1, .02)
+    
+    detections <- round(10^seq(log10(0.0001), log10(.2), length = 30), 3)
+    
+    # Also define gray color palette
+    gray <- rev(brewer.pal(5, "RdBu"))
+    
+    # 使用plot_core函数绘图
+    # 这将创建一个热图显示核心物种在不同检测和流行阈值下的存在情况
+    p <- plot_core(
+      site_samples_rel,
+      plot.type = "heatmap",
+      colours = gray,
+      prevalences = prevalences,
+      taxa.order = rev(all_core_taxa),
+      detections = detections
+    ) +
+      labs(x = "Detection threshold (Relative abundance)") +
+      
+      #Adjusts axis text size and legend bar height
+      theme(
+        axis.text.y = element_text(size = 14, face = "italic"),
+        axis.text.x.bottom = element_text(size = 8),
+        axis.title = element_text(size = 10),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 10)
+      )
+    
+    return(p)
+  }
 
 # 为每个位点绘制核心物种图
 plot_list <- list()
@@ -354,28 +375,71 @@ for (site in site_list) {
 }
 
 # 将四个图组合在一起
-combined_plot <- grid.arrange(
-  plot_list[["Gut"]],
-  plot_list[["Oral"]],
-  plot_list[["Skin"]],
-  plot_list[["Nasal"]],
-  nrow = 1
+# combined_plot <- grid.arrange(
+#   plot_list[["Gut"]],
+#   plot_list[["Oral"]],
+#   plot_list[["Skin"]],
+#   plot_list[["Nasal"]],
+#   nrow = 1
+# )
+
+p_gut <- plot_list[["Gut"]] +
+  theme(
+    legend.position = "none",
+    panel.grid = element_blank(),
+    panel.background = element_blank(),
+    plot.background = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  )
+p_oral <- plot_list[["Oral"]] + theme(
+  legend.position = "none",
+  axis.text.y  = element_blank(),
+  axis.tricks.y = element_blank(),
+  panel.grid = element_blank(),
+  panel.background = element_blank(),
+  plot.background = element_blank(),
+  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+  panel.border = element_rect(colour = "black", fill = NA, size = 1)
+)
+p_skin <- plot_list[["Skin"]] + theme(
+  legend.position = "none",
+  axis.text.y  = element_blank(),
+  axis.tricks.y = element_blank(),
+  panel.grid = element_blank(),
+  panel.background = element_blank(),
+  plot.background = element_blank(),
+  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+  panel.border = element_rect(colour = "black", fill = NA, size = 1)
+)
+p_nasal <- plot_list[["Nasal"]] + theme(
+  legend.position = "none",
+  axis.text.y  = element_blank(),
+  axis.tricks.y = element_blank(),
+  panel.grid = element_blank(),
+  panel.background = element_blank(),
+  plot.background = element_blank(),
+  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+  panel.border = element_rect(colour = "black", fill = NA, size = 1)
 )
 
-p_gut<-plot_list[["Gut"]]+theme(legend.position = "none",axis.text.y  = element_blank())
-p_oral<-plot_list[["Oral"]]+theme(legend.position = "none",axis.text.y  = element_blank())
-p_skin<-plot_list[["Skin"]]+theme(legend.position = "none",axis.text.y  = element_blank())
-p_nasal<-plot_list[["Nasal"]]+theme(legend.position = "none",axis.text.y  = element_blank())
 
+# combined_plot <- grid.arrange(
+#   p_gut,
+#   p_oral,
+#   p_skin,
+#   p_nasal,
+#   nrow = 1
+# )
 
-combined_plot <- grid.arrange(
-  p_gut,
-  p_oral,
-  p_skin,
-  p_nasal,
-  nrow = 1
+library(patchwork)
+
+combined_plot <- p_gut + p_oral + p_skin + p_nasal + plot_layout(ncol = 4)
+combined_plot
+
+ggsave(
+  "../../4_manuscript/Figures/Figure_1/figure_1d.png",
+  plot = combined_plot,
+  width = 10,
+  height = 6
 )
-
-pdf("../../4_manuscript/Figures/Figure_1/figure_1d.pdf", width = 10, height = 6)
-plot(combined_plot)
-dev.off()

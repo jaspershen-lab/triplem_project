@@ -7,7 +7,6 @@ library(tidymass)
 library(readxl)
 
 
-
 load("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
 metabolomics_object<-object_cross_section
 
@@ -55,12 +54,7 @@ gut_object <-
   gut_object %>%
   transform2relative_intensity()
 
-
-
-
-
-
-
+library(vegan)
 shannon_div <- diversity(t(gut_object@expression_data), index = "shannon")
 
 # 创建结果数据框
@@ -457,18 +451,18 @@ p1 <- ggplot(plot_data, aes(x = metabolite_sort, y = Rho)) +
     expand = expansion(mult = c(0.02, 0.02))
   ) +
   # Customize theme
-  theme_minimal() +
+  theme_bw() +
   theme(
     panel.grid.minor = element_line(color = "gray95"),
     panel.grid.major = element_line(color = "gray90"),
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
-    axis.text.y = element_text(size = 14),
-    axis.title = element_text(size = 16),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    # axis.text.y = element_text(size = 14),
+    # axis.title = element_text(size = 16),
     legend.position = "right",
     legend.box = "vertical",
-    plot.title = element_text(size = 12, face = "bold"),
-    plot.subtitle = element_text(size = 10),
-    plot.caption = element_text(hjust = 0, size = 8)
+    # plot.title = element_text(size = 12, face = "bold"),
+    # plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(hjust = 0)
   ) +
   # Add class names as x-axis labels
   scale_x_continuous(
@@ -488,7 +482,7 @@ p1 <- ggplot(plot_data, aes(x = metabolite_sort, y = Rho)) +
 # Display the plot
 p1
 
-
+ggsave(p1, filename = "4_manuscript/Figures/Figure_1/figure_1e.pdf", width = 8, height = 6)
 
 library(ggpubr)
 
@@ -500,6 +494,7 @@ plot_microbial_source_data$HMDB.Source.Microbial<-gsub("NA","FALSE",plot_microbi
 
 HMDB.Source.Microbial_color<-c("","")
 
+p <-
 ggplot(data=plot_microbial_source_data,aes(x=HMDB.Source.Microbial,y=abs(Rho),fill=HMDB.Source.Microbial))+ #”fill=“设置填充颜色
   stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ #由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
   geom_boxplot(size=0.5,outlier.fill="white",outlier.color="white")+ #size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
@@ -515,6 +510,9 @@ ggplot(data=plot_microbial_source_data,aes(x=HMDB.Source.Microbial,y=abs(Rho),fi
                     plot.title = element_text(size=15,face="bold","Helvetica",hjust = 0.5))+
   ylab("|Rho|")+xlab("Microbial Source")+ #设置x轴和y轴的标题
   stat_compare_means() 
+
+ggsave(p, filename = "4_manuscript/Figures/Figure_1/figure_1f.pdf", width = 4, height = 6)
+
 
 ## 绘制四个身体部位的rho值山峦图
 
@@ -611,6 +609,9 @@ p1 <- ggplot(ridge_data, aes(x = abs(Rho), y = Site, fill = Site)) +
     plot.caption = element_text(hjust = 0, size = 8)
   )
 
+
+
+p1
 
 
 # 统计总的代谢物种类的柱状图
