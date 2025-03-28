@@ -438,8 +438,8 @@ combined_plot <- p_gut + p_oral + p_skin + p_nasal + plot_layout(ncol = 4)
 combined_plot
 
 ggsave(
-  "../../4_manuscript/Figures/Figure_1/figure_1d.png",
+  "../../4_manuscript/Figures/Figure_1/figure_1d.pdf",
   plot = combined_plot,
-  width = 10,
+  width = 13,
   height = 6
 )
