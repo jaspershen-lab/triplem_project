@@ -33,7 +33,7 @@ tips_data <- data.frame(
 
 tips_data$Phylum[135]<-"Proteobacteria"
 
-
+library(reshape2)
 
 p1<-p %<+% tips_data + 
   geom_tippoint(aes(color = Phylum), size = 2) +
@@ -76,10 +76,13 @@ data3$site<-tolower(data3$site)
 
 data3<-subset(data3,Genus%in%tips_data$Genus)
 
-
+plot <-
 p2+new_scale_fill()+geom_fruit(data=data3, geom=geom_bar,
                                mapping=aes(y=Genus, x=Freq, fill=site),
                                pwidth=0.38, 
                                orientation="y", 
                                stat="identity",offset = 0.04
 )+scale_fill_manual(values = body_site_color)
+
+ggsave(plot, 
+       filename = "4_manuscript/Figures/Figure_2/figure_2e.pdf", width = 10, height = 8)
