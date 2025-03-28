@@ -325,7 +325,7 @@ Oscillibacter_PC1 <- cor_plot %>%
   ggplot(aes(ASV87, PC1)) +
   geom_point(color = "#edd064",
              show.legend = FALSE,
-             size = 3) +
+             size = 6) +
   geom_smooth(color = "#edd064",
               method = "lm",
               show.legend = FALSE) +
@@ -339,11 +339,11 @@ Oscillibacter_PC1 <- cor_plot %>%
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10)
   ) + stat_cor(method = "spearman")
-
+Oscillibacter_PC1
 ggsave(
   Oscillibacter_PC1,
   filename = file.path(r4projects::get_project_wd(), "4_manuscript/Figures/Figure_2/figure_2f.pdf"),
-  width = 6,
+  width = 7,
   height = 6
 )
 
@@ -351,7 +351,7 @@ Phocaeicola_PC1 <- cor_plot %>%
   ggplot(aes(ASV5, PC1)) +
   geom_point(color = "#edd064",
              show.legend = FALSE,
-             size = 3) +
+             size = 6) +
   geom_smooth(color = "#edd064",
               method = "lm",
               show.legend = FALSE) +

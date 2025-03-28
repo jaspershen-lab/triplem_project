@@ -205,9 +205,6 @@ skin_expression_data <-
 
 skin_temp_object <- skin_object
 skin_temp_object@expression_data <- skin_expression_data
-
-
-
 ####only remain the genus level
 library(microbiomedataset)
 
@@ -402,8 +399,6 @@ nasal_cors <- calculate_correlations(
 # 合并所有相关性结果
 all_cors <- rbind(gut_cors, oral_cors, skin_cors, nasal_cors)
 
-
-
 correlation_data <- all_cors
 
 
@@ -538,15 +533,13 @@ plot <-
 
 plot
 
-
-
 # 直接筛选原始数据
 correlation_data <- subset(all_cors,
                            Microbiome %in% c("Gut_Oscillibacter", "Gut_Phocaeicola"))
 
 # 然后继续使用原来的代码
 edges <- correlation_data %>%
-  select(Microbiome, Metabolite, Correlation, Site)
+  select(Microbiome, Metabolite, Correlation, Site, P_value)
 
 nodes <- data.frame(
   name = unique(c(
@@ -589,20 +582,25 @@ plot <-
   geom_edge_bend(
     strength = 0.2,
     aes(
-      edge_alpha = abs(Correlation),
-      edge_width = abs(Correlation),
-      color = Correlation > 0
+      edge_width = -log(P_value, 10),
+      color = Correlation
     ),
     style = "all",
     show.legend = TRUE
   )  +
   geom_node_point(aes(fill = site, size = degree, shape = type), color = "black") +
   geom_node_text(aes(label = name), repel = TRUE, size = 3) +
-  scale_edge_color_manual(
-    values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
-    name = "Correlation",
-    labels = c("Negative", "Positive")
+  scale_edge_color_gradient2(
+    low = "#9999FF",
+    mid = "white",
+    high = "#FF9999",
+    name = "Correlation"
   ) +
+  # scale_edge_color_manual(
+  #   values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
+  #   name = "Correlation",
+  #   labels = c("Negative", "Positive")
+  # ) +
   scale_fill_manual(
     values = c(
       "Gut" = "#edd064",
@@ -637,7 +635,6 @@ ggsave(
     r4projects::get_project_wd(),
     "4_manuscript/Figures/Figure_2/figure_2h.pdf"
   ),
-  width = 10,
-  height = 7,
-  dpi = 300
+  width = 12,
+  height = 6
 )
