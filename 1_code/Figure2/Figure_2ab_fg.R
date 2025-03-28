@@ -1,4 +1,35 @@
 
+
+### adonis
+rm(list = ls())
+setwd(r4projects::get_project_wd())
+source("1_code/100_tools.R")
+adonis_r2_all<-readRDS(file = "3_data_analysis/4_site_merge/adonis_r2_all.rds")
+
+library(ggpattern)
+adonis_r2_all$adonis_r2<-as.numeric(adonis_r2_all$adonis_r2)
+adonis_plot<-ggplot(adonis_r2_all, aes(x = bodysite, y = adonis_r2, fill = bodysite, pattern = group)) +
+  geom_bar_pattern(stat = "identity", 
+                   position = position_dodge(width = 0.7), 
+                   width = 0.6,
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025) +
+  geom_text(aes(label = paste(adonis_r2, "%", sep = "")), 
+            position = position_dodge(width = 0.7),
+            vjust = -0.5, size = 5) +
+  scale_fill_manual(values = body_site_color) +
+  scale_pattern_manual(values = c( "stripe","none")) +
+  labs(title = "Estimated Variance by Different bodysite microbiome",
+       x = NULL, 
+       y = "Estimated variance (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(family = "Helvetica", size = 15),
+        legend.position = "top")
+
+
+
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")

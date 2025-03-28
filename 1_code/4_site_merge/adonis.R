@@ -285,3 +285,16 @@ ggplot(adonis_r2_all, aes(x = bodysite, y = adonis_r2, fill = bodysite, pattern 
   theme_minimal() +
   theme(axis.text.x = element_text(family = "Helvetica", size = 15),
         legend.position = "top")
+
+
+
+
+
+###load("data)
+load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
+
+gut_object<-object_cross_section
+
+load("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
+
+metabolomics_object<-object_cross_section

@@ -1,49 +1,4 @@
-rm(list = ls())
-setwd(r4projects::get_project_wd())
-source("1_code/100_tools.R")
-setwd("1_code/4_site_merge/")
-library(tidymass)
-library(tidyverse)
-library(readxl)
-library(readxl)
-###load("data)
-load("../../3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
-
-gut_object<-object_cross_section
-
-load("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
-
-metabolomics_object<-object_cross_section
-
-
-load("../../3_data_analysis/oral_microbiome/data_preparation/object_cross_section")
-
-oral_object<-object_cross_section
-
-load("../../3_data_analysis/skin_microbiome/data_preparation/object_cross_section")
-
-skin_object<-object_cross_section
-
-load("../../3_data_analysis/nasal_microbiome/data_preparation/object_cross_section")
-
-nasal_object<-object_cross_section
-metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
-metabolite_annotation<-subset(metabolite_annotation,!(HMDB.Name=="NA"))
-metabolite_annotation_micro<-subset(metabolite_annotation,HMDB.Source.Microbial=="TRUE")
-####only remain the genus level
-library(microbiomedataset)
-
-gut_object <-
-  gut_object %>%
-  summarize_variables(what = "sum_intensity", group_by = "Genus")
-
-##only remain the genus at least 10% samples
-dim(gut_object)
-
-non_zero_per <-
-  apply(gut_object, 1, function(x) {
-    sum(x != 0) / ncol(gut_object)
-  })
+})
 
 idx <-
   which(non_zero_per > 0.1)
@@ -307,7 +262,7 @@ calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,meta
   microbiome_subset <- microbiome_data[common_samples,]
   
   colnames(microbiome_subset)<-  paste(site,taxdata$Genus,sep = "_")
-
+  
   metabolite_subset <- metabolite_data[common_samples,metabolite_anno$variable_id]
   
   
@@ -531,5 +486,4 @@ ggraph(graph, layout = "stress") +
     shape = guide_legend(title = "Node Type"),
     edge_alpha = guide_legend(title = "Correlation Strength"),
     edge_width = guide_legend(title = "Correlation Strength")
-  ) +
-  labs(title = "")
+  ) 

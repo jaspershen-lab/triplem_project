@@ -343,3 +343,22 @@ plot_quadrant_metabolite_selection <- function(selection_results_list, metabolom
   
   return(p)
 }
+
+
+# 假设我们有四个部位的选择结果
+selection_results_list <- list(
+  "Gut" = gut_result,
+  "Oral" = oral_result,
+  "Skin" = skin_result,
+  "Nasal" = nasal_result
+)
+
+# 定义部位名称
+sites <- c("Gut", "Oral", "Skin", "Nasal")
+
+# 绘制多部位比较图
+p <- plot_quadrant_metabolite_selection(
+  selection_results_list = selection_results_list,
+  metabolomics_class = metabolomics_class,
+  sites = sites
+)

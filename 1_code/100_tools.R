@@ -40,7 +40,7 @@ lm_adjust <-
     new_expression_data
   }
 
-adonis_r2_micro<-c(0.2512,0.1521,0.0912,0.1322)
+
 
 
 
@@ -111,3 +111,25 @@ microbiome_genus_filt <- function(gut_microbiome_table, gut_microbiome_tax, prev
   # 返回处理后的表
   return(gut_microbiome_table)
 }
+
+
+phylum_name =
+  c(
+    "Actinobacteria",
+    "Bacteroidetes",
+    "Cyanobacteria/Chloroplast"  ,
+    "Firmicutes",
+    "Lentisphaerae",
+    "Proteobacteria",
+    "Synergistetes",
+    "Verrucomicrobia",
+    "Campilobacterota",
+    "Candidatus_Saccharibacteria",
+    "Fusobacteria",
+    "Plantae",
+    "Tenericutes",
+    "Spirochaetes"
+  )
+
+phylum_color =
+  ggsci::pal_simpsons()(n = length(phylum_name))
