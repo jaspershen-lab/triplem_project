@@ -9,27 +9,32 @@ library(readxl)
 ###load("data)
 load("../../3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
-gut_object<-object_cross_section
+gut_object <- object_cross_section
 
-load("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
+load(
+  "../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section"
+)
 
-metabolomics_object<-object_cross_section
+metabolomics_object <- object_cross_section
 
 
 load("../../3_data_analysis/oral_microbiome/data_preparation/object_cross_section")
 
-oral_object<-object_cross_section
+oral_object <- object_cross_section
 
 load("../../3_data_analysis/skin_microbiome/data_preparation/object_cross_section")
 
-skin_object<-object_cross_section
+skin_object <- object_cross_section
 
 load("../../3_data_analysis/nasal_microbiome/data_preparation/object_cross_section")
 
-nasal_object<-object_cross_section
-metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
-metabolite_annotation<-subset(metabolite_annotation,!(HMDB.Name=="NA"))
-metabolite_annotation_micro<-subset(metabolite_annotation,HMDB.Source.Microbial=="TRUE")
+nasal_object <- object_cross_section
+metabolite_annotation <- read_excel(
+  "../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
+)
+metabolite_annotation <- subset(metabolite_annotation, !(HMDB.Name == "NA"))
+metabolite_annotation_micro <- subset(metabolite_annotation, HMDB.Source.Microbial ==
+                                        "TRUE")
 ####only remain the genus level
 library(microbiomedataset)
 
@@ -299,30 +304,42 @@ library(tidyverse)  # 数据处理
 # metabolites: 代谢物数据
 
 # 函数：计算相关性并筛选显著结果
-calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,metabolite_anno, site, threshold = 0.3, p_value = 0.05) {
+calculate_correlations <- function(microbiome_data,
+                                   taxdata,
+                                   metabolite_data,
+                                   metabolite_anno,
+                                   site,
+                                   threshold = 0.3,
+                                   p_value = 0.05) {
   # 确保样本行匹配
   common_samples <- intersect(rownames(microbiome_data), rownames(metabolite_data))
   
   # 子集化数据
-  microbiome_subset <- microbiome_data[common_samples,]
+  microbiome_subset <- microbiome_data[common_samples, ]
   
-  colnames(microbiome_subset)<-  paste(site,taxdata$Genus,sep = "_")
+  colnames(microbiome_subset) <-  paste(site, taxdata$Genus, sep = "_")
   
-  metabolite_subset <- metabolite_data[common_samples,metabolite_anno$variable_id]
+  metabolite_subset <- metabolite_data[common_samples, metabolite_anno$variable_id]
   
   
-  colnames(metabolite_subset)<-  metabolite_anno$HMDB.Name
+  colnames(metabolite_subset) <-  metabolite_anno$HMDB.Name
   # 计算相关性矩阵和p值
-  cors <- matrix(NA, nrow = ncol(microbiome_subset), ncol = ncol(metabolite_subset))
-  pvals <- matrix(NA, nrow = ncol(microbiome_subset), ncol = ncol(metabolite_subset))
+  cors <- matrix(NA,
+                 nrow = ncol(microbiome_subset),
+                 ncol = ncol(metabolite_subset))
+  pvals <- matrix(NA,
+                  nrow = ncol(microbiome_subset),
+                  ncol = ncol(metabolite_subset))
   
   # 逐个计算相关性
-  for(i in 1:ncol(microbiome_subset)) {
-    for(j in 1:ncol(metabolite_subset)) {
-      test_result <- cor.test(microbiome_subset[,i], metabolite_subset[,j], 
-                              method = "spearman", exact = FALSE)
-      cors[i,j] <- test_result$estimate
-      pvals[i,j] <- test_result$p.value
+  for (i in 1:ncol(microbiome_subset)) {
+    for (j in 1:ncol(metabolite_subset)) {
+      test_result <- cor.test(microbiome_subset[, i],
+                              metabolite_subset[, j],
+                              method = "spearman",
+                              exact = FALSE)
+      cors[i, j] <- test_result$estimate
+      pvals[i, j] <- test_result$p.value
     }
   }
   
@@ -353,17 +370,41 @@ calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,meta
 }
 
 # 对每个部位计算相关性
-gut_cors <- calculate_correlations(t(gut_temp_object@expression_data),gut_temp_object@variable_info,t(metabolomics_temp_object@expression_data),metabolite_annotation, "Gut")
-oral_cors <- calculate_correlations(t(oral_temp_object@expression_data),oral_temp_object@variable_info, t(metabolomics_temp_object@expression_data),metabolite_annotation ,"Oral")
-skin_cors <- calculate_correlations(t(skin_temp_object@expression_data),skin_temp_object@variable_info ,t(metabolomics_temp_object@expression_data),metabolite_annotation, "Skin")
-nasal_cors <- calculate_correlations(t(nasal_temp_object@expression_data),nasal_temp_object@variable_info, t(metabolomics_temp_object@expression_data),metabolite_annotation, "Nasal")
+gut_cors <- calculate_correlations(
+  t(gut_temp_object@expression_data),
+  gut_temp_object@variable_info,
+  t(metabolomics_temp_object@expression_data),
+  metabolite_annotation,
+  "Gut"
+)
+oral_cors <- calculate_correlations(
+  t(oral_temp_object@expression_data),
+  oral_temp_object@variable_info,
+  t(metabolomics_temp_object@expression_data),
+  metabolite_annotation ,
+  "Oral"
+)
+skin_cors <- calculate_correlations(
+  t(skin_temp_object@expression_data),
+  skin_temp_object@variable_info ,
+  t(metabolomics_temp_object@expression_data),
+  metabolite_annotation,
+  "Skin"
+)
+nasal_cors <- calculate_correlations(
+  t(nasal_temp_object@expression_data),
+  nasal_temp_object@variable_info,
+  t(metabolomics_temp_object@expression_data),
+  metabolite_annotation,
+  "Nasal"
+)
 
 # 合并所有相关性结果
 all_cors <- rbind(gut_cors, oral_cors, skin_cors, nasal_cors)
 
 
 
-correlation_data<-all_cors
+correlation_data <- all_cors
 
 
 # 使用ggraph创建网络图
@@ -372,15 +413,31 @@ edges <- correlation_data %>%
 
 # 创建节点列表
 nodes <- data.frame(
-  name = unique(c(correlation_data$Microbiome, correlation_data$Metabolite)),
-  type = ifelse(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)) %in% correlation_data$Microbiome, "Microbiome", "Metabolite"),
-  site = ifelse(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)) %in% correlation_data$Microbiome, 
-                correlation_data$Site[match(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)), correlation_data$Microbiome)], 
-                "Metabolite")
+  name = unique(c(
+    correlation_data$Microbiome, correlation_data$Metabolite
+  )),
+  type = ifelse(
+    unique(c(
+      correlation_data$Microbiome, correlation_data$Metabolite
+    )) %in% correlation_data$Microbiome,
+    "Microbiome",
+    "Metabolite"
+  ),
+  site = ifelse(
+    unique(c(
+      correlation_data$Microbiome, correlation_data$Metabolite
+    )) %in% correlation_data$Microbiome,
+    correlation_data$Site[match(unique(c(
+      correlation_data$Microbiome, correlation_data$Metabolite
+    )), correlation_data$Microbiome)],
+    "Metabolite"
+  )
 )
 
 # 创建igraph对象
-graph <- graph_from_data_frame(d = edges, vertices = nodes, directed = FALSE)
+graph <- graph_from_data_frame(d = edges,
+                               vertices = nodes,
+                               directed = FALSE)
 # 计算每个节点的degree
 # 计算degree
 node_degrees <- degree(graph)
@@ -394,11 +451,14 @@ top_nodes <- nodes %>%
 
 # 筛选包含top节点的边
 filtered_edges <- edges %>%
-  filter(Microbiome %in% top_nodes$name | Metabolite %in% top_nodes$name)
+  filter(Microbiome %in% top_nodes$name |
+           Metabolite %in% top_nodes$name)
 
 # 创建新的节点列表（包含所有在筛选后的边中出现的节点）
 filtered_nodes <- nodes %>%
-  filter(name %in% unique(c(filtered_edges$Microbiome, filtered_edges$Metabolite)))
+  filter(name %in% unique(c(
+    filtered_edges$Microbiome, filtered_edges$Metabolite
+  )))
 
 
 # 获取每个site的前10个节点的名字
@@ -412,7 +472,9 @@ top_10_nodes <- filtered_nodes %>%
 filtered_nodes$show_label <- filtered_nodes$name %in% top_10_nodes
 
 # 创建筛选后的igraph对象
-filtered_graph <- graph_from_data_frame(d = filtered_edges, vertices = filtered_nodes, directed = FALSE)
+filtered_graph <- graph_from_data_frame(d = filtered_edges,
+                                        vertices = filtered_nodes,
+                                        directed = FALSE)
 
 # 重新计算degree
 filtered_degrees <- degree(filtered_graph)
@@ -421,32 +483,42 @@ V(filtered_graph)$show_label <- filtered_nodes$show_label
 # 创建ggraph可视化
 
 library(ggraph)
-ggraph(filtered_graph, layout = "stress") +
+plot <-
+  ggraph(filtered_graph, layout = "stress") +
   # 添加边
-  geom_edge_link(aes(edge_alpha = abs(Correlation),
-                     edge_width = abs(Correlation),
-                     color = Correlation > 0),
-                 show.legend = TRUE) +
+  geom_edge_link(aes(
+    edge_alpha = abs(Correlation),
+    edge_width = abs(Correlation),
+    color = Correlation > 0
+  ),
+  show.legend = TRUE) +
   # 添加节点
-  geom_node_point(aes(fill = site, 
-                      size = degree,
-                      shape = type),color="white") +
+  geom_node_point(aes(fill = site, size = degree, shape = type), color =
+                    "white") +
   # 添加节点标签
-  geom_node_text(aes(label = ifelse(show_label, name, "")), 
-                 repel = TRUE, 
-                 size = 2,
-                 max.overlaps = 20)+
+  geom_node_text(
+    aes(label = ifelse(show_label, name, "")),
+    repel = TRUE,
+    size = 2,
+    max.overlaps = 20
+  ) +
   # 设置配色
-  scale_edge_color_manual(values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
-                          name = "Correlation",
-                          labels = c("Negative", "Positive")) +
-  scale_fill_manual(values = c("Gut" = "#edd064",
-                               "Oral" = "#a1d5b9",
-                               "Skin" = "#f2ccac",
-                               "Nasal" = "#a17db4",
-                               "Metabolite" = "#FF9999")) +
+  scale_edge_color_manual(
+    values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
+    name = "Correlation",
+    labels = c("Negative", "Positive")
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Gut" = "#edd064",
+      "Oral" = "#a1d5b9",
+      "Skin" = "#f2ccac",
+      "Nasal" = "#a17db4",
+      "Metabolite" = "#FF9999"
+    )
+  ) +
   # 设置节点大小
-  scale_size_continuous(range = c(2, 10), name = "Degree")+
+  scale_size_continuous(range = c(2, 10), name = "Degree") +
   # 设置节点形状
   scale_shape_manual(values = c("Microbiome" = 21, "Metabolite" = 22)) +
   # 设置边的透明度和宽度
@@ -464,29 +536,47 @@ ggraph(filtered_graph, layout = "stress") +
   ) +
   labs(title = "")
 
+plot
 
 
 
 # 直接筛选原始数据
-correlation_data <- subset(all_cors, Microbiome %in% c("Gut_Oscillibacter", "Gut_Phocaeicola"))
+correlation_data <- subset(all_cors,
+                           Microbiome %in% c("Gut_Oscillibacter", "Gut_Phocaeicola"))
 
 # 然后继续使用原来的代码
-edges <- correlation_data %>% 
+edges <- correlation_data %>%
   select(Microbiome, Metabolite, Correlation, Site)
 
 nodes <- data.frame(
-  name = unique(c(correlation_data$Microbiome, correlation_data$Metabolite)),
-  type = ifelse(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)) %in% correlation_data$Microbiome, "Microbiome", "Metabolite"),
-  site = ifelse(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)) %in% correlation_data$Microbiome, 
-                correlation_data$Site[match(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)), correlation_data$Microbiome)], 
-                "Metabolite")
+  name = unique(c(
+    correlation_data$Microbiome, correlation_data$Metabolite
+  )),
+  type = ifelse(
+    unique(c(
+      correlation_data$Microbiome, correlation_data$Metabolite
+    )) %in% correlation_data$Microbiome,
+    "Microbiome",
+    "Metabolite"
+  ),
+  site = ifelse(
+    unique(c(
+      correlation_data$Microbiome, correlation_data$Metabolite
+    )) %in% correlation_data$Microbiome,
+    correlation_data$Site[match(unique(c(
+      correlation_data$Microbiome, correlation_data$Metabolite
+    )), correlation_data$Microbiome)],
+    "Metabolite"
+  )
 )
 
 # 所有节点都显示标签
 nodes$show_label <- TRUE
 
 # 创建igraph对象
-graph <- graph_from_data_frame(d = edges, vertices = nodes, directed = FALSE)
+graph <- graph_from_data_frame(d = edges,
+                               vertices = nodes,
+                               directed = FALSE)
 
 # 计算degree
 node_degrees <- degree(graph)
@@ -494,42 +584,60 @@ V(graph)$degree <- node_degrees
 V(graph)$show_label <- TRUE
 
 # 创建ggraph可视化
-ggraph(graph, layout = "stress") +
-  # 添加边
-  geom_edge_link(aes(edge_alpha = abs(Correlation),
-                     edge_width = abs(Correlation),
-                     color = Correlation > 0),
-                 show.legend = TRUE) +
-  # 添加节点
-  geom_node_point(aes(fill = site, 
-                      size = degree,
-                      shape = type),color="white") +
-  # 添加节点标签
-  geom_node_text(aes(label = name), repel = TRUE, size = 3)+
-  # 设置配色
-  scale_edge_color_manual(values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
-                          name = "Correlation",
-                          labels = c("Negative", "Positive")) +
-  scale_fill_manual(values = c("Gut" = "#edd064",
-                               "Oral" = "#a1d5b9",
-                               "Skin" = "#f2ccac",
-                               "Nasal" = "#a17db4",
-                               "Metabolite" = "#FF9999")) +
-  # 设置节点大小
-  scale_size_continuous(range = c(2, 10), name = "Degree")+
-  # 设置节点形状
+plot <-
+  ggraph(graph, layout = "stress") +
+  geom_edge_bend(
+    strength = 0.2,
+    aes(
+      edge_alpha = abs(Correlation),
+      edge_width = abs(Correlation),
+      color = Correlation > 0
+    ),
+    style = "all",
+    show.legend = TRUE
+  )  +
+  geom_node_point(aes(fill = site, size = degree, shape = type), color = "black") +
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+  scale_edge_color_manual(
+    values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
+    name = "Correlation",
+    labels = c("Negative", "Positive")
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Gut" = "#edd064",
+      "Oral" = "#a1d5b9",
+      "Skin" = "#f2ccac",
+      "Nasal" = "#a17db4",
+      "Metabolite" = "#FF9999"
+    )
+  ) +
+  scale_size_continuous(range = c(4, 10), name = "Degree") +
   scale_shape_manual(values = c("Microbiome" = 21, "Metabolite" = 22)) +
-  # 设置边的透明度和宽度
   scale_edge_alpha(range = c(0.2, 0.8)) +
   scale_edge_width(range = c(0.3, 2)) +
-  # 主题设置
-  theme_graph() +
-  theme(legend.position = "none") +
-  guides(
-    color = guide_legend(title = "Type"),
-    size = guide_legend(title = "Node Type"),
-    shape = guide_legend(title = "Node Type"),
-    edge_alpha = guide_legend(title = "Correlation Strength"),
-    edge_width = guide_legend(title = "Correlation Strength")
-  ) +
-  labs(title = "")
+  theme_graph()
+# theme(legend.position = "none") +
+# guides(
+#   color = guide_legend(title = "Type"),
+#   size = guide_legend(title = "Node Type"),
+#   shape = guide_legend(title = "Node Type"),
+#   edge_alpha = guide_legend(title = "Correlation Strength"),
+#   edge_width = guide_legend(title = "Correlation Strength")
+# ) +
+# labs(title = "")
+
+plot
+
+library(extrafont)
+loadfonts()
+ggsave(
+  plot,
+  filename = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_2/figure_2h.pdf"
+  ),
+  width = 10,
+  height = 7,
+  dpi = 300
+)
