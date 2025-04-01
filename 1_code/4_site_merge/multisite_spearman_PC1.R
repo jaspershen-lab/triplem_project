@@ -14,11 +14,11 @@ load("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cro
 metabolomics_object<-object_cross_section
 
 dir.create("3_data_analysis/gut_microbiome/spearman/cross_section/",recursive = TRUE)
-
+metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
 setwd("3_data_analysis/gut_microbiome/spearman/cross_section/")
 
 
-metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+
 ####only remain the genus level
 library(microbiomedataset)
 

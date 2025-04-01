@@ -1,3 +1,24 @@
+rm(list = ls())
+setwd(r4projects::get_project_wd())
+source("1_code/100_tools.R")
+library(ggbeeswarm)
+setwd("1_code/4_site_merge/")
+##### 合并 gut 和 oral 的GBDT数据
+gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
+oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
+metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+
+oral_results_summary<-oral_GBDT_results$summary
+gut_results_summary<-gut_GBDT_results$summary
+
+gut_oral_results_summary<-cbind(gut_results_summary[,c(1,2,6)],oral_results_summary[,c(2,6)])
+gut_oral_results_summary$HMDB
+
+colnames(gut_oral_results_summary)<-c("metabolite","gut_R2","gut_features","oral_R2","oral_features")
+
+gut_oral_results_summary<-merge(gut_oral_results_summary,metabolite_annotation[,c("variable_id","HMDB.Name","HMDB.Source.Microbial")],by.x="metabolite",by.y="variable_id")
+
+
 preprocess_combined_data <- function(gut_data, oral_data, metabolite_data) {
   # 获取样本ID
   gut_samples <- colnames(gut_data)
@@ -291,19 +312,13 @@ plot_combined_feature_selection_results <- function(results) {
 
 
 
- combined_results <- analyze_combined_metabolite_ev(
-   gut_data = gut_temp_object@expression_data,
-   oral_data = oral_temp_object@expression_data,
-   metabolite_data = metabolomics_temp_object@expression_data,
-   do_feature_selection = TRUE,
-   correlation_method = "spearman",
-   p_threshold = 0.05,
-   p_adjust_method = "none",
-  rho_threshold = 0.1
- )
+
+ 
+gut_oral_interaction<-readRDS("../../1_code/gut_oral_microbiome/combined_results_with_interactions")
+ 
  
  gut_oral_results_summary_co_influence<- gut_oral_results_summary
- merge_model<-combined_results$summary[,c("metabolite","r2_mean")]
+ merge_model<-gut_oral_interaction$summary[,c("metabolite","r2_mean")]
  gut_oral_results_summary_co_influence<-merge(gut_oral_results_summary_co_influence,merge_model,by="metabolite")
    
  gut_oral_results_summary_co_influence$R2_diff<-gut_oral_results_summary_co_influence$r2_mean-(gut_oral_results_summary_co_influence$gut_R2+gut_oral_results_summary_co_influence$oral_R2)
@@ -339,14 +354,14 @@ plot_combined_feature_selection_results <- function(results) {
  
  # 创建长格式数据用于堆叠图
  data_long <- data_sorted %>%
-   select(HMDB.Name, gut_R2, oral_R2, r2_mean) %>%
+   dplyr::select(HMDB.Name, gut_R2, oral_R2, r2_mean) %>%
    gather(key = "source", value = "value", c(gut_R2, oral_R2))
  
  # 为r2_mean创建单独的长格式数据
  r2_mean_long <- data_sorted %>%
-   select(HMDB.Name, r2_mean) %>%
-   mutate(source = "r2_mean") %>%
-   rename(value = r2_mean)
+   dplyr::select(HMDB.Name, r2_mean) %>%
+   dplyr::mutate(source = "r2_mean") %>%
+   dplyr::rename(value = r2_mean)
  
  # 创建因子水平顺序
  level_order <- data_sorted$HMDB.Name

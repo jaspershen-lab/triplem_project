@@ -1,7 +1,7 @@
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
-
+library(ggbeeswarm)
 setwd("1_code/4_site_merge/")
 
 
@@ -79,17 +79,6 @@ g1 <- ggplot(data_long, aes(x = factor(metabolite, levels = data$metabolite), y 
         legend.position = "top",
         panel.spacing = unit(0, "lines"),
         panel.grid = element_blank()) 
-# 绘制代谢物种类的颜色条
-g2 <- ggplot(data, aes(x = factor(Metabolite, levels = data$Metabolite), y = 1, fill = HMDB.Super.Class)) +
-  geom_tile(height = 0.05) +
-  scale_fill_manual(values = c("#225822", "#87CEEB", "#F4A460", "#FF007F", "#4682B4",
-                               "#D3D3D3", "#708090", "#29AB87", "#8B4513", "#4B0082"), name = "HMDB.Super.Class") +
-  theme_void() +
-  theme(legend.position = "top")
-
-# 使用 cowplot 将两个图拼接在一起
-plot_grid(g1, g2, ncol = 1, align = "v", rel_heights = c(3, 0.3))
-
 
 
 
@@ -212,183 +201,37 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
 }
 
 # 使用函数
-# result <- metabolite_analysis(four_site_GBDT_R2)
-# print(result)
-
-
-
-## 绘制和弦图
-
-gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
-oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
-skin_GBDT_results<-readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
-nasal_GBDT_results<-readRDS("../../3_data_analysis/nasal_microbiome/GBDT/cross_section/nasal_GBDT_results")
-gut_GBDT_results_R2<-gut_GBDT_results$summary[,c(1,2)]
-colnames(gut_GBDT_results_R2)<-c("metabolite","gut")
-
-
-oral_GBDT_results_R2<-oral_GBDT_results$summary[,c(1,2)]
-colnames(oral_GBDT_results_R2)<-c("metabolite","oral")
-
-
-skin_GBDT_results_R2<-skin_GBDT_results$summary[,c(1,2)]
-colnames(skin_GBDT_results_R2)<-c("metabolite","skin")
-
-
-nasal_GBDT_results_R2<-nasal_GBDT_results$summary[,c(1,2)]
-colnames(nasal_GBDT_results_R2)<-c("metabolite","nasal")
-
-
-
-four_site_GBDT_R2<-cbind(gut_GBDT_results_R2,oral_GBDT_results_R2$oral,skin_GBDT_results_R2$skin,nasal_GBDT_results_R2$nasal)
-colnames(four_site_GBDT_R2)<-c("metabolite","gut","oral","skin","nasal")
-
-
-library(readxl)
-metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+ result <- metabolite_analysis(four_site_GBDT_R2)
+ print(result)
 
 
 
 
-library(tidyverse)
-library(circlize)
-library(RColorBrewer)
-
-
-  merged_data <- four_site_GBDT_R2 %>%
-    # 转换为长格式
-    pivot_longer(cols = c(gut, oral, skin, nasal),
-                 names_to = "Site",
-                 values_to = "R2") %>%
-    # 与注释数据合并
-    left_join(metabolite_annotation %>% 
-                select(variable_id, HMDB.Class),
-              by = c("metabolite" = "variable_id"))
-  merged_data<-subset(merged_data,R2>0.05)
-  
-  merged_data<-subset(merged_data,HMDB.Class%in%c("Benzene and substituted derivatives","Carboxylic acids and derivatives","Fatty Acyls","Glycerophospholipids","Indoles and derivatives","Organooxygen compounds","Steroids and steroid derivatives"))
-  # 创建连接矩阵
-  chord_matrix <- merged_data %>%
-    group_by(Site, HMDB.Class) %>%
-    dplyr::summarise(count = n(), .groups = 'drop') %>%
-    # 将数据转换为矩阵格式
-    pivot_wider(names_from = HMDB.Class,
-                values_from = count,
-                values_fill = 0) %>%
-    column_to_rownames("Site") %>%
-    as.matrix()
-  
-  # 设置颜色
-  # 为位点设置颜色
-  site_colors <- body_site_color
-  # 为代谢物类别设置颜色
-  chordDiagram(chord_matrix,
-               grid.col = c(site_colors,
-                            metabolite_class),
-               transparency = 0.5,
-               directional = 1,
-               direction.type = c("diffHeight", "arrows"),
-               link.arr.type = "big.arrow")
   
   
   
   
   
-### fisher 检验
+### UpSet
   
   library(UpSetR)
   four_site_GBDT_R2
 
-  #metabolite_annotation_mainclass<-subset(metabolite_annotation,HMDB.Class%in%c("Benzene and substituted derivatives","Carboxylic acids and derivatives","Fatty Acyls","Glycerophospholipids","Indoles and derivatives","Organooxygen compounds","Steroids and steroid derivatives"))
+  metabolite_annotation_mainclass<-subset(metabolite_annotation,HMDB.Class%in%c("Benzene and substituted derivatives","Carboxylic acids and derivatives","Fatty Acyls","Glycerophospholipids","Indoles and derivatives","Organooxygen compounds","Steroids and steroid derivatives"))
   
   
-  df<-four_site_GBDT_R2[,2:5]
+  df<-four_site_GBDT_R2
   
   df <- df %>% mutate(across(everything(), ~ifelse(. > 0.05, 1, 0)))
   
   df$metabolite<-four_site_GBDT_R2$metabolite
   
   
-  upset(df, sets = c("gut", "oral", "skin", "nasal"), keep.order = TRUE,sets.bar.color = body_site_color,matrix.color =  body_site_color)
+  upset(df, sets = c("gut", "oral", "skin", "nasal"), keep.order = TRUE,sets.bar.color =c("#edd064" , "#a1d5b9" ,"#f2ccac","#a17db4"))
   
   
   
-  # 函数用于分析不同位点代谢物的交集和分类信息
-  analyze_metabolite_distribution <- function(data, annotation_data) {
-    # 合并注释信息
-    data_with_anno <- merge(data, annotation_data, by.x = "metabolite",by.y="variable_id", all.x = TRUE)
-    data_with_anno<-subset(data_with_anno,HMDB.Class%in%c("Benzene and substituted derivatives","Carboxylic acids and derivatives","Fatty Acyls","Glycerophospholipids","Indoles and derivatives","Organooxygen compounds","Steroids and steroid derivatives"))
-    # 获取各位点存在的代谢物
-    gut_metabolites <- data_with_anno$metabolite[data_with_anno$gut == 1]
-    oral_metabolites <- data_with_anno$metabolite[data_with_anno$oral == 1]
-    skin_metabolites <- data_with_anno$metabolite[data_with_anno$skin == 1]
-    nasal_metabolites <- data_with_anno$metabolite[data_with_anno$nasal == 1]
-    
-    # 获取交集并排序
-    gut_oral <- data_with_anno[data_with_anno$metabolite %in% intersect(gut_metabolites, oral_metabolites), ]
-    gut_skin <- data_with_anno[data_with_anno$metabolite %in% intersect(gut_metabolites, skin_metabolites), ]
-    gut_nasal <- data_with_anno[data_with_anno$metabolite %in% intersect(gut_metabolites, nasal_metabolites), ]
-    
-    # 按HMDB.Class排序
-    gut_oral <- gut_oral[order(gut_oral$HMDB.Class), ]
-    gut_skin <- gut_skin[order(gut_skin$HMDB.Class), ]
-    gut_nasal <- gut_nasal[order(gut_nasal$HMDB.Class), ]
-    
-    # 打印详细信息
-    print_intersection_details <- function(intersection_data, name) {
-      cat("\n", paste0(name, " (共", nrow(intersection_data), "个代谢物)"), "\n")
-      cat("=" * 50, "\n")
-      
-      # 按类别分组打印
-      classes <- unique(intersection_data$HMDB.Class)
-      for(class in classes) {
-        cat("\n", class, ":", "\n")
-        subset <- intersection_data[intersection_data$HMDB.Class == class, ]
-        cat(paste(subset$metabolite, collapse = ", "), "\n")
-        cat("-" * 30, "\n")
-      }
-    }
-    
-    # 打印每个交集的详细信息
-    print_intersection_details(gut_oral, "Gut-Oral交集")
-    print_intersection_details(gut_skin, "Gut-Skin交集")
-    print_intersection_details(gut_nasal, "Gut-Nasal交集")
-    
-    # 统计各交集中的分类分布
-    analyze_distribution <- function(subset_data, name) {
-      dist_table <- table(subset_data$HMDB.Class)
-      percent_table <- prop.table(dist_table) * 100
-      
-      cat("\n", name, "分类统计:\n")
-      cat("=" * 50, "\n")
-      for(i in 1:length(dist_table)) {
-        cat(sprintf("%s: %d个 (%.2f%%)\n", 
-                    names(dist_table)[i], 
-                    dist_table[i], 
-                    percent_table[i]))
-      }
-      
-      return(list(counts = dist_table, percentages = percent_table))
-    }
-    
-    # 分析每个交集的分布
-    distributions <- list(
-      gut_oral = analyze_distribution(gut_oral, "Gut-Oral交集"),
-      gut_skin = analyze_distribution(gut_skin, "Gut-Skin交集"),
-      gut_nasal = analyze_distribution(gut_nasal, "Gut-Nasal交集")
-    )
-    
-    # 返回完整数据供后续分析
-    return(list(
-      gut_oral = gut_oral,
-      gut_skin = gut_skin,
-      gut_nasal = gut_nasal,
-      distributions = distributions
-    ))
-  }
-  
-  # 使用示例:
-  results <- analyze_metabolite_distribution(df, metabolite_annotation)
+ 
   
   
   
@@ -396,86 +239,4 @@ library(RColorBrewer)
   
   
   
-  
-  
-##  814个代谢物的热图
-  
-
-  gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
-  oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
-  skin_GBDT_results<-readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
-  nasal_GBDT_results<-readRDS("../../3_data_analysis/nasal_microbiome/GBDT/cross_section/nasal_GBDT_results")
-  gut_GBDT_results_R2<-gut_GBDT_results$summary[,c(1,2)]
-  colnames(gut_GBDT_results_R2)<-c("metabolite","gut")
-  
-  
-  oral_GBDT_results_R2<-oral_GBDT_results$summary[,c(1,2)]
-  colnames(oral_GBDT_results_R2)<-c("metabolite","oral")
-  
-  
-  skin_GBDT_results_R2<-skin_GBDT_results$summary[,c(1,2)]
-  colnames(skin_GBDT_results_R2)<-c("metabolite","skin")
-  
-  
-  nasal_GBDT_results_R2<-nasal_GBDT_results$summary[,c(1,2)]
-  colnames(nasal_GBDT_results_R2)<-c("metabolite","nasal")
-  
-  
-  
-  four_site_GBDT_R2<-cbind(gut_GBDT_results_R2,oral_GBDT_results_R2$oral,skin_GBDT_results_R2$skin,nasal_GBDT_results_R2$nasal)
-  colnames(four_site_GBDT_R2)<-c("metabolite","gut","oral","skin","nasal")
-  
-  
-  rownames(four_site_GBDT_R2)<-four_site_GBDT_R2$metabolite
-  four_site_GBDT_R2<-four_site_GBDT_R2[,-1]
-  
-  four_site_GBDT_R2[four_site_GBDT_R2 < 0.05] <- 0
-  
-  four_site_GBDT_R2<-four_site_GBDT_R2[rowSums(four_site_GBDT_R2)>0,]
-  
-  # 首先加载必要的包
-  library(ComplexHeatmap)
-  library(circlize)  # 用于颜色映射
-  
-
-  # 将数据框转换为矩阵
-  mat <- as.matrix(four_site_GBDT_R2)
-  
-  # 设置颜色映射
-  # 使用蓝色到红色的渐变色
-  col_fun = colorRamp2(
-    breaks = c(min(mat), 0, max(mat)),
-    colors = c("blue", "white", "red")
-  )
-  
-  # 创建热图
-  heatmap <- Heatmap(
-    mat,
-    name = "值",  # 图例标题
-    
-    # 颜色设置
-    col = col_fun1,
-    
-    # 聚类设置
-    cluster_rows = TRUE,
-    cluster_columns = TRUE,
-,
-    
-    # 行列名称设置
-    show_row_names = FALSE,
-    show_column_names = TRUE,
-    
-    # 热图标题
-    column_title = "热图标题",
-    
-    # 图例设置
-    heatmap_legend_param = list(
-      title = "值",
-      title_position = "leftcenter-rot",
-      legend_height = unit(4, "cm")
-    )
-  )
-  
-  # 绘制热图
-  draw(heatmap)
   

@@ -1,8 +1,7 @@
 # 读取interaction的结果
 
 
-gut_oral_interaction<-load("combined_results_with_interactions")
-
+gut_oral_interaction<-readRDS("../../../../1_code/gut_oral_microbiome/combined_results_with_interactions")
 
 
 # 2. 分位数分割图 - 根据一个菌群的分位数来展示另一个菌群与代谢物的关系

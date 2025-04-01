@@ -1,3 +1,263 @@
+setwd(r4projects::get_project_wd())
+source("1_code/100_tools.R")
+library(patchwork)
+library(doParallel)
+library(tidyverse)
+library(tidymass)
+library(parallel)
+library(progress)
+###load("data)
+load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
+
+gut_object<-object_cross_section
+
+load("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
+
+metabolomics_object<-object_cross_section
+metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+
+####only remain the genus level
+library(microbiomedataset)
+
+gut_object <-
+  gut_object %>%
+  summarize_variables(what = "sum_intensity", group_by = "Genus")
+
+##only remain the genus at least 10% samples
+dim(gut_object)
+
+non_zero_per <-
+  apply(gut_object, 1, function(x) {
+    sum(x != 0) / ncol(gut_object)
+  })
+
+idx <-
+  which(non_zero_per > 0.1)
+
+gut_object <-
+  gut_object[idx, ]
+
+
+gut_object <-
+  gut_object %>%
+  transform2relative_intensity()
+
+
+
+##
+##adjust BMI, sex, and IRIS, ethnicity
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+
+gut_expression_data <-
+  extract_expression_data(gut_object) %>%
+  apply(1, function(x) {
+    (x - mean(x)) / sd(x)
+  }) %>%
+  t() %>%
+  as.data.frame()
+
+library(plyr)
+
+gut_sample_info <-
+  gut_object@sample_info
+
+#######adjust BMI, sex, and IRIS, ethnicity
+gut_expression_data <-
+  lm_adjust(expression_data = gut_expression_data,
+            sample_info = gut_sample_info,
+            threads = 3)
+
+gut_temp_object <- gut_object
+gut_temp_object@expression_data <- gut_expression_data
+
+
+
+# 
+expression_data <-
+  extract_expression_data(metabolomics_object) %>%
+  `+`(1) %>%
+  log(2) %>%
+  apply(1, function(x) {
+    (x - mean(x)) / sd(x)
+  }) %>%
+  t() %>%
+  as.data.frame()
+
+library(plyr)
+
+sample_info <-
+  metabolomics_object@sample_info
+
+#######adjust BMI, sex, and IRIS, ethnicity
+expression_data <-
+  lm_adjust(expression_data = expression_data,
+            sample_info = sample_info,
+            threads = 3)
+
+metabolomics_temp_object <- metabolomics_object
+metabolomics_temp_object@expression_data <- expression_data
+
+
+
+
+load("3_data_analysis/oral_microbiome/data_preparation/object_cross_section")
+
+oral_object<-object_cross_section
+
+load("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section")
+
+metabolomics_object<-object_cross_section
+
+dir.create("3_data_analysis/oral_microbiome/spearman/cross_section/",recursive = TRUE)
+
+setwd("3_data_analysis/oral_microbiome/spearman/cross_section/")
+
+
+
+####only remain the genus level
+library(microbiomedataset)
+
+oral_object <-
+  oral_object %>%
+  summarize_variables(what = "sum_intensity", group_by = "Genus")
+
+##only remain the genus at least 10% samples
+dim(oral_object)
+
+non_zero_per <-
+  apply(oral_object, 1, function(x) {
+    sum(x != 0) / ncol(oral_object)
+  })
+
+idx <-
+  which(non_zero_per > 0.1)
+
+oral_object <-
+  oral_object[idx, ]
+
+
+oral_object <-
+  oral_object %>%
+  transform2relative_intensity()
+
+
+
+##
+##adjust BMI, sex, and IRIS, ethnicity
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+
+oral_expression_data <-
+  extract_expression_data(oral_object) %>%
+  apply(1, function(x) {
+    (x - mean(x)) / sd(x)
+  }) %>%
+  t() %>%
+  as.data.frame()
+
+library(plyr)
+
+oral_sample_info <-
+  oral_object@sample_info
+
+#######adjust BMI, sex, and IRIS, ethnicity
+oral_expression_data <-
+  lm_adjust(expression_data = oral_expression_data,
+            sample_info = oral_sample_info,
+            threads = 3)
+
+oral_temp_object <- oral_object
+oral_temp_object@expression_data <- oral_expression_data
+# 交叉验证函数
+single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
+  # 设置随机种子
+  if(!is.null(seed)) {
+    set.seed(seed)
+  }
+  
+  # 创建fold索引
+  fold_ids <- sample(rep(1:n_folds, length.out = length(y)))
+  all_predictions <- numeric(length(y))
+  
+  for(fold in 1:n_folds) {
+    # 划分训练集和测试集
+    test_idx <- which(fold_ids == fold)
+    train_idx <- which(fold_ids != fold)
+    
+    # 准备数据
+    train_data <- data.frame(X[train_idx, , drop = FALSE])
+    test_data <- data.frame(X[test_idx, , drop = FALSE])
+    train_data$target <- y[train_idx]
+    
+    # 训练模型
+    model <- gbm(
+      target ~ .,
+      data = train_data,
+      distribution = "gaussian",
+      n.trees = gbdt_params$n.trees,
+      interaction.depth = gbdt_params$interaction.depth,
+      shrinkage = gbdt_params$shrinkage,
+      n.minobsinnode = gbdt_params$n.minobsinnode,
+      verbose = FALSE
+    )
+    
+    # 预测
+    test_data <- data.frame(X[test_idx, , drop = FALSE])
+    all_predictions[test_idx] <- predict(model, test_data, n.trees = gbdt_params$n.trees)
+  }
+  
+  return(calculate_r2(y, all_predictions))
+}
+
+
+
+# R²计算函数
+calculate_r2 <- function(actual, predicted) {
+  1 - sum((actual - predicted)^2) / sum((actual - mean(actual))^2)
+}
+# 特征选择函数
+select_relevant_features <- function(X, y, correlation_method = "spearman", 
+                                     p_threshold = 0.05,
+                                     p_adjust_method = "none",
+                                     rho_threshold = 0.1) {  # 添加相关系数阈值参数
+  # 计算每个特征与目标变量的相关性
+  correlations <- sapply(1:ncol(X), function(i) {
+    result <- cor.test(X[,i], y, method = correlation_method)
+    c(correlation = result$estimate,
+      p_value = result$p.value)
+  })
+  
+  # 转换为矩阵便于处理
+  correlations<-as.data.frame(t(correlations))
+  colnames(correlations) <- c("correlation", "p_value")
+  rownames(correlations) <- colnames(X)
+  
+  # 进行多重检验校正
+  adjusted_p_values <- p.adjust(correlations[,"p_value"], method = p_adjust_method)
+  
+  # 添加校正后的p值到结果中
+  correlations <- cbind(correlations, adjusted_p_value = adjusted_p_values)
+  
+  # 同时根据校正后的p值和相关系数绝对值进行筛选
+  significant_features <- which(adjusted_p_values < p_threshold & 
+                                  abs(correlations[,"correlation"]) >= rho_threshold)
+  
+  # 按相关性绝对值排序
+  if(length(significant_features) > 0) {
+    abs_cors <- abs(correlations[significant_features, "correlation"])
+    significant_features <- significant_features[order(abs_cors, decreasing = TRUE)]
+  }
+  
+  return(list(
+    selected_indices = significant_features,
+    selected_features = colnames(X)[significant_features],
+    correlations = correlations
+  ))
+}
+
 # 新增函数：创建肠道菌群和口腔菌群的交互特征
 create_microbiome_interactions <- function(gut_data, oral_data, 
                                            method = "multiplication",
