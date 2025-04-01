@@ -133,3 +133,6 @@ phylum_name =
 
 phylum_color =
   ggsci::pal_simpsons()(n = length(phylum_name))
+
+site_color <-
+  c(gut = "#edd064" , oral = "#a1d5b9" , skin = "#f2ccac", nasal = "#a17db4")

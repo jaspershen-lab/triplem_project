@@ -369,7 +369,7 @@ Phocaeicola_PC1
 ggsave(
   Phocaeicola_PC1,
   filename = file.path(r4projects::get_project_wd(), "4_manuscript/Figures/Figure_2/figure_2g.pdf"),
-  width = 6,
+  width = 7,
   height = 6
 )
 
