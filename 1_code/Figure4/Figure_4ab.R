@@ -35,8 +35,8 @@ gut_oral_results_summary <- merge(
   by.y = "variable_id"
 )
 
-gut_oral_results_summary <- subset(gut_oral_results_summary, gut_R2 > 0 &
-                                     oral_R2 > 0)
+gut_oral_results_summary <- subset(gut_oral_results_summary, gut_R2 > 0.05 &
+                                     oral_R2 > 0.05)
 
 gut_oral_interaction <- readRDS("../../1_code/gut_oral_microbiome/combined_results_with_interactions")
 
