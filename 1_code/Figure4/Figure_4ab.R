@@ -57,7 +57,7 @@ gut_oral_results_summary_co_influence <- subset(gut_oral_results_summary_co_infl
 # gut_oral_results_summary_co_influence <- subset(gut_oral_results_summary_co_influence, !(HMDB.Name ==
 #                                                                                            "NA"))
 
-gut_oral_results_summary_co_influence <- gut_oral_results_summary_co_influence[!duplicated(gut_oral_results_summary_co_influence$HMDB.Name), ]
+# gut_oral_results_summary_co_influence <- gut_oral_results_summary_co_influence[!duplicated(gut_oral_results_summary_co_influence$HMDB.Name), ]
 
 gut_oral_results_summary_co_influence <-
 gut_oral_results_summary_co_influence %>% 
@@ -70,6 +70,10 @@ gut_oral_results_summary_co_influence %>%
 gut_oral_results_summary_co_influence <-
 gut_oral_results_summary_co_influence %>% 
   dplyr::filter(gut_R2 > 0.05 & oral_R2 > 0.05)
+
+dim(gut_oral_results_summary_co_influence)
+
+table(gut_oral_results_summary_co_influence$class)
 
 
 plot <-
@@ -84,7 +88,7 @@ plot <-
   theme_bw() +
   scale_fill_manual(values = c("Pos" = "#ff6361", "Neg" = "#a98467")) +
   geom_vline(xintercept = 0, color = "black") +
-  labs(title = "Distribution of R2_diff", x = "R2_diff", y = "Count") +
+  labs(x = "R2_diff", y = "Count") +
   theme(plot.title = element_text(hjust = 0.5))
 
 plot
@@ -96,16 +100,19 @@ ggsave(
     "4_manuscript/Figures/Figure_4/figure_4b_1.pdf"
   ),
   width = 7,
-  height = 7
+  height = 5.5
 )
 
 
-# plot <-
+plot <-
 ggplot(gut_oral_results_summary_co_influence,
        aes(x = r2_mean, gut_R2 + oral_R2)) +
-  geom_point(size = 5) +
+  geom_point(size = 7, aes(fill = class), 
+             shape = 21,
+             color = "black") +
   scale_x_continuous(limits = c(0, 0.35)) +
   scale_y_continuous(limits = c(0, 0.35)) +
+  scale_fill_manual(values = c("Pos" = "#ff6361", "Neg" = "#a98467")) +
   geom_abline(intercept = 0,
               slope = 1,
               color = "red") +
@@ -118,10 +125,10 @@ ggsave(
   plot,
   filename = file.path(
     r4projects::get_project_wd(),
-    "4_manuscript/Figures/Figure_4/figure_4b_1.pdf"
+    "4_manuscript/Figures/Figure_4/figure_4b_2.pdf"
   ),
   width = 7,
-  height = 7
+  height = 6
 )
 
 
