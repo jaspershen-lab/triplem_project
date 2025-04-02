@@ -223,10 +223,10 @@ analyze_interaction_features <- function(interaction_results, selected_metabolit
     weighted_oral = sort(weighted_oral_counts, decreasing = TRUE)
   ))
 }
-
+gut_oral_interaction<-readRDS("../../../../1_code/gut_oral_microbiome/combined_results_with_interactions")
 # 筛选显著受交互效应影响的代谢物
 significant_metabolites <- select_significant_interaction_metabolites(
-  combined_results_with_interactions,
+  gut_oral_interaction,
   min_r2 = 0.35,
   min_interaction_importance = 0.3,
   top_n = 50
@@ -389,7 +389,8 @@ p4 <- ggplot(data = all_interactions_oral) +
 
 p4
  
-
+p_combine <- p1 + p2 + p3 + p4 + plot_layout(nrow = 1,
+                                             widths = c(0.25, 1.25, 1.25, 0.25))
 
 # 批量绘制所有gut_feature、oral_feature和metabolite组合的互作用图
 
