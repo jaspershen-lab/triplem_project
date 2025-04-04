@@ -268,7 +268,7 @@ for (i in 1:nrow(oral_gut_associations)) {
       
       # 进行中介分析 - 使用非交互式bootstrap或将interaction设为FALSE
       med_result <- mediate(med_model, out_model, treat = "oral", mediator = "gut",
-                            boot = TRUE, sims = 1000)
+                            boot = TRUE, sims = 100)
       
       # 保存结果
       result_row <- data.frame(
@@ -316,7 +316,7 @@ for (i in 1:nrow(oral_gut_associations)) {
       
       # 进行中介分析 - 使用非交互式bootstrap或将interaction设为FALSE
       med_result <- mediate(med_model, out_model, treat = "gut", mediator = "oral",
-                            boot = TRUE, sims = 1000)
+                            boot = TRUE, sims = 100)
       
       # 保存结果
       result_row <- data.frame(
@@ -364,14 +364,34 @@ direction_counts <- table(bidirectional_mediation_results_sig$direction)
 
 
 
-# 如果需要更美观的图表，可以使用ggplot2
-ggplot(data=as.data.frame(direction_counts), aes(x=Var1, y=Freq,fill=Var1)) +
-  geom_bar(stat="identity") +
-  labs(x="Direction", y="Counts") +
+
+plot <-
+  ggplot(data = as.data.frame(direction_counts), aes(x = Var1, y = Freq, fill =
+                                                       Var1)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Direction", y = "Counts") +
   theme_bw() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle=45, hjust=1,size=14),
-        axis.text.y = element_text(size=12))+scale_fill_manual(values = c("#Edd064","#a1d5b9"))
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1,
+      size = 14
+    ),
+    axis.text.y = element_text(size = 12)
+  ) + scale_fill_manual(values = c("#Edd064", "#a1d5b9"))
+
+plot
+
+ggsave(
+  plot,
+  filename = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_5/figure_5b.pdf"
+  ),
+  width = 6,
+  height = 6
+)
 
 
 bidirectional_mediation_results_sig_oral_gut_metabolite<-subset(bidirectional_mediation_results_sig,bidirectional_mediation_results_sig$direction=="oral->gut->metabolite")
@@ -457,22 +477,7 @@ sankey_plot<-sankeyNetwork(
   units = "个数"
 )
 
-final_sankey <- htmlwidgets::onRender(sankey_plot, nodePositionJS)
 
-# 保存为HTML文件
-html_file <- "sankey_diagram.html"
-htmlwidgets::saveWidget(final_sankey, html_file)
-
-# 将HTML文件转换为PDF
-pdf_file <- "sankey_diagram.pdf"
-webshot2::webshot(
-  url = html_file, 
-  file = pdf_file,
-  delay = 1,        # 等待渲染完成的时间（秒）
-  zoom = 2,         # 增加分辨率
-  vwidth = 800,     # 视口宽度
-  vheight = 600     # 视口高度
-)
 
 
 

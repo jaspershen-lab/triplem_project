@@ -1,3 +1,4 @@
+rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
 library(patchwork)
@@ -6,6 +7,8 @@ library(tidyverse)
 library(tidymass)
 library(parallel)
 library(progress)
+library(readxl)
+
 ###load("data)
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
@@ -424,9 +427,9 @@ gut_oral_interaction <- readRDS("1_code/gut_oral_microbiome/combined_results_wit
 # 筛选显著受交互效应影响的代谢物
 significant_metabolites <- select_significant_interaction_metabolites(
   gut_oral_interaction,
-  min_r2 = 0.35,
+  min_r2 = 0.1,
   min_interaction_importance = 0.1,
-  top_n = 50
+  top_n = 500
 )
 
 # 可视化结果
@@ -701,10 +704,11 @@ plot_microbe_interaction_quantile <- function(gut_data,
   # 对于每个分位数计算口腔菌群与代谢物的相关性
   quantile_cors <- lapply(levels(plot_data$oral_quantile), function(q) {
     subset_data <- plot_data[plot_data$oral_quantile == q, ]
-    cor_value <- cor(subset_data$gut, subset_data$metabolite, method = "spearman")
-    data.frame(quantile = q, correlation = cor_value)
+    cor_value <- cor.test(subset_data$gut, subset_data$metabolite, method = "spearman")
+    data.frame(quantile = q, correlation = cor_value$estimate[[1]],p = cor_value$p.value*0.5)
   })
   quantile_cors <- do.call(rbind, quantile_cors)
+  
   
   # 创建散点图
   p <- ggplot(plot_data, aes(x = gut, y = metabolite, color = oral_quantile)) +
@@ -719,6 +723,13 @@ plot_microbe_interaction_quantile <- function(gut_data,
           quantile_cors$quantile,
           ":",
           round(quantile_cors$correlation, 2),
+          collapse = ", "
+        ),
+        "\n                           ",
+        paste(
+          quantile_cors$quantile,
+          ":",
+          round(quantile_cors$p, 2),
           collapse = ", "
         )
       ),
@@ -748,30 +759,18 @@ rownames(oral_data) <- oral_tax$Genus
 
 metabolomics_data <- metabolomics_temp_object@expression_data
 
-a <- plot_microbe_interaction_quantile(
+
+
+a<-plot_microbe_interaction_quantile(
   gut_data = gut_data,
   oral_data = oral_data,
-  metabolite_data = metabolomics_data,
-  gut_feature = "Mediterraneibacter",
-  oral_feature = "Lachnoanaerobaculum",
-  metabolite = "M178T111_NEG_RPLC",
+  metabolite_data= metabolomics_data,
+  gut_feature = "Paraprevotella",
+  oral_feature = "Enterococcus",
+  metabolite = "M205T407_2_POS_HILIC",
   n_quantiles = 3,
   use_log = FALSE
-) + ylab("Hippuric acid")
-
-a
-
-b <- plot_microbe_interaction_quantile(
-  gut_data = gut_data,
-  oral_data = oral_data,
-  metabolite_data = metabolomics_data,
-  gut_feature = "Mediterraneibacter",
-  oral_feature = "Lachnoanaerobaculum",
-  metabolite = "M199T542_NEG_HILIC",
-  n_quantiles = 3,
-  use_log = FALSE
-) + ylab("gamma-Glutamylalanine")
-
+) + ylab("L-Tryptophan")+xlim(c(-0.5,1.5))
 
 a
 
@@ -785,6 +784,21 @@ ggsave(
   height = 4
 )
 
+
+
+b<-plot_microbe_interaction_quantile(
+  gut_data = gut_data,
+  oral_data = oral_data,
+  metabolite_data= metabolomics_data,
+  gut_feature = "Paraprevotella",
+  oral_feature = "Enterococcus",
+  metabolite = "M219T395_NEG_HILIC",
+  n_quantiles = 3,
+  use_log = FALSE
+) + ylab("5-Hydroxy-L-tryptophan")+xlim(c(-0.5,1.5))
+
+
+
 ggsave(
   b,
   filename = file.path(
@@ -794,4 +808,40 @@ ggsave(
   width = 9,
   height = 4
 )
+
+
+
+
+
+c <- plot_microbe_interaction_quantile(
+  gut_data = gut_data,
+  oral_data = oral_data,
+  metabolite_data = metabolomics_data,
+  gut_feature = "Mediterraneibacter",
+  oral_feature = "Lachnoanaerobaculum",
+  metabolite = "M178T111_NEG_RPLC",
+  n_quantiles = 3,
+  use_log = FALSE
+) + ylab("Hippuric acid")
+
+c
+
+
+
+
+
+d <- plot_microbe_interaction_quantile(
+  gut_data = gut_data,
+  oral_data = oral_data,
+  metabolite_data = metabolomics_data,
+  gut_feature = "Mediterraneibacter",
+  oral_feature = "Lachnoanaerobaculum",
+  metabolite = "M199T542_NEG_HILIC",
+  n_quantiles = 3,
+  use_log = FALSE
+) + ylab("gamma-Glutamylalanine")
+
+
+
+
 
