@@ -436,7 +436,7 @@ processed_data <- predict_TF %>%
 
 
 # 创建图表
-ggplot(processed_data) +
+p<-ggplot(processed_data) +
   # 添加复制率的平滑曲线
   geom_smooth(aes(x = model_performance, y = cumulative_replication), 
               color = "#007b7a", se = FALSE, span = 0.2) +
@@ -479,7 +479,10 @@ ggplot(processed_data) +
   )
 
 
-
+ggsave(p,
+       filename = "4_manuscript/Figures/Figure_3/figure_s3_FBIP_validation_1.pdf",
+       width = 6,
+       height = 5)
 
 ggplot(predictions_oberserve, aes(x=predictions_oberserve$estimate, y= predictions_oberserve$model_performance)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
@@ -508,7 +511,7 @@ top_10_metabolites <- top_10_metabolites %>%
   mutate(HMDB.Name = factor(HMDB.Name, levels = HMDB.Name))
 
 # 创建棒棒糖图
-ggplot(top_10_metabolites, aes(x = HMDB.Name, y = abs(estimate)+0.1)) +
+p<-ggplot(top_10_metabolites, aes(x = HMDB.Name, y = abs(estimate)+0.1)) +
   geom_segment(aes(xend = HMDB.Name, yend = 0), color = "gray50") +
   geom_point(size = 3, color = "steelblue") +
   coord_flip() + # 水平显示
@@ -523,6 +526,10 @@ ggplot(top_10_metabolites, aes(x = HMDB.Name, y = abs(estimate)+0.1)) +
     plot.title = element_text(face = "bold")
   )
 
+ggsave(p,
+       filename = "4_manuscript/Figures/Figure_3/figure_s3_FBIP_validation_2.pdf",
+       width = 5,
+       height = 6)
 
 
 
@@ -542,14 +549,14 @@ predictions_data_oberserve_data<-data.frame(cbind(oberserve_data,predictions_dat
 
 
 
-ggplot(predictions_oberserve, aes(x=predictions_data_oberserve_data$HMDB0011743, y= predictions_data_oberserve_data$HMDB0011743.1)) +
+ggplot(predictions_data_oberserve_data, aes(x=predictions_data_oberserve_data$HMDB0011743, y= predictions_data_oberserve_data$HMDB0011743.1)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "spearman")+theme(legend.position="none", #不需要图例
+  geom_smooth(method="lm",colour = "grey50") +theme_bw() +stat_cor(method = "spearman")+theme(legend.position="none", #不需要图例
                                                                                                  axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
                                                                                                  axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
                                                                                                  axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
                                                                                                  axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
-                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))
+                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+ylim(c(-0.25,0.75))
 
 
 

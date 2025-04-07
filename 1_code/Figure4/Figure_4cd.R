@@ -825,7 +825,15 @@ c <- plot_microbe_interaction_quantile(
 ) + ylab("Hippuric acid")
 
 c
-
+ggsave(
+  c,
+  filename = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_4/figure_s4c.pdf"
+  ),
+  width = 9,
+  height = 4
+)
 
 
 
@@ -841,7 +849,15 @@ d <- plot_microbe_interaction_quantile(
   use_log = FALSE
 ) + ylab("gamma-Glutamylalanine")
 
-
+ggsave(
+  d,
+  filename = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_4/figure_s4d.pdf"
+  ),
+  width = 9,
+  height = 4
+)
 
 
 

@@ -268,7 +268,7 @@ for (i in 1:nrow(oral_gut_associations)) {
       
       # 进行中介分析 - 使用非交互式bootstrap或将interaction设为FALSE
       med_result <- mediate(med_model, out_model, treat = "oral", mediator = "gut",
-                            boot = TRUE, sims = 100)
+                            boot = TRUE, sims = 10)
       
       # 保存结果
       result_row <- data.frame(

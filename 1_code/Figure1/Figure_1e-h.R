@@ -758,10 +758,10 @@ if ("Others" %in% important_classes) {
 
 # 统计各位点每个类别的数量和百分比
 site_class_summary <- site_data %>%
-  group_by(Site, HMDB.Class) %>%
+  dplyr::group_by(Site, HMDB.Class) %>%
   dplyr::summarise(count = n(), .groups = "drop") %>%
-  group_by(Site) %>%
-  mutate(total = sum(count), percentage = count / total * 100)
+  dplyr::group_by(Site) %>%
+  dplyr::mutate(total = sum(count), percentage = count / total * 100)
 
 # 处理各位点的数据，确保类别一致性
 site_class_final <- site_class_summary %>%
@@ -899,17 +899,17 @@ p <- ggplot(combined_data, aes(x = Site, y = percentage, fill = HMDB.Class)) +
 # 为每个分段添加标签（当分段足够大时）
 # 首先计算每个分段的位置
 label_data <- combined_data %>%
-  group_by(Site) %>%
-  arrange(desc(HMDB.Class)) %>%
-  mutate(
+  dplyr::group_by(Site) %>%
+  dplyr::arrange(desc(HMDB.Class)) %>%
+  dplyr::mutate(
     ymin = lag(cumsum(percentage), default = 0),
     ymax = cumsum(percentage),
     pos = (ymin + ymax) / 2
   ) %>%
-  ungroup()
+  dplyr::ungroup()
 
 # 只为较大的分段添加标签（例如>=5%）
-label_threshold <- 5
+label_threshold <- 2
 p <- p +
   geom_text(
     data = subset(label_data, percentage >= label_threshold),
@@ -1117,7 +1117,14 @@ p <- ggplot(p_value_long, aes(x = Site2, y = Site1, fill = neg_log_p)) +
   coord_fixed()
 
 # 7. 显示热图
-print(p)
+
+
+p
+
+ggsave(p,
+       filename = "4_manuscript/Figures/Figure_1/figure_s1_chi.test.pdf",
+       width = 5,
+       height = 5)
 
 # 8. 创建显著性摘要表
 significance_summary <- result_df %>%

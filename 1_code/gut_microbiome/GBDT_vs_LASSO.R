@@ -76,3 +76,9 @@ p2<-ggplot(two_model, aes(x=delt_R2)) +
     axis.ticks.length = unit(0.25, "cm"),  # 增加刻度线长度
     axis.ticks = element_line(linewidth = 0.8)  # 增加刻度线粗细
   ) +xlab("GBDT R²-lasso R²")
+
+
+p3<-p1+p2
+
+ggsave("4_manuscript/Figures/Figure_3/Figure_s3_gut.pdf", 
+       p3, width = 4, height = 8)

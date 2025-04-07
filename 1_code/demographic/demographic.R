@@ -1,7 +1,7 @@
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
-source("1_code/mantel_Procrustes_code.R")
+
 library(tidyverse)
 library(tidymass)
 library(readxl)
@@ -36,9 +36,7 @@ library(circlize)
 library(grid)
 
 
-library(ComplexHeatmap)
-library(circlize)
-library(grid)
+
 
 # 将不透明度设置为0.7（相当于30%的透明度）
 alpha_value = 0.7
@@ -314,10 +312,10 @@ alpha_value = 0.7
 
 # 定义四个部位的颜色
 microbiome_colors <- c(
-  "gut" = "#D55E00",    # 深红色
-  "oral" = "#CC79A7",   # 粉色
-  "skin" = "#0072B2",   # 深蓝色
-  "nasal" = "#009E73"   # 绿色
+  "gut" = "#edd064",    # 深红色
+  "oral" = "#a1d5b9",   # 粉色
+  "skin" = "#f2ccac",   # 深蓝色
+  "nasal" = "#a17db4"   # 绿色
 )
 
 # 创建注释对象
@@ -333,30 +331,30 @@ ha = columnAnnotation(
                      width = unit(2, "cm")),
   
   # 添加四个部位的alpha多样性棒棒糖图
-  `Gut Shannon` = anno_barplot(
+  `Gut` = anno_points(
     alpha_diversity$gut,
-    gp = gpar(fill = scales::alpha(microbiome_colors["gut"], alpha_value)),
+    gp = gpar(col = scales::alpha(microbiome_colors["gut"], alpha_value)),
     border = TRUE,
     width = unit(2, "cm")
   ),
   
-  `Oral Shannon` = anno_barplot(
+  `Oral` = anno_points(
     alpha_diversity$oral,
-    gp = gpar(fill = scales::alpha(microbiome_colors["oral"], alpha_value)),
+    gp = gpar(col = scales::alpha(microbiome_colors["oral"], alpha_value)),
     border = TRUE,
     width = unit(2, "cm")
   ),
   
-  `Skin Shannon` = anno_barplot(
+  `Skin` = anno_points(
     alpha_diversity$skin,
-    gp = gpar(fill = scales::alpha(microbiome_colors["skin"], alpha_value)),
+    gp = gpar(col = scales::alpha(microbiome_colors["skin"], alpha_value)),
     border = TRUE,
     width = unit(2, "cm")
   ),
   
-  `Nasal Shannon` = anno_barplot(
+  `Nasal` = anno_points(
     alpha_diversity$nasal,
-    gp = gpar(fill = scales::alpha(microbiome_colors["nasal"], alpha_value)),
+    gp = gpar(col = scales::alpha(microbiome_colors["nasal"], alpha_value)),
     border = TRUE,
     width = unit(2, "cm")
   ),
@@ -405,4 +403,8 @@ ht = Heatmap(mat,
              height = unit(0.2, "cm"))   # 设置整体高度
 
 # 绘制并设置图例位置
-draw(ht, annotation_legend_side = "bottom")
+setwd(r4projects::get_project_wd())
+
+pdf("4_manuscript/Figures/Figure_1/figure_s1_ipop_demographic.pdf", width = 10, height = 6)
+ht_drawn <-draw(ht, annotation_legend_side = "bottom")  # 捕获绘制的对象
+dev.off()
