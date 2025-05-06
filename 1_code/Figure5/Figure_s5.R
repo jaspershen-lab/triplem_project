@@ -12,6 +12,8 @@ rownames(gut_microbiome)<-gut_microbiome$Sample_id
 gut_microbiome<-gut_microbiome[,-1]
 gut_metadata<-data.frame(read_excel("2_data/2023_Eransegal_NC/gut_metadata.xlsx"))
 gut_tax<-data.frame(read_excel("2_data/2023_Eransegal_NC/gut_tax.xlsx"))
+
+oral_tax<-data.frame(read_excel("2_data/2023_Eransegal_NC/oral_tax.xlsx"))
 ## 口腔数据
 oral_microbiome<-data.frame(read_excel("2_data/2023_Eransegal_NC/oral_table.xlsx"))
 rownames(oral_microbiome)<-oral_microbiome$Sample_id
@@ -281,7 +283,9 @@ ggplot(data=as.data.frame(direction_counts), aes(x=Var1, y=Freq,fill=Var1)) +
         axis.text.y = element_text(size=12))+scale_fill_manual(values = c("#Edd064","#a1d5b9"))
 
 bidirectional_mediation_results_sig<-subset(bidirectional_mediation_results,ACME_p<0.05)
+gut_tax<-data.frame(read_excel("2_data/2023_Eransegal_NC/gut_tax.xlsx"))
 
+oral_tax<-data.frame(read_excel("2_data/2023_Eransegal_NC/oral_tax.xlsx"))
 
 bidirectional_mediation_results_sig<-merge(bidirectional_mediation_results_sig,oral_tax[,c("Genus","MGSS")],by.x="oral_feature",by.y="MGSS")
 
@@ -292,11 +296,15 @@ bidirectional_mediation_results_sig<-subset(bidirectional_mediation_results_sig,
 bidirectional_mediation_results_sig<-subset(bidirectional_mediation_results_sig,!(Genus.y%in%c("g__unknown","g__Firmicutes_unclassified")))
 
 
-sankey_data<-bidirectional_mediation_results_sig[,c(8,9,4)]
+sankey_data<-bidirectional_mediation_results_sig[,c(9,10,4)]
 
 colnames(sankey_data)<-c("Oral","Gut","Metabolite")
 sankey_data$Oral<-gsub("g__","Oral_",sankey_data$Oral)
 sankey_data$Gut<-gsub("g__","Gut_",sankey_data$Gut)
+# 安装并加载必要的包
+
+library(networkD3)
+library(dplyr)
 # 安装并加载必要的包
 
 library(networkD3)
@@ -314,9 +322,11 @@ metabolite_nodes <- unique(sankey_data$Metabolite)
 # 创建节点数据框
 nodes_df <- data.frame(
   name = c(oral_nodes, gut_nodes, metabolite_nodes),
-  group = c(rep("Oral", length(oral_nodes)), 
-            rep("Gut", length(gut_nodes)), 
-            rep("Metabolite", length(metabolite_nodes))),
+  group = c(
+    rep("Oral", length(oral_nodes)),
+    rep("Gut", length(gut_nodes)),
+    rep("Metabolite", length(metabolite_nodes))
+  ),
   stringsAsFactors = FALSE
 )
 
@@ -326,15 +336,15 @@ nodes_df$ID <- 0:(nrow(nodes_df) - 1)
 # 第二步：准备连接(links)数据
 # 创建从Oral到Gut的连接
 links_oral_gut <- sankey_data %>%
-  dplyr::select(Oral, Gut) %>%
-  dplyr::group_by(Oral, Gut) %>%
+  select(Oral, Gut) %>%
+  group_by(Oral, Gut) %>%
   dplyr::summarise(value = n(), .groups = 'drop') %>%
   dplyr::rename("source" = "Oral", "target" = "Gut")
 
 # 创建从Gut到Metabolite的连接
 links_gut_metabolite <- sankey_data %>%
-  dplyr::select(Gut, Metabolite) %>%
-  dplyr::group_by(Gut, Metabolite) %>%
+  select(Gut, Metabolite) %>%
+  group_by(Gut, Metabolite) %>%
   dplyr::summarise(value = n(), .groups = 'drop') %>%
   dplyr::rename("source" = "Gut", "target" = "Metabolite")
 
@@ -349,21 +359,28 @@ links_df$source <- match(links_df$source, nodes_df$name) - 1
 links_df$target <- match(links_df$target, nodes_df$name) - 1
 
 # 定义颜色函数，为每个组分配固定颜色
-colourScale <- JS(paste0('d3.scaleOrdinal()
+colourScale <- JS(
+  paste0(
+    'd3.scaleOrdinal()
   .domain(["Oral", "Gut", "Metabolite"])
-  .range(["#a1d5b9", "#Edd064", "#B6C7EA"])'))
+  .range(["#a1d5b9", "#Edd064", "#B6C7EA"])'
+  )
+)
 
 # 第三步：创建桑基图
-sankey_plot<-sankeyNetwork(
-  Links = links_df, 
+sankey_plot <- sankeyNetwork(
+  Links = links_df,
   Nodes = nodes_df,
-  Source = "source", 
+  Source = "source",
   Target = "target",
-  Value = "value", 
+  Value = "value",
   NodeID = "name",
-  NodeGroup = "group",  # 根据组分配颜色
-  LinkGroup = "group",  # 根据源节点的组分配连接颜色
-  colourScale = colourScale,  # 使用自定义颜色比例
+  NodeGroup = "group",
+  # 根据组分配颜色
+  LinkGroup = "group",
+  # 根据源节点的组分配连接颜色
+  colourScale = colourScale,
+  # 使用自定义颜色比例
   fontSize = 12,
   nodeWidth = 30,
   nodePadding = 10,
@@ -372,103 +389,36 @@ sankey_plot<-sankeyNetwork(
   units = "个数"
 )
 
-final_sankey <- htmlwidgets::onRender(sankey_plot, nodePositionJS)
 
-# 保存为HTML文件
-html_file <- "sankey_diagram.html"
-htmlwidgets::saveWidget(final_sankey, html_file)
-
-# 将HTML文件转换为PDF
-pdf_file <- "sankey_diagram.pdf"
-webshot2::webshot(
-  url = html_file, 
-  file = pdf_file,
-  delay = 1,        # 等待渲染完成的时间（秒）
-  zoom = 2,         # 增加分辨率
-  vwidth = 800,     # 视口宽度
-  vheight = 600     # 视口高度
+sankey_plot
+ggsave(
+  sankey_plot,
+  filename = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_5/figure_5a.pdf"
+  ),
+  width = 8,
+  height = 5
 )
 
-calculate_correlations <- function(gut_data, oral_data, metabolome_data, 
-                                   mediation_results) {
-  
-  # 创建一个空的列表来存储结果
-  correlation_results <- list()
-  
-  # 对mediation_results的每一行进行循环
-  for (i in 1:nrow(mediation_results)) {
-    # 获取当前行的特征名称
-    gut_feature <- mediation_results$gut_feature[i]
-    oral_feature <- mediation_results$oral_feature[i]
-    metabolite_feature <- mediation_results$metabolite[i]
-    
-    # 提取相应的数据
-    gut_values <- gut_data[gut_feature, ]
-    oral_values <- oral_data[oral_feature, ]
-    metabolite_values <- metabolome_data[metabolite_feature, ]
-    
-    # 确保所有数据都是数值型
-    gut_values <- as.numeric(gut_values)
-    oral_values <- as.numeric(oral_values)
-    metabolite_values <- as.numeric(metabolite_values)
-    
-    # 创建一个组合数据框，只包含有完整观测的样本
-    combined_data <- data.frame(
-      gut = gut_values,
-      oral = oral_values,
-      metabolite = metabolite_values
-    )
-    
-    # 移除含有NA的行
-    combined_data <- na.omit(combined_data)
-    
-    # 如果有足够的数据点来计算相关性
-    if (nrow(combined_data) >= 3) {
-      # 计算Pearson相关系数
-      cor_gut_oral <- cor.test(combined_data$gut, combined_data$oral, method = "spearman")
-      cor_gut_metabolite <- cor.test(combined_data$gut, combined_data$metabolite, method = "spearman")
-      cor_oral_metabolite <- cor.test(combined_data$oral, combined_data$metabolite, method = "spearman")
-      
-      # 存储结果
-      result <- data.frame(
-        Mediation_Row = i,
-        Gut_Feature = gut_feature,
-        Oral_Feature = oral_feature,
-        Metabolite_Feature = metabolite_feature,
-        Gut_Oral_Cor = cor_gut_oral$estimate,
-        Gut_Oral_Pvalue = cor_gut_oral$p.value,
-        Gut_Metabolite_Cor = cor_gut_metabolite$estimate,
-        Gut_Metabolite_Pvalue = cor_gut_metabolite$p.value,
-        Oral_Metabolite_Cor = cor_oral_metabolite$estimate,
-        Oral_Metabolite_Pvalue = cor_oral_metabolite$p.value,
-        Sample_Size = nrow(combined_data)
-      )
-      
-      # 添加到结果列表
-      correlation_results[[i]] <- result
-    } else {
-      # 如果数据点不足，添加一个包含NA的行
-      result <- data.frame(
-        Mediation_Row = i,
-        Gut_Feature = gut_feature,
-        Oral_Feature = oral_feature,
-        Metabolite_Feature = metabolite_feature,
-        Gut_Oral_Cor = NA,
-        Gut_Oral_Pvalue = NA,
-        Gut_Metabolite_Cor = NA,
-        Gut_Metabolite_Pvalue = NA,
-        Oral_Metabolite_Cor = NA,
-        Oral_Metabolite_Pvalue = NA,
-        Sample_Size = nrow(combined_data)
-      )
-      
-      # 添加到结果列表
-      correlation_results[[i]] <- result
-    }
-  }
-  
-  # 将所有结果合并成一个数据框
-  final_results <- do.call(rbind, correlation_results)
-  
-  return(final_results)
-}
+htmlwidgets::saveWidget(
+  sankey_plot,
+  file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_5/figure_s5.html"
+  ),
+  selfcontained = TRUE
+)
+
+# Convert to PDF
+pagedown::chrome_print(
+  file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_5/figure_s5.html"
+  ),
+  output = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_5/figure_s5.pdf"
+  )
+)
+
