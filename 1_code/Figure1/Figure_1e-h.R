@@ -10,9 +10,8 @@ library(readxl)
 load(
   "3_data_analysis/plasma_metabolomics/data_preparation/metabolite/object_cross_section"
 )
+
 metabolomics_object <- object_cross_section
-
-
 
 
 ### 计算四个身体部位菌群的alpha多样性
@@ -24,8 +23,6 @@ metabolite_annotation <- read_excel(
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
 ### 计算四个身体部位菌群的alpha多样性
-
-
 
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
@@ -95,11 +92,6 @@ oral_object <-
 oral_object <-
   oral_object %>%
   transform2relative_intensity()
-
-
-
-
-
 
 
 shannon_div <- diversity(t(oral_object@expression_data), index = "shannon")
