@@ -324,6 +324,7 @@ skin_object<-object_cross_section
 load("../../3_data_analysis/nasal_microbiome/data_preparation/object_cross_section")
 nasal_object<-object_cross_section
 metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+my_comparisons <- list(c("IS", "IR"))
 ####only remain the genus level
 library(microbiomedataset)
 
