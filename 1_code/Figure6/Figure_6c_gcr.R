@@ -679,7 +679,7 @@ plot_group_comparison_results <- function(results) {
     geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray") +
     scale_color_manual(values = c("FALSE" = "gray", "TRUE" = "red"),
                        labels = c("Not significant", "Significant (p < 0.05)")) +
-    theme_minimal() +
+    theme_bw() +
     labs(title = paste("R² Comparison:", group1_name, "vs", group2_name),
          x = paste("R² in", group1_name, "group"),
          y = paste("R² in", group2_name, "group"),
@@ -688,9 +688,9 @@ plot_group_comparison_results <- function(results) {
   
   # 2. R²差异的分布图
   p2 <- ggplot(summary_df, aes(x = r2_difference)) +
-    geom_histogram(bins = 30, alpha = 0.7, fill = "steelblue") +
+    geom_histogram(bins = 30, alpha = 0.7, fill = "steelblue", color = 'black') +
     geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
-    theme_minimal() +
+    theme_bw() +
     labs(title = "Distribution of R² Differences",
          x = paste("R² Difference (", group1_name, "-", group2_name, ")"),
          y = "Count")
@@ -703,11 +703,13 @@ plot_group_comparison_results <- function(results) {
          value.name = "n_interactions") %>%
     mutate(group = ifelse(group == "group1_n_interaction", group1_name, group2_name))
   
+  interaction_data$group <- factor(interaction_data$group, levels = c("IS", "IR"))
+  
   p3 <- ggplot(interaction_data, aes(x = group, y = n_interactions, fill = group)) +
     geom_boxplot(alpha = 0.7) +
     geom_jitter(width = 0.2, alpha = 0.5) +
     scale_fill_manual(values=c("IR"="#E69F00", "IS"="#0072B2")) +
-    theme_minimal() +
+    theme_bw() +
     labs(title = "Number of Selected Interaction Features",
          x = "Group",
          y = "Number of Interaction Features",
@@ -715,27 +717,27 @@ plot_group_comparison_results <- function(results) {
   
   # 4. 效应大小vs显著性
   p4 <- ggplot(summary_df, aes(x = effect_size, y = -log10(p_diff_adjusted))) +
-    geom_point(aes(color = abs(effect_size) > 0.5 & p_diff_adjusted < 0.05), 
-               alpha = 0.7, size = 2) +
+    geom_point(aes(fill = abs(effect_size) > 0.5 & p_diff_adjusted < 0.05), 
+               alpha = 0.7, size = 4, shape = 21) +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
     geom_vline(xintercept = c(-0.5, 0.5), linetype = "dashed", color = "gray") +
-    scale_color_manual(values = c("FALSE" = "gray", "TRUE" = "red"),
+    scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red"),
                        labels = c("Not significant", "Significant & Large effect")) +
-    theme_minimal() +
+    theme_bw() +
     labs(title = "Effect Size vs Significance",
          x = "Effect Size (Cohen's d)",
          y = "-log10(Adjusted p-value)",
-         color = "Classification")
+         fill = "Classification")
   
   # 5. 火山图样式的R²差异图
   p5 <- ggplot(summary_df, aes(x = r2_difference, y = -log10(p_diff_adjusted))) +
-    geom_point(aes(color = p_diff_adjusted < 0.05 & abs(r2_difference) > 0.1), 
-               alpha = 0.7, size = 2) +
+    geom_point(aes(fill = p_diff_adjusted < 0.05 & abs(r2_difference) > 0.1), 
+               alpha = 0.7, size = 4, shape = 21) +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
     geom_vline(xintercept = c(-0.1, 0.1), linetype = "dashed", color = "gray") +
-    scale_color_manual(values = c("FALSE" = "gray", "TRUE" = "red"),
+    scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red"),
                        labels = c("Not significant", "Significant difference")) +
-    theme_minimal() +
+    theme_bw() +
     labs(title = "Volcano Plot: R² Differences",
          x = paste("R² Difference (", group1_name, "-", group2_name, ")"),
          y = "-log10(Adjusted p-value)",
@@ -754,7 +756,7 @@ plot_group_comparison_results <- function(results) {
     geom_text(aes(label = round(value, 2)), color = "white", size = 3) +
     scale_fill_gradient2(low = "blue", mid = "white", high = "red",
                          midpoint = 0, limit = c(-1, 1)) +
-    theme_minimal() +
+    theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(title = "Correlation Matrix",
          x = "", y = "", fill = "Correlation")

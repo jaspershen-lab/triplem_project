@@ -50,14 +50,18 @@ my_comparisons <- list(c("IS", "IR"))
 
 p<-plot_richness(gut_phyloseq_filt, "IRIS", "IRIS",nrow = 1,measures=alpha_meas)
 
+library(ggpubr)
 
-gut_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设置填充颜色
+p$data$IRIS <- factor(p$data$IRIS, levels = c("IS", "IR"))
+
+gut_alpha<-
+  ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设置填充颜色
   stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ #由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
   geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ #size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
   geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ #设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
   scale_fill_manual(values = c("#E69F00", "#0072B2"))+  #设置填充的颜色
   scale_color_manual(values=c("black","black","black"))+ #设置散点图的圆圈的颜色为黑色
-  ggtitle("Gut microbiome")+ #设置总的标题
+  # ggtitle("Gut microbiome")+ #设置总的标题
   theme_bw()+ #背景变为白色
   theme(legend.position="none", #不需要图例
         axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
@@ -67,7 +71,10 @@ gut_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设置
         plot.title = element_text(size=15,face="bold",hjust = 0.5), #设置总标题的字体属
         panel.grid.minor = element_blank())+
   ylab("Alpha Diversity Index")+xlab("")+ #设置x轴和y轴的标题
-  stat_compare_means(comparisons=my_comparisons,label = "p.value")+facet_wrap(~variable,scales = "free")
+  stat_compare_means(comparisons=my_comparisons,label = "p.value")+
+  facet_wrap(~variable,scales = "free")
+
+gut_alpha
 
 ggsave(
   gut_alpha,
@@ -79,10 +86,6 @@ ggsave(
   height = 4
 )
 
-
-
-
-
 alpha_meas = c("Shannon")
 
 
@@ -92,6 +95,7 @@ my_comparisons <- list(c("IS", "IR"))
 
 p<-plot_richness(oral_phyloseq_filt, "IRIS", "IRIS",nrow = 1,measures=alpha_meas)
 
+p$data$IRIS <- factor(p$data$IRIS, levels = c("IS", "IR"))
 
 oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设置填充颜色
   stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ #由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
@@ -99,7 +103,7 @@ oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设�
   geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ #设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
   scale_fill_manual(values = c("#E69F00", "#0072B2"))+  #设置填充的颜色
   scale_color_manual(values=c("black","black","black"))+ #设置散点图的圆圈的颜色为黑色
-  ggtitle("oral microbiome")+ #设置总的标题
+  # ggtitle("oral microbiome")+ #设置总的标题
   theme_bw()+ #背景变为白色
   theme(legend.position="none", #不需要图例
         axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
@@ -110,7 +114,7 @@ oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设�
         panel.grid.minor = element_blank())+
   ylab("Alpha Diversity Index")+xlab("")+ #设置x轴和y轴的标题
   stat_compare_means(comparisons=my_comparisons,label = "p.value")+facet_wrap(~variable,scales = "free")
-
+oral_alpha
 ggsave(
   oral_alpha,
   filename = file.path(
@@ -143,12 +147,14 @@ colnames(data)[1:2]<-c("NMDS1","NMDS2")
 pc1<-""
 pc2<-""
 
+data$IRIS <- factor(data$IRIS, levels = c("IS", "IR"))
 
-
-gut_beta<-ggplot(data, aes(NMDS1, NMDS2)) +
+gut_beta<-
+  ggplot(data, aes(NMDS1, NMDS2)) +
   #绘制样本点，根据分组匹配颜色和形状，size调整点的大小
-  geom_point(aes(colour=IRIS,fill=IRIS),size=2.5)+
+  geom_point(aes(fill=IRIS),size=2.5, shape = 21)+
   #匹配形状、边框和填充的图例+
+  scale_fill_manual(values=c("#E69F00", "#0072B2"))+
   scale_color_manual(values=c("#E69F00", "#0072B2"))+
   #设置标题和横纵坐标label文字
   labs(title="NMDS - The composition of gut microbiome") +
@@ -173,7 +179,7 @@ gut_beta<-ggplot(data, aes(NMDS1, NMDS2)) +
         legend.key.height=unit(1.6,"cm"))+
   #设置标题的格式
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = IRIS),geom = "polygon",level = 0.5,alpha = 0,size=2)
-
+gut_beta
 ggsave(
   gut_beta,
   filename = file.path(
@@ -346,15 +352,9 @@ idx <-
 gut_object <-
   gut_object[idx, ]
 
-
 gut_object <-
   gut_object %>%
   transform2relative_intensity()
-
-
-
-
-
 
 ####only remain the genus level
 library(microbiomedataset)
@@ -377,16 +377,9 @@ idx <-
 oral_object <-
   oral_object[idx, ]
 
-
 oral_object <-
   oral_object %>%
   transform2relative_intensity()
-
-
-
-
-
-
 
 ####only remain the genus level
 library(microbiomedataset)
@@ -409,14 +402,9 @@ idx <-
 skin_object <-
   skin_object[idx, ]
 
-
 skin_object <-
   skin_object %>%
   transform2relative_intensity()
-
-
-
-
 
 ####only remain the genus level
 library(microbiomedataset)
@@ -439,17 +427,9 @@ idx <-
 nasal_object <-
   nasal_object[idx, ]
 
-
 nasal_object <-
   nasal_object %>%
   transform2relative_intensity()
-
-
-
-
-
-
-
 
 # 合并四个部位的微生物组数据绘制PCOA图
 
@@ -600,12 +580,16 @@ nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
 
 # 绘制NMDS图
-nmds_plot<-ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = IRIS,shape = Site)) +
-  geom_point(size = 4, alpha = 0.8,colour="white") +
+nmds_plot<-
+  ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = IRIS, shape = Site),
+         color = "black") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_point(size = 4, alpha = 0.8,colour="black") +
   scale_fill_manual(values=c("IR"="#E69F00", "IS"="#0072B2")) +
   #geom_path(aes(group = Subject), linetype = "dashed", color = "grey70")+
-  scale_shape_manual(values = c(21,22))+
-  labs(title = "NMDS of Microbiome Samples",
+  scale_shape_manual(values = c(21,22)) +
+  labs(
        subtitle = paste("Stress =", round(nmds_result$stress, 3)),
        x = "NMDS1",
        y = "NMDS2") +
@@ -672,11 +656,13 @@ for(subj in subjects) {
 library(ggplot2)
 
 # 创建箱线图
-box_plot <- ggplot(paired_distances, aes(x=IRIS, y=Distance, fill=IRIS)) +
+paired_distances$IRIS <- factor(paired_distances$IRIS, levels = c("IS", "IR"))
+box_plot <- 
+  ggplot(paired_distances, aes(x=IRIS, y=Distance, fill=IRIS)) +
   geom_boxplot(alpha=0.7) +
   geom_jitter(width=0.2, size=2, alpha=0.6) +
   scale_fill_manual(values=c("IR"="#E69F00", "IS"="#0072B2")) +
-  labs(title="Gut-Oral Microbiome Distance",
+  labs(
        subtitle="",
        x="Group",
        y="Bray-Curtis Distance") +
@@ -688,7 +674,7 @@ box_plot <- ggplot(paired_distances, aes(x=IRIS, y=Distance, fill=IRIS)) +
     axis.text = element_text(size=10),
     legend.position = "none")+stat_compare_means(comparisons=my_comparisons,label = "p.value",method = 't.test')
 
-print(box_plot)
+box_plot
 
 ggsave(
   box_plot,

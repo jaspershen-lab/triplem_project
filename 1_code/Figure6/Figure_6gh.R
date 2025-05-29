@@ -95,7 +95,6 @@ expression_data <-
 metabolomics_temp_object <- metabolomics_object
 metabolomics_temp_object@expression_data <- expression_data
 
-
 load("3_data_analysis/oral_microbiome/data_preparation/object_cross_section")
 
 oral_object <- object_cross_section
@@ -307,6 +306,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
       out_model <- lm(metabolite ~ oral + gut + oral:gut, data = med_data)
       
       # 进行中介分析
+      library(mediation)
       med_result <- mediate(
         med_model,
         out_model,
@@ -571,8 +571,21 @@ is_counts_df <- data.frame(
 comparison_df <- rbind(ir_counts_df, is_counts_df)
 
 # 创建条形图
+plot <-
+comparison_df %>% 
+  dplyr::filter(Direction == "oral->gut->metabolite") %>% 
+  dplyr::mutate(Group = factor(Group, levels = c("IS", "IR"))) %>%
+  ggplot(aes(x = Group, y = Count, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge", show.legend = FALSE) +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_bw() +
+  scale_fill_manual(values = c("IS" = "#1f77b4", "IR" = "#ff7f0e")) +
+  labs(x = "", y = "Count", title = "Number of significant mediation paths") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 
-
+ggsave(plot, 
+       filename = "4_manuscript/Figures/Figure_6/number of significant mediation paths.pdf",
+       width = 6, height = 5)
 
 # 提取口腔->肠道->代谢物路径进行详细比较
 ir_og_path <- subset(bidirectional_mediation_results_ir_sig, direction == "oral->gut->metabolite")
@@ -642,3 +655,4 @@ if(nrow(is_og_path) > 0) {
 }
 is_plot
 ir_plot
+
