@@ -585,7 +585,7 @@ comparison_df %>%
 
 ggsave(plot, 
        filename = "4_manuscript/Figures/Figure_6/number of significant mediation paths.pdf",
-       width = 6, height = 5)
+       width = 4, height = 5)
 
 # 提取口腔->肠道->代谢物路径进行详细比较
 ir_og_path <- subset(bidirectional_mediation_results_ir_sig, direction == "oral->gut->metabolite")
