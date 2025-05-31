@@ -427,9 +427,9 @@ gut_oral_interaction <- readRDS("1_code/gut_oral_microbiome/combined_results_wit
 # 筛选显著受交互效应影响的代谢物
 significant_metabolites <- select_significant_interaction_metabolites(
   gut_oral_interaction,
-  min_r2 = 0.1,
+  min_r2 = 0.35,
   min_interaction_importance = 0.1,
-  top_n = 500
+  top_n = 50
 )
 
 # 可视化结果

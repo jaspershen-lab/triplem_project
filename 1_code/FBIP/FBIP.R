@@ -24,14 +24,14 @@ FBIP_metagenomic<-data.frame(t(FBIP_metagenomic),check.names = FALSE)
 FBIP_metabolome<-read.table("2_data/FBIP-main/metabolites data/plasma metabolites data.txt",header = TRUE,sep = "\t")
 
 FBIP_metadata<-read.table("2_data/FBIP-main/metadata/FBIP_metadata.txt",header = TRUE,sep = "\t")
-FBIP_metadata<-subset(FBIP_metadata,Time%in%c("W0","W4","W16"))
+FBIP_metadata<-subset(FBIP_metadata,time_num%in%c("W0","W4","W16"))
 
 FBIP_metagenomic<-FBIP_metagenomic[FBIP_metadata$SampleID,]
 
     
 FBIP_metabolome<-subset(FBIP_metabolome,Time%in%c("W0","W4","W16"))
 
-FBIP_metabolome<-merge(FBIP_metabolome,FBIP_metadata[,c("ST","SampleID")],by="ST")
+FBIP_metabolome<-merge(FBIP_metabolome,FBIP_metadata[,c("Time","SampleID")],by.x="ST",by.y="Time")
 rownames(FBIP_metabolome)<-FBIP_metabolome$SampleID
 FBIP_metabolome<-FBIP_metabolome[,c(-1,-2,-3,-197)]
 
