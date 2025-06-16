@@ -7,9 +7,18 @@ rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
 adonis_r2_all <- readRDS(file = "3_data_analysis/4_site_merge/adonis_r2_all.rds")
+adonis_r2_all$bodysite<-as.character(adonis_r2_all$bodysite)
+
+
+adonis_r2_all[9,]<-c("33.25","All","Total")
+adonis_r2_all[10,]<-c("37.22","All","Microbial")
+
+
 
 library(ggpattern)
 adonis_r2_all$adonis_r2 <- as.numeric(adonis_r2_all$adonis_r2)
+
+adonis_r2_all$bodysite<-factor(adonis_r2_all$bodysite,levels=c("All","gut","oral","skin","nasal"))
 adonis_plot <-
   ggplot(adonis_r2_all,
          aes(
