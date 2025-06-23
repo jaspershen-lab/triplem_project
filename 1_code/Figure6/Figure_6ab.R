@@ -191,6 +191,68 @@ ggsave(
 )
 
 
+dis_bray<- phyloseq::distance(oral_phyloseq_filt, "bray")
+
+## 采用PCoA的方法对距离矩阵进行降维
+dis_bray.pcoa = ordinate(oral_phyloseq_filt, method="NMDS", distance=dis_bray)
+
+## 绘制初始图形
+bray.pcoa <- plot_ordination(oral_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
+
+## 提取图形数据
+data<-bray.pcoa$data
+
+## 修改列名
+colnames(data)[1:2]<-c("NMDS1","NMDS2")
+
+## 获取主坐标轴1,2的解释度
+pc1<-""
+pc2<-""
+
+data$IRIS <- factor(data$IRIS, levels = c("IS", "IR"))
+
+gut_beta<-
+  ggplot(data, aes(NMDS1, NMDS2)) +
+  #绘制样本点，根据分组匹配颜色和形状，size调整点的大小
+  geom_point(aes(fill=IRIS),size=2.5, shape = 21)+
+  #匹配形状、边框和填充的图例+
+  scale_fill_manual(values=c("#E69F00", "#0072B2"))+
+  scale_color_manual(values=c("#E69F00", "#0072B2"))+
+  #设置标题和横纵坐标label文字
+  labs(title="NMDS - The composition of gut microbiome") +
+  theme(text=element_text(size=30))+
+  #添加横纵两条虚线
+  geom_vline(aes(xintercept = 0),linetype="dotted")+
+  geom_hline(aes(yintercept = 0),linetype="dotted")+
+  #调整背景、坐标轴、图例的格式
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid=element_blank(),
+        axis.title = element_text(color='black',size=14),
+        axis.ticks.length = unit(0.4,"lines"), axis.ticks = element_line(color='black'),
+        axis.line = element_line(colour 
+                                 = "black"),
+        axis.title.x=element_text(colour='black', size=14),
+        axis.title.y=element_text(colour='black', size=14),
+        axis.text=element_text(colour='black',size=14),
+        legend.title=element_blank(),
+        legend.text=element_text(size=14),
+        legend.key=element_blank(),
+        legend.background = element_rect(colour = "black"),
+        legend.key.height=unit(1.6,"cm"))+
+  #设置标题的格式
+  theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = IRIS),geom = "polygon",level = 0.5,alpha = 0,size=2)
+gut_beta
+ggsave(
+  gut_beta,
+  filename = file.path(
+    r4projects::get_project_wd(),
+    "4_manuscript/Figures/Figure_6/figure_s6d.pdf"
+  ),
+  width = 6,
+  height = 5
+)
+
+
 # 生成属水平表
 ####only remain the genus level
 library(microbiomedataset)
