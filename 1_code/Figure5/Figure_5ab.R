@@ -1,3 +1,4 @@
+rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
 
@@ -274,7 +275,7 @@ for (i in 1:nrow(oral_gut_associations)) {
         treat = "oral",
         mediator = "gut",
         boot = TRUE,
-        sims = 100
+        sims = 10
       )
       
       # 保存结果
