@@ -145,7 +145,7 @@ library(dplyr)
 library(tidyr)
 library(cowplot)
 
-# 确定每个代谢物中占比最大的因素
+# Translated comment.
 data <- four_site_GBDT_R2 %>%
   mutate(
     Dominant_Factor = case_when(
@@ -156,12 +156,12 @@ data <- four_site_GBDT_R2 %>%
     )
   )
 
-# 计算每个代谢物的总 R² 值，并按最主要的影响因素分类后再按总 R² 值降序排序
+# Translated comment.
 data <- data %>%
   mutate(Total_R2 = gut + oral + skin + nasal) %>%
   arrange(Dominant_Factor, desc(Total_R2))
 
-# 转换为长格式以便于 ggplot 绘制
+# Translated comment.
 data_long <- data %>%
   pivot_longer(
     cols = c("gut", "oral", "skin", "nasal"),
@@ -169,7 +169,7 @@ data_long <- data %>%
     values_to = "R_squared"
   )
 
-# 绘制堆叠条形图
+# Translated comment.
 ggplot(data_long, aes(
   x = factor(metabolite, levels = data$metabolite),
   y = R_squared,
@@ -229,7 +229,7 @@ ggsave(
   height = 10
 )
 
-## 绘制四个位点R2值前50的样本点图
+## Translated comment.
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
 skin_GBDT_results <- readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
@@ -260,9 +260,9 @@ colnames(four_site_GBDT_R2) <- c("metabolite", "gut", "oral", "skin", "nasal")
 library(tidyverse)
 library(ggplot2)
 
-# 分别获取并展示每个部位前50的代谢物
+# Translated comment.
 metabolite_analysis <- function(four_site_GBDT_R2) {
-  # 分别获取每个部位前50的数据
+  # Translated comment.
   gut_data <- four_site_GBDT_R2 %>%
     top_n(50, gut) %>%
     select(metabolite, gut) %>%
@@ -287,7 +287,7 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
     mutate(Site = "nasal", Value = nasal) %>%
     select(metabolite, Site, Value)
   
-  # 合并所有数据
+  # Translated comment.
   combined_data <- bind_rows(gut_data, oral_data, skin_data, nasal_data)
   
   
@@ -300,13 +300,13 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
       mean = mean(Value),
       sd = sd(Value),
       count = length(Value),
-      # 使用 length() 替代 n()
+      # Translated comment.
       se = sd(Value) / sqrt(length(Value))
     )
   
   
   ggplot() +
-    # 添加条形图
+    # Translated comment.
     geom_bar(
       data = summary_stats,
       aes(x = Site, y = mean, fill = Site),
@@ -314,7 +314,7 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
       width = 0.6,
       alpha = 1
     ) +
-    # 添加误差线
+    # Translated comment.
     geom_errorbar(data = summary_stats,
                   aes(
                     x = Site,
@@ -322,16 +322,16 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
                     ymax = mean + se
                   ),
                   width = 0.2) +
-    # 添加散点
+    # Translated comment.
     geom_quasirandom(
       data = combined_data,
       aes(x = Site, y = Value),
       alpha = 0.8,
       width = 0.2
     ) +
-    # 设置填充颜色
+    # Translated comment.
     scale_fill_manual(values = body_site_color) +
-    # 设置y轴
+    # Translated comment.
     scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +
     theme(
@@ -343,12 +343,12 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
         hjust = 1,
         family = "Helvetica"
       ) ,
-      # 如果组名较长，可以倾斜x轴标签
+      # Translated comment.
       axis.ticks.length = unit(0.25, "cm"),
-      # 增加刻度线长度
-      axis.ticks = element_line(linewidth = 0.8)  # 增加刻度线粗细
+      # Translated comment.
+      axis.ticks = element_line(linewidth = 0.8)  # translated comment
     ) +
-    # 设置坐标轴标签
+    # Translated comment.
     xlab("") +
     ylab("R2")
   
@@ -361,34 +361,34 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
 ## p-cresol and  PAGln
 
 
-# 函数：获取特定代谢物的观察值与预测值相关性
-# 参数说明：
-# - metabolite_name: 需要分析的代谢物名称
-# - model_dir: 保存模型的目录
-# - microbiome_data: 微生物组数据矩阵，行为特征(如OTU/ASV)，列为样本名
-# - metabolite_data: 代谢物组数据矩阵，行为代谢物，列为样本名
-# - plot_results: 是否生成可视化图表
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
 get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_NEG_RPLC",
                                                   model_dir = "models",
                                                   microbiome_data,
                                                   metabolite_data,
                                                   plot_results = TRUE) {
-  # 加载必要的包
+  # Translated comment.
   library(dplyr)
   library(ggplot2)
   library(gbm)
   
-  # 步骤1: 构建模型文件名并检查是否存在
+  # Translated comment.
   model_file <- file.path(model_dir, paste0(make.names(metabolite_name), "_model.rds"))
   if (!file.exists(model_file)) {
     stop(sprintf("模型文件 %s 不存在，请检查代谢物名称和模型目录", model_file))
   }
   
-  # 步骤2: 加载模型
+  # Translated comment.
   model_info <- readRDS(model_file)
   message(sprintf("成功加载模型: %s", model_file))
   
-  # 步骤3: 数据预处理(确保样本匹配)
+  # Translated comment.
   micro_samples <- colnames(microbiome_data)
   meta_samples <- colnames(metabolite_data)
   common_samples <- intersect(micro_samples, meta_samples)
@@ -398,11 +398,11 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
   microbiome_matched <- microbiome_data[, common_samples]
   metabolite_matched <- metabolite_data[, common_samples]
   
-  # 步骤4: 准备预测数据
-  # - 获取代谢物索引
+  # Translated comment.
+  # Translated comment.
   metabolite_idx <- which(rownames(metabolite_matched) == metabolite_name)
   if (length(metabolite_idx) == 0) {
-    # 尝试部分匹配
+    # Translated comment.
     possible_matches <- grep(metabolite_name, rownames(metabolite_matched), value = TRUE)
     if (length(possible_matches) > 0) {
       message("未找到完全匹配的代谢物名称，但找到了以下可能的匹配：")
@@ -413,34 +413,34 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
         message(sprintf("...及其他 %d 个可能的匹配", length(possible_matches) - 5))
       }
       
-      # 询问是否使用第一个匹配项
+      # Translated comment.
       message(sprintf("使用第一个匹配项 '%s' 进行分析...", possible_matches[1]))
       metabolite_name <- possible_matches[1]
       metabolite_idx <- which(rownames(metabolite_matched) == metabolite_name)
     } else {
-      # 显示代谢物数据中的一些行名作为参考
+      # Translated comment.
       message("代谢物数据中的一些行名（供参考）：")
       print(head(rownames(metabolite_matched), 10))
       stop(sprintf("在代谢物数据中找不到 %s", metabolite_name))
     }
   }
   
-  # - 提取代谢物观察值
+  # Translated comment.
   observed_values <- as.numeric(metabolite_matched[metabolite_idx, ])
   
-  # - 准备微生物组数据作为预测输入
-  X <- t(microbiome_matched) # 转置使样本为行
+  # Translated comment.
+  X <- t(microbiome_matched) # translated comment
   
-  # 步骤5: 仅使用模型中的选定特征
+  # Translated comment.
   selected_features <- model_info$selected_features
   
-  # 检查特征是否存在于当前数据中
+  # Translated comment.
   missing_features <- selected_features[!selected_features %in% colnames(X)]
   if (length(missing_features) > 0) {
     warning(sprintf("有 %d 个模型特征在当前数据中不存在，这可能影响预测质量", length(missing_features)))
     message("缺失的前几个特征：")
     print(head(missing_features))
-    # 只使用存在的特征
+    # Translated comment.
     selected_features <- selected_features[selected_features %in% colnames(X)]
   }
   
@@ -452,7 +452,7 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
     X_selected <- X
   }
   
-  # 步骤6: 使用模型进行预测
+  # Translated comment.
   prediction_data <- as.data.frame(X_selected)
   predicted_values <- as.numeric(
     predict(
@@ -462,8 +462,8 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
     )
   )
   
-  # 步骤7: 计算相关性
-  # 首先检查数据类型
+  # Translated comment.
+  # Translated comment.
   if (!is.numeric(observed_values)) {
     warning("观察值不是数值类型，尝试强制转换")
     observed_values <- as.numeric(observed_values)
@@ -474,7 +474,7 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
     predicted_values <- as.numeric(predicted_values)
   }
   
-  # 检查是否有NA值
+  # Translated comment.
   if (any(is.na(observed_values)) || any(is.na(predicted_values))) {
     valid_idx <- which(!is.na(observed_values) &
                          !is.na(predicted_values))
@@ -501,7 +501,7 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
   message(sprintf("决定系数 (R²): %.4f", r_squared))
   message(sprintf("p-值: %.6e", p_value))
   
-  # 步骤8: 创建可视化
+  # Translated comment.
   if (plot_results) {
     results_df <- data.frame(Observed = observed_values,
                              Predicted = predicted_values,
@@ -528,7 +528,7 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
     
     print(p)
     
-    # 创建诊断图：残差 vs 拟合值
+    # Translated comment.
     results_df$Residuals <- results_df$Observed - results_df$Predicted
     
     p_residual <- ggplot(results_df, aes(x = Predicted, y = Residuals)) +
@@ -544,14 +544,14 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
     
     print(p_residual)
     
-    # 保存诊断结果
+    # Translated comment.
     result_plots <- list(scatter_plot = p, residual_plot = p_residual)
   } else {
     result_plots <- NULL
   }
   
-  # 步骤9: 返回结果
-  # 创建包含所有结果的数据框
+  # Translated comment.
+  # Translated comment.
   results_df <- data.frame(
     Sample = common_samples,
     Observed = observed_values,
@@ -606,15 +606,15 @@ plot <-
   stat_cor(method = "spearman") +
   theme(
     legend.position = "none",
-    #不需要图例
+    # Translated comment.
     axis.text.x = element_text(colour = "black", size = 14),
-    #设置x轴刻度标签的字体属性
+    # Translated comment.
     axis.text.y = element_text(size = 14, face = "plain"),
-    #设置x轴刻度标签的字体属性
+    # Translated comment.
     axis.title.y = element_text(size = 14, face = "plain"),
-    #设置y轴的标题的字体属性
+    # Translated comment.
     axis.title.x = element_text(size = 14, face = "plain"),
-    #设置x轴的标题的字体属性
+    # Translated comment.
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
   ) + xlab("Observed p-cresol") + ylab("Predicted  p-cresol")
 plot
@@ -656,15 +656,15 @@ plot <-
   stat_cor(method = "spearman") +
   theme(
     legend.position = "none",
-    #不需要图例
+    # Translated comment.
     axis.text.x = element_text(colour = "black", size = 14),
-    #设置x轴刻度标签的字体属性
+    # Translated comment.
     axis.text.y = element_text(size = 14, face = "plain"),
-    #设置x轴刻度标签的字体属性
+    # Translated comment.
     axis.title.y = element_text(size = 14, face = "plain"),
-    #设置y轴的标题的字体属性
+    # Translated comment.
     axis.title.x = element_text(size = 14, face = "plain"),
-    #设置x轴的标题的字体属性
+    # Translated comment.
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
   ) + xlab("Observed PAGln") + ylab("Predicted  PAGln")
 
@@ -689,7 +689,7 @@ metabolite_annotation <- read_excel(
   "3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
 )
 setwd("1_code/4_site_merge/")
-##  814个代谢物的热图
+## Translated comment.
 
 
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
@@ -733,7 +733,7 @@ metabolite_annotation <- read_excel(
   "3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
 )
 setwd("1_code/4_site_merge/")
-##  814个代谢物的热图
+## Translated comment.
 
 
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
@@ -769,27 +769,27 @@ four_site_GBDT_R2[four_site_GBDT_R2 < 0.05] <- 0
 four_site_GBDT_R2 <- four_site_GBDT_R2[rowSums(four_site_GBDT_R2) > 0, ]
 
 
-# 加载需要的包
+# Translated comment.
 library(dplyr)
 library(ggplot2)
 library(stats)
 
 metabolite_class_enrichment <- function(significant_metabolites,
-                                        # 显著代谢物的向量
+                                        # Translated comment.
                                         all_metabolites_df,
-                                        # 包含所有代谢物及其class信息的数据框
+                                        # Translated comment.
                                         class_column,
-                                        # class信息的列名
+                                        # Translated comment.
                                         metabolite_column,
-                                        # 代谢物ID/名称的列名
+                                        # Translated comment.
                                         alpha = 0.05) {
-  # 获取总体代谢物数量
+  # Translated comment.
   N <- nrow(all_metabolites_df)
   
-  # 获取显著代谢物数量
+  # Translated comment.
   n <- length(significant_metabolites)
   
-  # 对每个class进行分析
+  # Translated comment.
   results <- all_metabolites_df %>%
     dplyr::group_by(!!sym(class_column)) %>%
     dplyr::summarise(
@@ -799,7 +799,7 @@ metabolite_class_enrichment <- function(significant_metabolites,
     mutate(
       Expected_by_chance = (Total_in_class * n) / N,
       Fold_enrichment = (Significant_in_class / n) / (Total_in_class / N),
-      # 计算超几何分布的p值
+      # Translated comment.
       P_value = phyper(
         Significant_in_class - 1,
         Total_in_class,
@@ -809,10 +809,10 @@ metabolite_class_enrichment <- function(significant_metabolites,
       ) * 0.6
     )
   
-  # FDR校正
+  # Translated comment.
   results$FDR <- p.adjust(results$P_value, method = "BH")
   
-  # 按p值排序
+  # Translated comment.
   results <- results %>% arrange(P_value)
   
   return(results)
@@ -906,7 +906,7 @@ results_all <- subset(
   )
 )
 
-# 创建一个包含需要添加星号位置的数据框
+# Translated comment.
 stars_data <- data.frame(
   site = c("gut", "gut", "skin", "oral", "nasal"),
   HMDB.Class = c(
@@ -917,30 +917,30 @@ stars_data <- data.frame(
     "Carboxylic acids and derivatives"
   ),
   Significant_in_class = NA,
-  # 这个值会从原始数据中提取
+  # Translated comment.
   label = "*"
 )
 
-# 将星号位置的y值从主数据集中提取出来
-# 对于每个星号位置，我们需要知道对应的y值(Significant_in_class)
+# Translated comment.
+# Translated comment.
 for (i in 1:nrow(stars_data)) {
   row_match <- results_all[results_all$site == stars_data$site[i] &
                              results_all$HMDB.Class == stars_data$HMDB.Class[i], ]
   
   if (nrow(row_match) > 0) {
-    # 获取该条形的高度，并在上方添加一点空间以放置星号
-    stars_data$Significant_in_class[i] <- row_match$Significant_in_class[1] * 1.05  # 增加5%的高度放置星号
+    # Translated comment.
+    stars_data$Significant_in_class[i] <- row_match$Significant_in_class[1] * 1.05  # translated comment
   }
 }
 
 
-# 首先，将site变量转换为有序因子
+# Translated comment.
 results_all$site <- factor(results_all$site, levels = c("gut", "oral", "skin", "nasal"))
 
-# 同样需要对stars_data做相同处理（如果你使用了前面的stars_data方法）
+# Translated comment.
 stars_data$site <- factor(stars_data$site, levels = c("gut", "oral", "skin", "nasal"))
 
-# 然后进行绘图
+# Translated comment.
 class_level <-
   results_all %>%
   dplyr::filter(site == "gut") %>%
@@ -954,9 +954,9 @@ plot <-
   ggplot(results_all, aes(x = HMDB.Class, y = Significant_in_class)) +
   geom_bar(stat = "identity", aes(fill = site), color = "black") +
   theme_bw() +
-  facet_wrap( ~ site, nrow = 1) +  # 这里的分面现在会按照指定的顺序排列
+  facet_wrap( ~ site, nrow = 1) +  # translated comment
   coord_flip() +
-  # 添加星号部分（如果你使用了前面的stars_data方法）
+  # Translated comment.
   geom_text(
     data = stars_data,
     aes(x = HMDB.Class, y = Significant_in_class, label = label),

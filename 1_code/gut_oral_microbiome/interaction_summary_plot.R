@@ -1,31 +1,31 @@
-# 筛选受交互效应最显著的代谢物
+# Translated comment.
 select_significant_interaction_metabolites <- function(combined_results, 
                                                        min_r2 = 0.1,
                                                        min_interaction_importance = 0.2,
                                                        top_n = 20) {
-  # 存储每个代谢物的交互特征重要性总和
+  # Translated comment.
   metabolite_interaction_importance <- list()
   
-  # 遍历所有代谢物结果
+  # Translated comment.
   for(i in 1:length(combined_results$detailed_results)) {
     result <- combined_results$detailed_results[[i]]
     metabolite_name <- result$metabolite
     
-    # 检查是否有特征重要性数据
+    # Translated comment.
     if(!is.null(result$feature_importance)) {
-      # 提取特征重要性
+      # Translated comment.
       importance_df <- result$feature_importance
       
-      # 仅选择交互特征
+      # Translated comment.
       interaction_features <- importance_df[grepl("^int_", importance_df$var), ]
       
       if(nrow(interaction_features) > 0) {
-        # 计算交互特征重要性总和及其占比
+        # Translated comment.
         total_importance <- sum(importance_df$rel.inf)
         interaction_importance_sum <- sum(interaction_features$rel.inf)
         interaction_importance_ratio <- interaction_importance_sum / total_importance
         
-        # 保存结果
+        # Translated comment.
         metabolite_interaction_importance[[metabolite_name]] <- list(
           metabolite = metabolite_name,
           r2 = result$mean_r2,
@@ -38,7 +38,7 @@ select_significant_interaction_metabolites <- function(combined_results,
     }
   }
   
-  # 将列表转换为数据框
+  # Translated comment.
   importance_df <- do.call(rbind, lapply(metabolite_interaction_importance, function(x) {
     data.frame(
       metabolite = x$metabolite,
@@ -49,24 +49,24 @@ select_significant_interaction_metabolites <- function(combined_results,
     )
   }))
   
-  # 筛选具有足够高R²和交互特征重要性的代谢物
+  # Translated comment.
   filtered_metabolites <- importance_df[importance_df$r2 >= min_r2 & 
                                           importance_df$interaction_importance_ratio >= min_interaction_importance, ]
   
-  # 根据交互特征重要性比例排序
+  # Translated comment.
   ranked_metabolites <- filtered_metabolites[order(filtered_metabolites$interaction_importance_ratio, 
                                                    decreasing = TRUE), ]
   
-  # 选择前N个代谢物
+  # Translated comment.
   top_metabolites <- head(ranked_metabolites, top_n)
   
-  # 提取这些代谢物的详细交互特征
+  # Translated comment.
   top_metabolites_details <- lapply(as.character(top_metabolites$metabolite), function(metabolite) {
     metabolite_interaction_importance[[metabolite]]
   })
   names(top_metabolites_details) <- top_metabolites$metabolite
   
-  # 返回结果
+  # Translated comment.
   return(list(
     summary = top_metabolites,
     details = top_metabolites_details,
@@ -74,18 +74,18 @@ select_significant_interaction_metabolites <- function(combined_results,
   ))
 }
 
-# 可视化交互特征对代谢物的影响
+# Translated comment.
 plot_interaction_effects <- function(interaction_results) {
-  # 提取排序后的前20个代谢物(或全部，如果少于20个)
+  # Translated comment.
   summary_df <- interaction_results$summary
   n_to_plot <- min(nrow(summary_df), 20)
   top_metabolites <- summary_df[1:n_to_plot, ]
   
-  # 转换为因子以保持排序
+  # Translated comment.
   top_metabolites$metabolite <- factor(top_metabolites$metabolite, 
                                        levels = top_metabolites$metabolite[order(top_metabolites$interaction_importance_ratio)])
   
-  # 创建条形图
+  # Translated comment.
   p1 <- ggplot(top_metabolites, aes(x = metabolite, y = interaction_importance_ratio)) +
     geom_bar(stat = "identity", fill = "steelblue") +
     coord_flip() +
@@ -94,7 +94,7 @@ plot_interaction_effects <- function(interaction_results) {
          x = "代谢物",
          y = "交互特征重要性比例")
   
-  # 创建散点图，显示R²与交互特征重要性的关系
+  # Translated comment.
   p2 <- ggplot(interaction_results$all_metabolites, 
                aes(x = interaction_importance_ratio, y = r2)) +
     geom_point(alpha = 0.7) +
@@ -104,7 +104,7 @@ plot_interaction_effects <- function(interaction_results) {
          x = "交互特征重要性比例",
          y = "R²")
   
-  # 提取每个代谢物的Top5交互特征
+  # Translated comment.
   top_interactions <- do.call(rbind, lapply(1:n_to_plot, function(i) {
     metabolite <- as.character(top_metabolites$metabolite[i])
     details <- interaction_results$details[[metabolite]]
@@ -125,20 +125,20 @@ plot_interaction_effects <- function(interaction_results) {
     }
   }))
   
-  # 提取交互特征的组成部分
+  # Translated comment.
   if(nrow(top_interactions) > 0) {
-    # 修改正则表达式以匹配"int_ASV1330_OTU_691"这样的格式
+    # Translated comment.
     pattern <- "int_(ASV[0-9]+)_(OTU_[0-9]+)"
     top_interactions$gut_feature <- sub(pattern, "\\1", top_interactions$feature)
     top_interactions$oral_feature <- sub(pattern, "\\2", top_interactions$feature)
     
-    # 为热图准备数据
+    # Translated comment.
     heatmap_data <- top_interactions
-    # 因子化以保持排序
+    # Translated comment.
     heatmap_data$metabolite <- factor(heatmap_data$metabolite, 
                                       levels = rev(levels(top_metabolites$metabolite)))
     
-    # 创建热图
+    # Translated comment.
     p3 <- ggplot(heatmap_data, aes(x = feature, y = metabolite, fill = importance)) +
       geom_tile() +
       scale_fill_viridis_c() +
@@ -149,14 +149,14 @@ plot_interaction_effects <- function(interaction_results) {
            y = "代谢物",
            fill = "重要性")
   } else {
-    # 如果没有交互特征，创建空图
+    # Translated comment.
     p3 <- ggplot() + 
       geom_text(aes(x = 0, y = 0, label = "没有交互特征")) +
       theme_void() +
       labs(title = "代谢物的Top交互特征重要性")
   }
   
-  # 组合图表
+  # Translated comment.
   library(patchwork)
   combined_plots <- (p1 | p2) / p3 +
     plot_layout(heights = c(1, 2))
@@ -169,14 +169,14 @@ plot_interaction_effects <- function(interaction_results) {
   ))
 }
 
-# 提取交互特征的细节信息
+# Translated comment.
 analyze_interaction_features <- function(interaction_results, selected_metabolites = NULL) {
   if(is.null(selected_metabolites)) {
-    # 如果未指定代谢物，使用所有top代谢物
+    # Translated comment.
     selected_metabolites <- interaction_results$summary$metabolite
   }
   
-  # 收集所有选定代谢物的交互特征
+  # Translated comment.
   all_interactions <- do.call(rbind, lapply(as.character(selected_metabolites), function(metabolite) {
     details <- interaction_results$details[[metabolite]]
     if(!is.null(details) && !is.null(details$top_interactions) && nrow(details$top_interactions) > 0) {
@@ -195,25 +195,25 @@ analyze_interaction_features <- function(interaction_results, selected_metabolit
     return(NULL)
   }
   
-  # 提取交互特征的组成部分
-  # 修改正则表达式以匹配"int_ASV1330_OTU_691"这样的格式
+  # Translated comment.
+  # Translated comment.
   pattern <- "int_(ASV[0-9]+)_(OTU_[0-9]+)"
   all_interactions$gut_feature <- sub(pattern, "\\1", all_interactions$feature)
   all_interactions$oral_feature <- sub(pattern, "\\2", all_interactions$feature)
   
-  # 分析肠道和口腔特征的频率
+  # Translated comment.
   gut_counts <- table(all_interactions$gut_feature)
   oral_counts <- table(all_interactions$oral_feature)
   
-  # 找出最常见的特征对
+  # Translated comment.
   feature_pairs <- paste(all_interactions$gut_feature, all_interactions$oral_feature, sep = "_")
   pair_counts <- table(feature_pairs)
   
-  # 按重要性加权的特征频率
+  # Translated comment.
   weighted_gut_counts <- tapply(all_interactions$importance, all_interactions$gut_feature, sum)
   weighted_oral_counts <- tapply(all_interactions$importance, all_interactions$oral_feature, sum)
   
-  # 返回分析结果
+  # Translated comment.
   return(list(
     all_interactions = all_interactions,
     gut_frequency = sort(gut_counts, decreasing = TRUE),
@@ -224,7 +224,7 @@ analyze_interaction_features <- function(interaction_results, selected_metabolit
   ))
 }
 gut_oral_interaction<-readRDS("../../../../1_code/gut_oral_microbiome/combined_results_with_interactions")
-# 筛选显著受交互效应影响的代谢物
+# Translated comment.
 significant_metabolites <- select_significant_interaction_metabolites(
   gut_oral_interaction,
   min_r2 = 0.35,
@@ -232,18 +232,18 @@ significant_metabolites <- select_significant_interaction_metabolites(
   top_n = 50
 )
 
-# 可视化结果
+# Translated comment.
 interaction_plots <- plot_interaction_effects(significant_metabolites)
 print(interaction_plots$combined)
 
-# 分析交互特征细节
+# Translated comment.
 interaction_details <- analyze_interaction_features(significant_metabolites)
 
 
 
 
 
-### 合并口腔和肠道重要性和频率表
+### Translated comment.
 gut_frequency<-data.frame(interaction_details$gut_frequency)
 weighted_gut<-data.frame(interaction_details$weighted_gut)
 weighted_gut$ASV<-rownames(weighted_gut)
@@ -256,7 +256,7 @@ weighted_oral$ASV<-rownames(weighted_oral)
 colnames(weighted_oral)<-c("importance","ASV")
 oral_ASV_importance<-merge(oral_frequency,weighted_oral,by.x="Var1",by.y="ASV")
 
-### 统计肠道菌群参与交互影响的代谢物种类
+### Translated comment.
 all_interactions<-interaction_details$all_interactions
 
 all_interactions<-merge(all_interactions,metabolite_annotation[,c("variable_id","HMDB.Name","HMDB.Class")],by.x="metabolite",by.y="variable_id")
@@ -274,7 +274,7 @@ all_interactions_oral<-data.frame(table(all_interactions$oral_feature,all_intera
 all_interactions_oral<-subset(all_interactions_oral,Var2%in%HMDB_Class)
 
 
-#合并表格
+# Translated comment.
 
 all_interactions_gut<-merge(all_interactions_gut,gut_ASV_importance,by="Var1")
 
@@ -295,22 +295,22 @@ all_interactions_oral<-subset(all_interactions_oral,!(ASV%in%c("OTU_68","OTU_80"
 
 
 
-# 创建唯一的Phylum列表
+# Translated comment.
 phyla <- c("Firmicutes", "Proteobacteria", "Bacteroidetes", "Actinobacteria", 
            "Cyanobacteria/Chloroplast", "Unclassified_Bacteria", "Fusobacteria", 
            "Spirochaetes", "Tenericutes")
 
-# 为每个Phylum分配多巴胺风格的颜色
+# Translated comment.
 phylum_colors <- c(
-  "Firmicutes" = "#fbb4ae",             # 亮粉色
-  "Proteobacteria" = "#ccebc5",         # 深蓝灰色
-  "Bacteroidetes" = "#b3cde3",          # 亮青色
-  "Actinobacteria" = "#BCECE0",         # 薄荷绿
-  "Cyanobacteria/Chloroplast" = "#7D5BA6", # 紫色
-  "Unclassified_Bacteria" = "#8A89C0",  # 薰衣草色
-  "Fusobacteria" = "#5762D5",           # 电紫色
-  "Spirochaetes" = "#FC9E4F",           # 杏色
-  "Tenericutes" = "#FFCCF9"             # 浅粉色
+  "Firmicutes" = "# translated comment
+  "Proteobacteria" = "# translated comment
+  "Bacteroidetes" = "# translated comment
+  "Actinobacteria" = "# translated comment
+  "Cyanobacteria/Chloroplast" = "# translated comment
+  "Unclassified_Bacteria" = "# translated comment
+  "Fusobacteria" = "# translated comment
+  "Spirochaetes" = "# translated comment
+  "Tenericutes" = "# translated comment
 )
 
 
@@ -374,15 +374,15 @@ p4 <- ggplot(data = all_interactions_oral) +
   geom_tile(aes(x = "a", y = Genus, fill = Phylum), width = 0.5) + 
   labs(x = "", y = "") + 
   scale_fill_manual(values = phylum_colors) + 
-  scale_y_discrete(position = "right") +  # 将Y轴位置设为右侧
+  scale_y_discrete(position = "right") +  # translated comment
   theme_bw() +
   theme(
     panel.grid = element_blank(),
     panel.border = element_blank(),
     axis.ticks = element_blank(),
     axis.text.x = element_blank(),
-    axis.text.y.left = element_blank(),  # 移除左侧Y轴标签
-    axis.text.y = element_text(face = "italic", hjust = 0),  # hjust=0使文本左对齐（靠近右侧轴线）
+    axis.text.y.left = element_blank(),  # translated comment
+    axis.text.y = element_text(face = "italic", hjust = 0),  # translated comment
     legend.position = "top",
     legend.justification = "right"
   )
@@ -392,22 +392,22 @@ p4
 p_combine <- p1 + p2 + p3 + p4 + plot_layout(nrow = 1,
                                              widths = c(0.25, 1.25, 1.25, 0.25))
 
-# 批量绘制所有gut_feature、oral_feature和metabolite组合的互作用图
+# Translated comment.
 
-# 设置输出目录
+# Translated comment.
 output_dir <- "interaction_plots"
 if(!dir.exists(output_dir)) {
   dir.create(output_dir)
 }
 
-# 遍历all_interactions表格中的每一行
+# Translated comment.
 for(i in 1:nrow(all_interactions)) {
-  # 获取当前组合的特征
+  # Translated comment.
   current_metabolite <- all_interactions$metabolite[i]
   current_gut_feature <- all_interactions$gut_feature[i]
   current_oral_feature <- all_interactions$oral_feature[i]
   
-  # 生成文件名（使用特征ID和重要性值）
+  # Translated comment.
   importance_value <- all_interactions$importance[i]
   file_name <- paste0(
     output_dir, "/", 
@@ -419,10 +419,10 @@ for(i in 1:nrow(all_interactions)) {
     ".pdf"
   )
   
-  # 打开PDF设备
+  # Translated comment.
   pdf(file_name, width = 8, height = 6)
   
-  # 绘制互作用图
+  # Translated comment.
   plot <- plot_microbe_interaction_quantile(
     gut_data = gut_temp_object@expression_data,
     oral_data = oral_temp_object@expression_data,
@@ -434,7 +434,7 @@ for(i in 1:nrow(all_interactions)) {
     use_log = FALSE
   )
   
-  # 添加标题（包含代谢物名称和类别信息）
+  # Translated comment.
   if(!is.na(all_interactions$HMDB.Name[i])) {
     title_text <- paste0(
       "Interaction: ", current_metabolite, " (", all_interactions$HMDB.Name[i], ")\n",
@@ -443,17 +443,17 @@ for(i in 1:nrow(all_interactions)) {
     plot <- plot + ggtitle(title_text)
   }
   
-  # 打印图形
+  # Translated comment.
   print(plot)
   
-  # 关闭PDF设备
+  # Translated comment.
   dev.off()
   
-  # 打印进度
+  # Translated comment.
   cat(sprintf("已完成 %d/%d: %s\n", i, nrow(all_interactions), file_name))
 }
 
-# 完成后显示摘要
+# Translated comment.
 cat(sprintf("批量绘图完成！共生成 %d 个图形文件，保存在 %s 目录下。\n", 
             nrow(all_interactions), output_dir))
                                   

@@ -105,7 +105,7 @@ metabolomics_temp_object@expression_data <- expression_data
 
 microbiome_data<-gut_temp_object@expression_data
 metabolite_data<-metabolomics_temp_object@expression_data
-# 运行预测（自动使用并行计算）
+# Translated comment.
 
 
 

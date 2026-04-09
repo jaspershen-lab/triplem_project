@@ -169,8 +169,8 @@ metabolome_data<-metabolomics_temp_object@expression_data
 
 
 
-# 双向中介效应分析：口腔菌群、肠道菌群与代谢物的关系
-# 安装并加载必要的包
+# Translated comment.
+# Translated comment.
 if (!requireNamespace("mediation", quietly = TRUE)) install.packages("mediation")
 if (!requireNamespace("tidyverse", quietly = TRUE)) install.packages("tidyverse")
 
@@ -180,18 +180,18 @@ library(readr)
 
 
 
-# 确保样本名一致
+# Translated comment.
 common_samples <- Reduce(intersect, list(colnames(gut_data), colnames(oral_data), colnames(metabolome_data)))
 gut_data <- gut_data[, common_samples]
 oral_data <- oral_data[, common_samples]
 metabolome_data <- metabolome_data[, common_samples]
 
-# 转置数据以便于分析（行为样本，列为特征）
+# Translated comment.
 gut_data_t <- t(gut_data)
 oral_data_t <- t(oral_data)
 metabolome_data_t <- t(metabolome_data)
 
-# 函数: 计算Spearman相关性并应用FDR校正
+# Translated comment.
 calculate_correlations <- function(data1, data2) {
   result <- matrix(NA, nrow = ncol(data1), ncol = ncol(data2))
   rownames(result) <- colnames(data1)
@@ -206,7 +206,7 @@ calculate_correlations <- function(data1, data2) {
     }
   }
   
-  # FDR校正
+  # Translated comment.
   fdr_values <- matrix(p.adjust(p_values, method = "BH"), nrow = nrow(p_values))
   rownames(fdr_values) <- rownames(p_values)
   colnames(fdr_values) <- colnames(p_values)
@@ -214,18 +214,18 @@ calculate_correlations <- function(data1, data2) {
   return(list(cor = result, p = p_values, fdr = fdr_values))
 }
 
-# 第一步：找出与代谢物相关联的微生物特征（肠道菌群和口腔菌群）
+# Translated comment.
 gut_metabolome_cor <- calculate_correlations(gut_data_t, metabolome_data_t)
 gut_metabolome_associations <- which(gut_metabolome_cor$p < 0.05, arr.ind = TRUE)
 
 oral_metabolome_cor <- calculate_correlations(oral_data_t, metabolome_data_t)
 oral_metabolome_associations <- which(oral_metabolome_cor$p < 0.05, arr.ind = TRUE)
 
-# 第二步：找出口腔菌群与肠道菌群之间的关联
+# Translated comment.
 oral_gut_cor <- calculate_correlations(oral_data_t, gut_data_t)
 oral_gut_associations <- which(oral_gut_cor$p < 0.05, arr.ind = TRUE)
 
-# 创建结果存储数据框
+# Translated comment.
 bidirectional_mediation_results <- data.frame(
   direction = character(),
   oral_feature = character(),
@@ -237,9 +237,9 @@ bidirectional_mediation_results <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# 第三步：双向中介分析
+# Translated comment.
 
-# 方向1：口腔菌群 → 肠道菌群 → 代谢物
+# Translated comment.
 for (i in 1:nrow(oral_gut_associations)) {
   oral_idx <- oral_gut_associations[i, "row"]
   gut_idx <- oral_gut_associations[i, "col"]
@@ -247,7 +247,7 @@ for (i in 1:nrow(oral_gut_associations)) {
   oral_feature <- rownames(oral_gut_cor$cor)[oral_idx]
   gut_feature <- colnames(oral_gut_cor$cor)[gut_idx]
   
-  # 检查该肠道菌群是否与代谢物相关联
+  # Translated comment.
   gut_metabolite_associations <- which(gut_metabolome_cor$fdr[gut_idx, ] < 0.05, arr.ind = TRUE)
   
   if (length(gut_metabolite_associations) > 0) {
@@ -255,22 +255,22 @@ for (i in 1:nrow(oral_gut_associations)) {
       met_idx <- gut_metabolite_associations[j]
       metabolite <- colnames(gut_metabolome_cor$cor)[met_idx]
       
-      # 构建数据框用于中介分析
+      # Translated comment.
       med_data <- data.frame(
         oral = oral_data_t[, oral_feature],
         gut = gut_data_t[, gut_feature],
         metabolite = metabolome_data_t[, metabolite]
       )
       
-      # 口腔菌群 → 肠道菌群 → 代谢物
+      # Translated comment.
       med_model <- lm(gut ~ oral, data = med_data)
       out_model <- lm(metabolite ~ oral + gut + oral:gut, data = med_data)
       
-      # 进行中介分析 - 使用非交互式bootstrap或将interaction设为FALSE
+      # Translated comment.
       med_result <- mediate(med_model, out_model, treat = "oral", mediator = "gut",
                             boot = TRUE, sims = 10)
       
-      # 保存结果
+      # Translated comment.
       result_row <- data.frame(
         direction = "oral->gut->metabolite",
         oral_feature = oral_feature,
@@ -287,7 +287,7 @@ for (i in 1:nrow(oral_gut_associations)) {
   }
 }
 
-# 方向2：肠道菌群 → 口腔菌群 → 代谢物
+# Translated comment.
 for (i in 1:nrow(oral_gut_associations)) {
   oral_idx <- oral_gut_associations[i, "row"]
   gut_idx <- oral_gut_associations[i, "col"]
@@ -295,7 +295,7 @@ for (i in 1:nrow(oral_gut_associations)) {
   oral_feature <- rownames(oral_gut_cor$cor)[oral_idx]
   gut_feature <- colnames(oral_gut_cor$cor)[gut_idx]
   
-  # 检查该口腔菌群是否与代谢物相关联
+  # Translated comment.
   oral_metabolite_associations <- which(oral_metabolome_cor$fdr[oral_idx, ] < 0.05, arr.ind = TRUE)
   
   if (length(oral_metabolite_associations) > 0) {
@@ -303,22 +303,22 @@ for (i in 1:nrow(oral_gut_associations)) {
       met_idx <- oral_metabolite_associations[j]
       metabolite <- colnames(oral_metabolome_cor$cor)[met_idx]
       
-      # 构建数据框用于中介分析
+      # Translated comment.
       med_data <- data.frame(
         gut = gut_data_t[, gut_feature],
         oral = oral_data_t[, oral_feature],
         metabolite = metabolome_data_t[, metabolite]
       )
       
-      # 肠道菌群 → 口腔菌群 → 代谢物
+      # Translated comment.
       med_model <- lm(oral ~ gut, data = med_data)
       out_model <- lm(metabolite ~ gut + oral + gut:oral, data = med_data)
       
-      # 进行中介分析 - 使用非交互式bootstrap或将interaction设为FALSE
+      # Translated comment.
       med_result <- mediate(med_model, out_model, treat = "gut", mediator = "oral",
                             boot = TRUE, sims = 100)
       
-      # 保存结果
+      # Translated comment.
       result_row <- data.frame(
         direction = "gut->oral->metabolite",
         oral_feature = oral_feature,
@@ -335,13 +335,13 @@ for (i in 1:nrow(oral_gut_associations)) {
   }
 }
 
-# FDR校正
+# Translated comment.
 if (nrow(bidirectional_mediation_results) > 0) {
   bidirectional_mediation_results$ACME_fdr <- 
     p.adjust(bidirectional_mediation_results$ACME_p, method = "BH")
 }
 
-# 统计两个方向的存在显著交互效应的比例
+# Translated comment.
 
 bidirectional_mediation_results_sig<-subset(bidirectional_mediation_results,ACME_p<0.1)
 
@@ -359,7 +359,7 @@ bidirectional_mediation_results_sig<-merge(bidirectional_mediation_results_sig,m
 
 
 
-# 统计direction列的频数
+# Translated comment.
 direction_counts <- table(bidirectional_mediation_results_sig$direction)
 
 
@@ -402,21 +402,21 @@ sankey_data<-bidirectional_mediation_results_sig_oral_gut_metabolite[,9:11]
 colnames(sankey_data)<-c("Oral","Gut","Metabolite")
 
 
-# 安装并加载必要的包
+# Translated comment.
 
 library(networkD3)
 library(dplyr)
 
-# 假设你的数据已经存在名为sankey_data的数据框中
-# sankey_data包含三列: "Oral", "Gut", "Metabolite"
+# Translated comment.
+# Translated comment.
 
-# 第一步：准备节点数据
-# 收集所有唯一的节点名称
+# Translated comment.
+# Translated comment.
 oral_nodes <- unique(sankey_data$Oral)
 gut_nodes <- unique(sankey_data$Gut)
 metabolite_nodes <- unique(sankey_data$Metabolite)
 
-# 创建节点数据框
+# Translated comment.
 nodes_df <- data.frame(
   name = c(oral_nodes, gut_nodes, metabolite_nodes),
   group = c(rep("Oral", length(oral_nodes)), 
@@ -425,40 +425,40 @@ nodes_df <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# 为每个节点分配一个唯一ID
+# Translated comment.
 nodes_df$ID <- 0:(nrow(nodes_df) - 1)
 
-# 第二步：准备连接(links)数据
-# 创建从Oral到Gut的连接
+# Translated comment.
+# Translated comment.
 links_oral_gut <- sankey_data %>%
   select(Oral, Gut) %>%
   group_by(Oral, Gut) %>%
   dplyr::summarise(value = n(), .groups = 'drop') %>%
   dplyr::rename("source" = "Oral", "target" = "Gut")
 
-# 创建从Gut到Metabolite的连接
+# Translated comment.
 links_gut_metabolite <- sankey_data %>%
   select(Gut, Metabolite) %>%
   group_by(Gut, Metabolite) %>%
   dplyr::summarise(value = n(), .groups = 'drop') %>%
   dplyr::rename("source" = "Gut", "target" = "Metabolite")
 
-# 合并所有连接
-# 为links添加组标识
+# Translated comment.
+# Translated comment.
 links_oral_gut$group <- "Oral"
 links_gut_metabolite$group <- "Gut"
 links_df <- rbind(links_oral_gut, links_gut_metabolite)
 
-# 将节点名称转换为节点ID
+# Translated comment.
 links_df$source <- match(links_df$source, nodes_df$name) - 1
 links_df$target <- match(links_df$target, nodes_df$name) - 1
 
-# 定义颜色函数，为每个组分配固定颜色
+# Translated comment.
 colourScale <- JS(paste0('d3.scaleOrdinal()
   .domain(["Oral", "Gut", "Metabolite"])
   .range(["#a1d5b9", "#Edd064", "#B6C7EA"])'))
 
-# 第三步：创建桑基图
+# Translated comment.
 sankey_plot<-sankeyNetwork(
   Links = links_df, 
   Nodes = nodes_df,
@@ -466,9 +466,9 @@ sankey_plot<-sankeyNetwork(
   Target = "target",
   Value = "value", 
   NodeID = "name",
-  NodeGroup = "group",  # 根据组分配颜色
-  LinkGroup = "group",  # 根据源节点的组分配连接颜色
-  colourScale = colourScale,  # 使用自定义颜色比例
+  NodeGroup = "group",  # translated comment
+  LinkGroup = "group",  # translated comment
+  colourScale = colourScale,  # translated comment
   fontSize = 12,
   nodeWidth = 30,
   nodePadding = 10,
@@ -482,7 +482,7 @@ sankey_plot<-sankeyNetwork(
 
 
 
-# 获取中介效应中对应元素的相关性
+# Translated comment.
 colnames(bidirectional_mediation_results_sig_oral_gut_metabolite)[9:11]<-c("Oral","Gut","Metabolite")
 
 
@@ -491,44 +491,44 @@ colnames(bidirectional_mediation_results_sig_oral_gut_metabolite)[9:11]<-c("Oral
 calculate_correlations <- function(gut_data, oral_data, metabolome_data, 
                                    mediation_results) {
   
-  # 创建一个空的列表来存储结果
+  # Translated comment.
   correlation_results <- list()
   
-  # 对mediation_results的每一行进行循环
+  # Translated comment.
   for (i in 1:nrow(mediation_results)) {
-    # 获取当前行的特征名称
+    # Translated comment.
     gut_feature <- mediation_results$gut_feature[i]
     oral_feature <- mediation_results$oral_feature[i]
     metabolite_feature <- mediation_results$metabolite[i]
     
-    # 提取相应的数据
+    # Translated comment.
     gut_values <- gut_data[gut_feature, ]
     oral_values <- oral_data[oral_feature, ]
     metabolite_values <- metabolome_data[metabolite_feature, ]
     
-    # 确保所有数据都是数值型
+    # Translated comment.
     gut_values <- as.numeric(gut_values)
     oral_values <- as.numeric(oral_values)
     metabolite_values <- as.numeric(metabolite_values)
     
-    # 创建一个组合数据框，只包含有完整观测的样本
+    # Translated comment.
     combined_data <- data.frame(
       gut = gut_values,
       oral = oral_values,
       metabolite = metabolite_values
     )
     
-    # 移除含有NA的行
+    # Translated comment.
     combined_data <- na.omit(combined_data)
     
-    # 如果有足够的数据点来计算相关性
+    # Translated comment.
     if (nrow(combined_data) >= 3) {
-      # 计算Pearson相关系数
+      # Translated comment.
       cor_gut_oral <- cor.test(combined_data$gut, combined_data$oral, method = "spearman")
       cor_gut_metabolite <- cor.test(combined_data$gut, combined_data$metabolite, method = "spearman")
       cor_oral_metabolite <- cor.test(combined_data$oral, combined_data$metabolite, method = "spearman")
       
-      # 存储结果
+      # Translated comment.
       result <- data.frame(
         Mediation_Row = i,
         Gut_Feature = gut_feature,
@@ -543,10 +543,10 @@ calculate_correlations <- function(gut_data, oral_data, metabolome_data,
         Sample_Size = nrow(combined_data)
       )
       
-      # 添加到结果列表
+      # Translated comment.
       correlation_results[[i]] <- result
     } else {
-      # 如果数据点不足，添加一个包含NA的行
+      # Translated comment.
       result <- data.frame(
         Mediation_Row = i,
         Gut_Feature = gut_feature,
@@ -561,18 +561,18 @@ calculate_correlations <- function(gut_data, oral_data, metabolome_data,
         Sample_Size = nrow(combined_data)
       )
       
-      # 添加到结果列表
+      # Translated comment.
       correlation_results[[i]] <- result
     }
   }
   
-  # 将所有结果合并成一个数据框
+  # Translated comment.
   final_results <- do.call(rbind, correlation_results)
   
   return(final_results)
 }
 
-# 调用函数计算相关性
+# Translated comment.
 correlation_results <- calculate_correlations(
   gut_data, 
   oral_data, 

@@ -3,7 +3,7 @@ setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
 library(ggbeeswarm)
 setwd("1_code/4_site_merge/")
-##### 合并 gut 和 oral 的GBDT数据
+##### Translated comment.
 gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
 metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
@@ -20,47 +20,47 @@ gut_oral_results_summary<-merge(gut_oral_results_summary,metabolite_annotation[,
 
 
 preprocess_combined_data <- function(gut_data, oral_data, metabolite_data) {
-  # 获取样本ID
+  # Translated comment.
   gut_samples <- colnames(gut_data)
   oral_samples <- colnames(oral_data)
   meta_samples <- colnames(metabolite_data)
   
-  # 检查样本ID
+  # Translated comment.
   message("Initial sample counts:")
   message(sprintf("Gut microbiome samples: %d", length(gut_samples)))
   message(sprintf("Oral microbiome samples: %d", length(oral_samples)))
   message(sprintf("Metabolite samples: %d", length(meta_samples)))
   
-  # 找出共同样本
+  # Translated comment.
   common_samples <- Reduce(intersect, list(gut_samples, oral_samples, meta_samples))
   message(sprintf("Common samples across all datasets: %d", length(common_samples)))
   
-  # 提取共同样本的数据
+  # Translated comment.
   gut_matched <- gut_data[, common_samples]
   oral_matched <- oral_data[, common_samples]
   metabolite_matched <- metabolite_data[, common_samples]
   
-  # 转换和检查数据维度
+  # Translated comment.
   gut_df <- as.data.frame(t(gut_matched))
   oral_df <- as.data.frame(t(oral_matched))
   
-  # 添加来源前缀
+  # Translated comment.
   colnames(gut_df) <- paste0("gut_", colnames(gut_df))
   colnames(oral_df) <- paste0("oral_", colnames(oral_df))
   
-  # 检查维度
+  # Translated comment.
   message(sprintf("Gut features: %d", ncol(gut_df)))
   message(sprintf("Oral features: %d", ncol(oral_df)))
   
-  # 合并数据
+  # Translated comment.
   combined_microbiome <- cbind(gut_df, oral_df)
   
-  # 添加来源前缀以区分特征
+  # Translated comment.
   colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)] <- 
     paste0(combined_microbiome$source, "", 
            colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)])
   
-  # 确保样本顺序一致
+  # Translated comment.
   rownames(combined_microbiome) <- common_samples
   
   return(list(
@@ -70,7 +70,7 @@ preprocess_combined_data <- function(gut_data, oral_data, metabolite_data) {
   ))
 }
 
-# 修改主分析函数以使用合并的数据
+# Translated comment.
 analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data, 
                                            n_cores = NULL, seed = 42,
                                            do_feature_selection = TRUE,
@@ -78,28 +78,28 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
                                            p_threshold = 0.05,
                                            p_adjust_method = "BH",
                                            rho_threshold = 0.1) {
-  # 设置全局种子
+  # Translated comment.
   set.seed(seed)
   
-  # 设置参数
+  # Translated comment.
   n_boots <- 100
   n_folds <- 10
   
-  # 设置并行
+  # Translated comment.
   if(is.null(n_cores)) {
     n_cores <- detectCores() - 1
   }
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
   
-  # 数据预处理
+  # Translated comment.
   processed_data <- preprocess_combined_data(gut_data, oral_data, metabolite_data)
   
-  # 准备数据
+  # Translated comment.
   X <- as.matrix(processed_data$combined_microbiome)
   Y <- processed_data$metabolite
   
-  # 打印信息
+  # Translated comment.
   message("\nAnalysis settings:")
   message(sprintf("Feature selection: %s", if(do_feature_selection) "Yes" else "No"))
   if(do_feature_selection) {
@@ -115,7 +115,7 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
   message(sprintf("Metabolites: %d", ncol(Y)))
   message(sprintf("Using %d cores", n_cores))
   
-  # GBDT参数
+  # Translated comment.
   gbdt_params <- list(
     n.trees = 100,
     interaction.depth = 15,
@@ -125,24 +125,24 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
     train.fraction = 0.8
   )
   
-  # 导出函数到并行环境
+  # Translated comment.
   clusterExport(cl, c("single_cv", "calculate_r2"), envir = environment())
   
-  # 存储结果
+  # Translated comment.
   results <- list()
   
-  # 设置进度条
+  # Translated comment.
   pb <- progress_bar$new(
     format = "[:bar] :percent | Metabolite :current/:total | Elapsed: :elapsed | ETA: :eta",
     total = ncol(Y)
   )
   
-  # 分析每个代谢物
+  # Translated comment.
   for(i in 1:ncol(Y)) {
     start_time <- Sys.time()
     current_y <- Y[, i]
     
-    # 特征选择
+    # Translated comment.
     if(do_feature_selection) {
       feature_selection <- select_relevant_features(
         X, current_y,
@@ -154,7 +154,7 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
       selected_features <- feature_selection$selected_features
       X_selected <- X[, selected_features, drop = FALSE]
       
-      # 统计选中的特征中来自口腔和肠道的比例
+      # Translated comment.
       n_gut <- sum(grepl("^gut_", selected_features))
       n_oral <- sum(grepl("^oral_", selected_features))
     } else {
@@ -163,9 +163,9 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
       n_oral <- sum(grepl("^oral_", colnames(X)))
     }
     
-    # 只有在有选定特征时才继续分析
+    # Translated comment.
     if(ncol(X_selected) > 0) {
-      # 并行Bootstrap
+      # Translated comment.
       boot_results <- foreach(b = 1:n_boots,
                               .combine = 'c',
                               .packages = c("gbm", "caret")) %dopar% {
@@ -178,7 +178,7 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
                                 single_cv(boot_X, boot_y, n_folds, gbdt_params, seed = local_seed)
                               }
       
-      # 计算统计量
+      # Translated comment.
       mean_r2 <- mean(boot_results)
       ci <- quantile(boot_results, probs = c(0.025, 0.975))
       t_stat <- mean_r2 / (sd(boot_results) / sqrt(n_boots))
@@ -190,7 +190,7 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
       p_value <- 1
     }
     
-    # 存储结果
+    # Translated comment.
     results[[i]] <- list(
       metabolite = colnames(Y)[i],
       mean_r2 = mean_r2,
@@ -204,7 +204,7 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
       n_oral_features = n_oral
     )
     
-    # 更新进度条和打印结果
+    # Translated comment.
     pb$tick()
     end_time <- Sys.time()
     time_taken <- difftime(end_time, start_time, units = "mins")
@@ -216,10 +216,10 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
     message(sprintf("Time: %.2f mins", time_taken))
   }
   
-  # 关闭并行集群
+  # Translated comment.
   stopCluster(cl)
   
-  # 整理结果为数据框
+  # Translated comment.
   summary_df <- do.call(rbind, lapply(results, function(x) {
     data.frame(
       metabolite = x$metabolite,
@@ -233,7 +233,7 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
     )
   }))
   
-  # 添加额外的可视化分析
+  # Translated comment.
   if(do_feature_selection) {
     viz_results <- plot_combined_feature_selection_results(list(
       detailed_results = results,
@@ -251,9 +251,9 @@ analyze_combined_metabolite_ev <- function(gut_data, oral_data, metabolite_data,
   ))
 }
 
-# 新增可视化函数
+# Translated comment.
 plot_combined_feature_selection_results <- function(results) {
-  # 准备数据
+  # Translated comment.
   feature_summary <- do.call(rbind, lapply(results$detailed_results, function(x) {
     data.frame(
       metabolite = x$metabolite,
@@ -264,7 +264,7 @@ plot_combined_feature_selection_results <- function(results) {
     )
   }))
   
-  # 1. 特征数量与R²的关系图
+  # Translated comment.
   p1 <- ggplot(feature_summary, aes(x = n_features, y = r2)) +
     geom_point(alpha = 0.6) +
     geom_smooth(method = "loess", se = TRUE) +
@@ -273,7 +273,7 @@ plot_combined_feature_selection_results <- function(results) {
          x = "Number of Selected Features",
          y = "R² Score")
   
-  # 2. 口腔vs肠道特征比例
+  # Translated comment.
   p2 <- ggplot(feature_summary, aes(x = n_gut / (n_gut + n_oral), y = r2)) +
     geom_point(alpha = 0.6) +
     geom_smooth(method = "loess", se = TRUE) +
@@ -282,7 +282,7 @@ plot_combined_feature_selection_results <- function(results) {
          x = "Proportion of Gut Features",
          y = "R² Score")
   
-  # 3. 特征来源分布
+  # Translated comment.
   feature_source_data <- data.frame(
     Source = rep(c("Gut", "Oral"), nrow(feature_summary)),
     Count = c(feature_summary$n_gut, feature_summary$n_oral),
@@ -295,7 +295,7 @@ plot_combined_feature_selection_results <- function(results) {
     labs(title = "Distribution of Selected Features by Source",
          y = "Number of Selected Features")
   
-  # 组合图表
+  # Translated comment.
   combined_plots <- (p1 + p2) / p3 +
     plot_layout(heights = c(1, 0.8))
   
@@ -338,50 +338,50 @@ gut_oral_interaction<-readRDS("../../1_code/gut_oral_microbiome/combined_results
  
  
  
- # 读取数据
+ # Translated comment.
  data <- gut_oral_results_summary_co_influence
  
- # 数据处理
+ # Translated comment.
  library(tidyr)
  library(dplyr)
  library(ggplot2)
- # 处理重复的HMDB.Name
+ # Translated comment.
  data$HMDB.Name <- make.unique(data$HMDB.Name, sep = "_")
- # 对数据进行排序并选择前30个代谢物
+ # Translated comment.
  data_sorted <- data %>%
    arrange(desc(r2_mean)) %>%
    slice(1:30)
  
- # 创建长格式数据用于堆叠图
+ # Translated comment.
  data_long <- data_sorted %>%
    dplyr::select(HMDB.Name, gut_R2, oral_R2, r2_mean) %>%
    gather(key = "source", value = "value", c(gut_R2, oral_R2))
  
- # 为r2_mean创建单独的长格式数据
+ # Translated comment.
  r2_mean_long <- data_sorted %>%
    dplyr::select(HMDB.Name, r2_mean) %>%
    dplyr::mutate(source = "r2_mean") %>%
    dplyr::rename(value = r2_mean)
  
- # 创建因子水平顺序
+ # Translated comment.
  level_order <- data_sorted$HMDB.Name
  
- # 将HMDB.Name转换为因子，并设置水平顺序
+ # Translated comment.
  data_long$HMDB.Name <- factor(data_long$HMDB.Name, levels = level_order)
  r2_mean_long$HMDB.Name <- factor(r2_mean_long$HMDB.Name, levels = level_order)
  
- # 创建堆叠条形图和r2_mean对比图
+ # Translated comment.
  ggplot() +
-   # 堆叠的gut_R2和oral_R2
+   # Translated comment.
    geom_col(data = data_long, 
             aes(x = HMDB.Name, y = value, fill = source),
             position = "stack",
             width = 0.4) +
-   # r2_mean的柱子
+   # Translated comment.
    geom_col(data = r2_mean_long,
             aes(x = HMDB.Name, y = value, fill = source),
             width = 0.4,
-            position = position_nudge(x = 0.4)) +  # 将r2_mean柱子向右偏移
+            position = position_nudge(x = 0.4)) +  # translated comment
    scale_fill_manual(values = c("gut_R2" = "#edd064", 
                                 "oral_R2" = "#a1d5b9",
                                 "r2_mean" = "grey50"),
@@ -400,7 +400,7 @@ gut_oral_interaction<-readRDS("../../1_code/gut_oral_microbiome/combined_results
    ) +
    scale_y_continuous(limits = c(0, 0.65))
  
- # 统计信息
+ # Translated comment.
  data_sorted$sum_R2 <- data_sorted$gut_R2 + data_sorted$oral_R2
  print("Summary of gut_R2 + oral_R2 vs r2_mean:")
  data_sorted$difference <- data_sorted$sum_R2 - data_sorted$r2_mean

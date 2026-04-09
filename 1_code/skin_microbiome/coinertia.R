@@ -118,53 +118,53 @@ metabolomics_data<-metabolomics_data[metabolomics_Microbial$variable_id,]
 
 library(ade4)
 
-# 假设你的数据是这样的:
-# microbiome_data: 行是样本,列是菌群
-# metabolome_data: 行是相同的样本,列是代谢物
+# Translated comment.
+# Translated comment.
+# Translated comment.
 
-# 1. 数据预处理
-# 标准化数据,确保行名一致
+# Translated comment.
+# Translated comment.
 microbiome_scaled <- t(microbiome_data)
 metabolome_scaled <- t(metabolomics_data)
 
-# 2. 分别对两个数据集进行PCA
+# Translated comment.
 pca_microbiome <- dudi.pca(data.frame(microbiome_scaled), scannf = FALSE, nf = 5)
 pca_metabolome <- dudi.pca(data.frame(metabolome_scaled), scannf = FALSE, nf = 5)
 
-# 3. 进行Coinertia分析
+# Translated comment.
 coia <- coinertia(pca_microbiome, pca_metabolome, scannf = FALSE, nf = 2)
 
-# 4. 查看结果
-# RV系数(整体相关性)
+# Translated comment.
+# Translated comment.
 coia$RV
 
-# 计算每个样本的投影距离
+# Translated comment.
 distances <- sqrt(rowSums((coia$mX - coia$mY)^2))
 
-# 为结果创建一个数据框
-# 查看coinertia对象的结构
+# Translated comment.
+# Translated comment.
 str(coia)
 
-# 查看特征值（eigenvalues）
+# Translated comment.
 coia$eig
 
-# 查看各轴的解释百分比
+# Translated comment.
 percent_var <- (coia$eig/sum(coia$eig))*100
 print(percent_var)
 
-# 获取两组数据在共同空间的坐标
-# 菌群数据的坐标
-micro_scores <- coia$li  # 样本在菌群空间的坐标
-micro_loadings <- coia$c1 # 菌群变量的贡献
+# Translated comment.
+# Translated comment.
+micro_scores <- coia$li  # translated comment
+micro_loadings <- coia$c1 # translated comment
 
-# 代谢物数据的坐标
-metab_scores <- coia$li # 样本在代谢物空间的坐标
-metab_loadings <- coia$l1 # 代谢物变量的贡献
+# Translated comment.
+metab_scores <- coia$li # translated comment
+metab_loadings <- coia$l1 # translated comment
 
-# 查看变量贡献
-# 菌群变量贡献
+# Translated comment.
+# Translated comment.
 head(micro_loadings)
-# 代谢物变量贡献
+# Translated comment.
 head(metab_loadings)
 
 
@@ -180,9 +180,9 @@ a<-cbind(skin_temp_object@sample_info,distances)
 
 ggplot(a, aes(x=adjusted_age, y= distances)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", #不需要图例
-                                                                                                axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-                                                                                                axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-                                                                                                axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-                                                                                                axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # translated comment
+                                                                                                axis.text.x=element_text(colour="black",size=14), # translated comment
+                                                                                                axis.text.y=element_text(size=14,face="plain"), # translated comment
+                                                                                                axis.title.y=element_text(size = 14,face="plain"), # translated comment
+                                                                                                axis.title.x=element_text(size = 14,face="plain"), # translated comment
                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+xlab("Age")

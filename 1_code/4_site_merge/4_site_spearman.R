@@ -116,7 +116,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## 计算所有genus与代谢组数据PC1之间的相关性
+## Translated comment.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -129,25 +129,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# 假设 'metabolomics_pc' 和 'gut_pc' 是您的数据框，并已正确设置
-# 确保两个数据框的样本（行名）相同且顺序一致
+# Translated comment.
+# Translated comment.
 
-# 将数据框转换为矩阵以便进行相关性计算
+# Translated comment.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# 将结果转换为数据框
+# Translated comment.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -161,7 +161,7 @@ rownames(cor_values_filtered)<-rownames(gut_expression_data)
 
 
 
-## 绘制桑基图
+## Translated comment.
 library(reshape2)
 sangkey_data<-melt(cor_values_filtered)
 
@@ -230,7 +230,7 @@ plot_data$site_genus <- paste(plot_data$Var1, plot_data$Var2, sep = "_")
 
 plot_data_sorted <- plot_data[order(plot_data$Freq), ]
 
-# 更新因子水平以反映新的排序
+# Translated comment.
 plot_data_sorted$site_genus <- factor(plot_data_sorted$site_genus , levels = unique(plot_data_sorted$site_genus ))
 
 

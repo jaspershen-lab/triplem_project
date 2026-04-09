@@ -5,7 +5,7 @@ library(readxl)
 
 metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
 setwd("1_code/4_site_merge/")
-##  814个代谢物的热图
+## Translated comment.
 
 
 gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
@@ -51,25 +51,25 @@ four_site_GBDT_R2<-four_site_GBDT_R2[rowSums(four_site_GBDT_R2)>0,]
 
 
 
-# 加载需要的包
+# Translated comment.
 library(dplyr)
 library(ggplot2)
 library(stats)
 
 metabolite_class_enrichment <- function(
-    significant_metabolites,  # 显著代谢物的向量
-    all_metabolites_df,      # 包含所有代谢物及其class信息的数据框
-    class_column,            # class信息的列名
-    metabolite_column,       # 代谢物ID/名称的列名
-    alpha = 0.05            # 显著性水平
+    significant_metabolites,  # translated comment
+    all_metabolites_df,      # translated comment
+    class_column,            # translated comment
+    metabolite_column,       # translated comment
+    alpha = 0.05            # translated comment
 ) {
-  # 获取总体代谢物数量
+  # Translated comment.
   N <- nrow(all_metabolites_df)
   
-  # 获取显著代谢物数量
+  # Translated comment.
   n <- length(significant_metabolites)
   
-  # 对每个class进行分析
+  # Translated comment.
   results <- all_metabolites_df %>%
     dplyr::group_by(!!sym(class_column)) %>%
     dplyr::summarise(
@@ -79,7 +79,7 @@ metabolite_class_enrichment <- function(
     mutate(
       Expected_by_chance = (Total_in_class * n) / N,
       Fold_enrichment = (Significant_in_class/n)/(Total_in_class/N),
-      # 计算超几何分布的p值
+      # Translated comment.
       P_value = phyper(
         Significant_in_class - 1,
         Total_in_class,
@@ -89,10 +89,10 @@ metabolite_class_enrichment <- function(
       )
     )
   
-  # FDR校正
+  # Translated comment.
   results$FDR <- p.adjust(results$P_value, method = "BH")
   
-  # 按p值排序
+  # Translated comment.
   results <- results %>% arrange(P_value)
   
   return(results)
@@ -188,7 +188,7 @@ ggplot(results_all, aes(x = HMDB.Class, y = Significant_in_class)) +
     legend.position = "none",
     axis.text = element_text(size = 14,family = "Helvetica"),
     axis.title = element_text(size = 14,family = "Helvetica"),
-    axis.text.x = element_text(family = "Helvetica") , # 如果组名较长，可以倾斜x轴标签
-    axis.ticks.length = unit(0.25, "cm"),  # 增加刻度线长度
-    axis.ticks = element_line(linewidth = 0.8)  # 增加刻度线粗细
+    axis.text.x = element_text(family = "Helvetica") , # translated comment
+    axis.ticks.length = unit(0.25, "cm"),  # translated comment
+    axis.ticks = element_line(linewidth = 0.8)  # translated comment
   )+scale_fill_manual(values = body_site_color)

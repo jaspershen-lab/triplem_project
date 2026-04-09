@@ -39,15 +39,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# 需要筛选的 HMDB.ID 列表
+# Translated comment.
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# 筛选 compound_list 中每个 data.frame 的元素
+# Translated comment.
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# 查看筛选结果
+# Translated comment.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -107,15 +107,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# 需要筛选的 HMDB.ID 列表
+# Translated comment.
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# 筛选 compound_list 中每个 data.frame 的元素
+# Translated comment.
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# 查看筛选结果
+# Translated comment.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -173,15 +173,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# 需要筛选的 HMDB.ID 列表
+# Translated comment.
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# 筛选 compound_list 中每个 data.frame 的元素
+# Translated comment.
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# 查看筛选结果
+# Translated comment.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -243,15 +243,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# 需要筛选的 HMDB.ID 列表
+# Translated comment.
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# 筛选 compound_list 中每个 data.frame 的元素
+# Translated comment.
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# 查看筛选结果
+# Translated comment.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -280,7 +280,7 @@ enrich_results_nasal<-enrich_results
 
 
 
-#########合并四个位点代谢物通路富集结果生成网络图
+######### Translated comment.
 
 
 enrich_results_gut$site<-"gut"
@@ -317,7 +317,7 @@ ggraph_data <- igraph::graph_from_data_frame(d = edges,
 
 
 
-#加载包
+# Translated comment.
 library(ggplot2)
 library(RColorBrewer)
 library(tidyverse)

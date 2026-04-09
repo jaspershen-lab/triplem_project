@@ -1,4 +1,4 @@
-# 计算肠型
+# Translated comment.
 
 library(microbiome)
 library(DirichletMultinomial)
@@ -37,7 +37,7 @@ gut_object <-
 
 
 
-## 导入成phyloseq对象
+## Translated comment.
 
 
 
@@ -100,7 +100,7 @@ for (k in seq(ncol(fitted(best)))) {
 
 
 
-# 绘制PCoA
+# Translated comment.
 
 gut_phyloseq <- microbiome::transform(gut_phyloseq, "compositional")
 taxa <- core_members(gut_phyloseq, prevalence = 5/100,detection = 1/100)
@@ -112,36 +112,36 @@ sample_data(gut_phyloseq_filt)$CT <- as.character(ass)
 
 dis_bray<- phyloseq::distance(gut_phyloseq_filt, "bray")
 
-## 采用PCoA的方法对距离矩阵进行降维
+## Translated comment.
 dis_bray.pcoa = ordinate(gut_phyloseq_filt, method="NMDS", distance=dis_bray)
 
-## 绘制初始图形
+## Translated comment.
 bray.pcoa <- plot_ordination(gut_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
 
-## 提取图形数据
+## Translated comment.
 data<-bray.pcoa$data
 
-## 修改列名
+## Translated comment.
 colnames(data)[1:2]<-c("NMDS1","NMDS2")
 
-## 获取主坐标轴1,2的解释度
+## Translated comment.
 pc1<-""
 pc2<-""
 
 
 
 ggplot(data, aes(NMDS1, NMDS2)) +
-  #绘制样本点，根据分组匹配颜色和形状，size调整点的大小
+  # Translated comment.
   geom_point(aes(colour=CT,fill=CT),size=2.5)+
-  #匹配形状、边框和填充的图例
+  # Translated comment.
   scale_color_manual(values=c ("#2442B2","#E12441"))+
-  #设置标题和横纵坐标label文字
+  # Translated comment.
   labs(title="NMDS - The composition of gut microbiome") +
   theme(text=element_text(size=30))+
-  #添加横纵两条虚线
+  # Translated comment.
   geom_vline(aes(xintercept = 0),linetype="dotted")+
   geom_hline(aes(yintercept = 0),linetype="dotted")+
-  #调整背景、坐标轴、图例的格式
+  # Translated comment.
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid=element_blank(),
         axis.title = element_text(color='black',size=14),
@@ -156,6 +156,6 @@ ggplot(data, aes(NMDS1, NMDS2)) +
         legend.key=element_blank(),
         legend.background = element_rect(colour = "black"),
         legend.key.height=unit(1.6,"cm"))+
-  #设置标题的格式
+  # Translated comment.
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = CT),geom = "polygon",level = 0.8,alpha = 0,size=2)
 

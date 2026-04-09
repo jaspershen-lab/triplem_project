@@ -9,7 +9,7 @@ library(readxl)
 
 demographic_data<-read.table("2_data/FBIP-main/metadata/FBIP_metadata.txt")
 
-# 筛选时间点0
+# Translated comment.
 demographic_data<-subset(demographic_data,Time=="W0")
 
 
@@ -20,20 +20,20 @@ library(grid)
 
 demographic_data$Gender<-gsub("F","Female",demographic_data$Gender)
 demographic_data$Gender<-gsub("M","Male",demographic_data$Gender)
-# 将不透明度设置为0.7（相当于30%的透明度）
+# Translated comment.
 alpha_value = 0.7
 
-# 创建注释对象
+# Translated comment.
 ha = columnAnnotation(
-  # 连续型变量使用单一颜色，添加透明度
+  # Translated comment.
   Age = anno_barplot(demographic_data$Age, 
                      gp = gpar(fill = scales::alpha("#E69F00", alpha_value)),
                      border = TRUE,
-                     width = unit(2, "cm")),  # 使用橙色
+                     width = unit(2, "cm")),  # translated comment
   BMI = anno_barplot(demographic_data$BMI,
                      gp = gpar(fill = scales::alpha("#56B4E9", alpha_value)),
                      border = TRUE,
-                     width = unit(2, "cm")),  # 使用蓝色
+                     width = unit(2, "cm")),  # translated comment
   TC = anno_barplot(demographic_data$TC,
                      gp = gpar(fill = scales::alpha("#F21451", alpha_value)),
                      border = TRUE,
@@ -44,46 +44,46 @@ ha = columnAnnotation(
                     width = unit(2, "cm")),  
   
   border = TRUE,
-  # 分类型变量
+  # Translated comment.
   Gender = demographic_data$Gender,
 
-  # 设置分类变量的颜色，添加透明度
+  # Translated comment.
   col = list(
     Gender = mapply(function(x) scales::alpha(x, alpha_value), sex_color, USE.NAMES = TRUE)
   ),
   
-  # 设置注释的样式
+  # Translated comment.
   annotation_name_gp = gpar(fontsize = 10),
   annotation_name_side = "left",
   simple_anno_size = unit(0.5, "cm"),
   
-  # 添加图例
+  # Translated comment.
   show_legend = TRUE,
   annotation_legend_param = list(
     Gender = list(title = "Gender")
   ),
   
-  # 设置列间距
-  gap = unit(c(2, 2, 1, 1, 1), "mm")  # 在各列之间添加间距
+  # Translated comment.
+  gap = unit(c(2, 2, 1, 1, 1), "mm")  # translated comment
 )
 
-# 创建一个空矩阵用于绘制热图
+# Translated comment.
 mat = matrix(0, nrow = 1, ncol = nrow(demographic_data))
 
-# 创建并绘制热图，禁用聚类
+# Translated comment.
 ht = Heatmap(mat,
              top_annotation = ha,
              show_row_names = FALSE,
              show_column_names = FALSE,
              show_heatmap_legend = FALSE,
-             cluster_rows = FALSE,    # 禁用行聚类
-             cluster_columns = FALSE, # 禁用列聚类
-             height = unit(0.2, "cm"))   # 设置整体宽度
+             cluster_rows = FALSE,    # translated comment
+             cluster_columns = FALSE, # translated comment
+             height = unit(0.2, "cm"))   # translated comment
 
-# 绘制并设置图例位置
+# Translated comment.
 
 
 
 pdf("4_manuscript/Figures/Figure_1/figure_s1_FBIP_demographic.pdf", width = 10, height = 6)
-ht_drawn <-draw(ht, annotation_legend_side = "bottom")  # 捕获绘制的对象
+ht_drawn <-draw(ht, annotation_legend_side = "bottom")  # translated comment
 dev.off()

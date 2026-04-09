@@ -46,7 +46,7 @@ library(cowplot)
 
 
 
-# 确定每个代谢物中占比最大的因素
+# Translated comment.
 data <- four_site_GBDT_R2 %>%
   mutate(Dominant_Factor = case_when(
     gut >= oral & gut >= skin & gut>=nasal ~ "gut",
@@ -55,18 +55,18 @@ data <- four_site_GBDT_R2 %>%
     nasal >= oral & nasal >= skin & nasal>=oral ~ "nasal"
   ))
 
-# 计算每个代谢物的总 R² 值，并按最主要的影响因素分类后再按总 R² 值降序排序
+# Translated comment.
 data <- data %>%
   mutate(Total_R2 = gut + oral + skin + nasal) %>%
   arrange(Dominant_Factor, desc(Total_R2))
 
-# 转换为长格式以便于 ggplot 绘制
+# Translated comment.
 data_long <- data %>%
   pivot_longer(cols = c("gut", "oral", "skin","nasal"),
                names_to = "Factor",
                values_to = "R_squared")
 
-# 绘制堆叠条形图
+# Translated comment.
 g1 <- ggplot(data_long, aes(x = factor(metabolite, levels = data$metabolite), y = R_squared, fill = Factor)) +
   geom_bar(stat = "identity", width = 0.8) +
   scale_fill_manual(values = body_site_color, name = "Factor") +
@@ -83,7 +83,7 @@ g1 <- ggplot(data_long, aes(x = factor(metabolite, levels = data$metabolite), y 
 
 
 
-## 绘制四个位点R2值前50的样本点图
+## Translated comment.
 gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
 skin_GBDT_results<-readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
@@ -114,9 +114,9 @@ colnames(four_site_GBDT_R2)<-c("metabolite","gut","oral","skin","nasal")
 library(tidyverse)
 library(ggplot2)
 
-# 分别获取并展示每个部位前50的代谢物
+# Translated comment.
 metabolite_analysis <- function(four_site_GBDT_R2) {
-  # 分别获取每个部位前50的数据
+  # Translated comment.
   gut_data <- four_site_GBDT_R2 %>% 
     top_n(50, gut) %>%
     select(metabolite, gut) %>%
@@ -145,7 +145,7 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
            Value = nasal) %>%
     select(metabolite, Site, Value)
   
-  # 合并所有数据
+  # Translated comment.
   combined_data <- bind_rows(gut_data, oral_data, skin_data, nasal_data)
   
 
@@ -157,50 +157,50 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
     dplyr:: summarise(
       mean = mean(Value),
       sd = sd(Value),
-      count = length(Value),  # 使用 length() 替代 n()
+      count = length(Value),  # translated comment
       se = sd(Value)/sqrt(length(Value))
     )
   
   
   ggplot() +
-    # 添加条形图
+    # Translated comment.
     geom_bar(data = summary_stats, 
              aes(x = Site, y = mean, fill = Site),
              stat = "identity",
              width = 0.6,
              alpha = 1) +
-    # 添加误差线
+    # Translated comment.
     geom_errorbar(data = summary_stats,
                   aes(x = Site, 
                       ymin = mean - se, 
                       ymax = mean + se),
                   width = 0.2) +
-    # 添加散点
+    # Translated comment.
     geom_quasirandom(data = combined_data,
                      aes(x = Site, y = Value),
                      alpha = 0.8,
                      width = 0.2) +
-    # 设置填充颜色
+    # Translated comment.
     scale_fill_manual(values = body_site_color) +
-    # 设置y轴
+    # Translated comment.
     scale_y_continuous(expand = c(0, 0)) +  
     theme_classic() +
     theme(
       legend.position = "none",
       axis.text = element_text(size = 14,family = "Helvetica"),
       axis.title = element_text(size = 14,family = "Helvetica"),
-      axis.text.x = element_text(angle = 30, hjust = 1,family = "Helvetica") , # 如果组名较长，可以倾斜x轴标签
-      axis.ticks.length = unit(0.25, "cm"),  # 增加刻度线长度
-      axis.ticks = element_line(linewidth = 0.8)  # 增加刻度线粗细
+      axis.text.x = element_text(angle = 30, hjust = 1,family = "Helvetica") , # translated comment
+      axis.ticks.length = unit(0.25, "cm"),  # translated comment
+      axis.ticks = element_line(linewidth = 0.8)  # translated comment
     ) +
-    # 设置坐标轴标签
+    # Translated comment.
     xlab("") +
     ylab("R2")
   
   
 }
 
-# 使用函数
+# Translated comment.
  result <- metabolite_analysis(four_site_GBDT_R2)
  print(result)
 

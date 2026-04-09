@@ -47,30 +47,30 @@ library(ggraph)
 library(dplyr)
 library(tidyr)
 
-# 将代谢物-部位矩阵转换为网络图的函数
+# Translated comment.
 metabolite_to_network <- function(metabolite_matrix, annotation_df) {
-  # 确保输入是矩阵或数据框
+  # Translated comment.
   if (!is.matrix(metabolite_matrix) && !is.data.frame(metabolite_matrix)) {
     stop("输入必须是矩阵或数据框")
   }
   
-  # 转换为数据框
+  # Translated comment.
   metabolite_df <- as.data.frame(metabolite_matrix)
   
-  # 添加代谢物名称列
+  # Translated comment.
   metabolite_df$metabolite <- rownames(metabolite_matrix)
   
-  # 转换为长格式
+  # Translated comment.
   edges_df <- metabolite_df %>%
     pivot_longer(
       cols = c("gut", "oral", "skin", "nasal"),
       names_to = "body_site",
       values_to = "value"
     ) %>%
-    mutate(value = as.numeric(value)) %>%  # 确保值为数值类型
-    filter(value > 0)  # 只保留有连接的边
+    mutate(value = as.numeric(value)) %>%  # translated comment
+    filter(value > 0)  # translated comment
   
-  # 创建节点数据框，整合注释信息
+  # Translated comment.
   metabolite_nodes <- data.frame(
     name = unique(edges_df$metabolite),
     type = "metabolite"
@@ -88,14 +88,14 @@ metabolite_to_network <- function(metabolite_matrix, annotation_df) {
     HMDB.Name = NA
   )
   
-  # 合并所有节点信息
+  # Translated comment.
   nodes <- bind_rows(metabolite_nodes, body_site_nodes)
   
-  # 创建边数据框
+  # Translated comment.
   edges <- edges_df %>%
     select(from = metabolite, to = body_site, weight = value)
   
-  # 创建tidygraph对象
+  # Translated comment.
   graph <- tbl_graph(
     nodes = nodes,
     edges = edges,
@@ -105,12 +105,12 @@ metabolite_to_network <- function(metabolite_matrix, annotation_df) {
   return(graph)
 }
 
-# 创建可视化函数
+# Translated comment.
 plot_metabolite_network <- function(graph) {
-  # 获取节点属性数据框
+  # Translated comment.
   node_data <- as_tibble(graph)
   
-  # 计算每个HMDB.Class的频率并获取前8个类别
+  # Translated comment.
   top_classes <- node_data %>%
     filter(!is.na(HMDB.Class)) %>%
     count(HMDB.Class) %>%
@@ -118,7 +118,7 @@ plot_metabolite_network <- function(graph) {
     slice_head(n = 8) %>%
     pull(HMDB.Class)
   
-  # 将不在前8的类别标记为"Others"
+  # Translated comment.
   V(graph)$HMDB.Class_grouped <- ifelse(
     V(graph)$type == "body_site",
     "body_site",
@@ -127,23 +127,23 @@ plot_metabolite_network <- function(graph) {
            "Others")
   )
   
-  # 生成调色板
+  # Translated comment.
   class_colors <- setNames(
     colorRampPalette(c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999"))(8),
     top_classes
   )
-  # 添加Others和body_site的颜色
+  # Translated comment.
   class_colors <- c(class_colors,
                     "Others" = "#CCCCCC",
                     "body_site" = "red")
   
   ggraph(graph, layout = "fr") +
-    # 添加边
+    # Translated comment.
     geom_edge_link(aes(width = weight, alpha = weight),
                    color = "grey50") +
     scale_edge_width_continuous(range = c(0.2, 2)) +
     scale_edge_alpha_continuous(range = c(0.2, 0.8)) +
-    # 添加节点
+    # Translated comment.
     geom_node_point(aes(color = HMDB.Class_grouped, 
                         size = type)) +
     scale_color_manual(values = class_colors,
@@ -152,13 +152,13 @@ plot_metabolite_network <- function(graph) {
       metabolite = 3,
       body_site = 8
     )) +
-    # 添加标签
+    # Translated comment.
     geom_node_text(aes(label = ifelse(type == "body_site", name,
                                       ifelse(HMDB.Class == "Indoles and derivatives", 
                                              HMDB.Name, ""))),
                    repel = TRUE,
                    size = 3) +
-    # 主题设置
+    # Translated comment.
     theme_graph() +
     theme(
       legend.position = "bottom",
@@ -172,8 +172,8 @@ plot_metabolite_network <- function(graph) {
     )
 }
 
-# 使用示例
-# 假设你有如下数据（请根据实际数据替换）：
+# Translated comment.
+# Translated comment.
 example_data <- matrix(
   c(1, 0, 1, 0,
     0, 1, 1, 1,
@@ -186,8 +186,8 @@ example_data <- matrix(
   )
 )
 
-# 创建网络图对象
+# Translated comment.
 graph <- metabolite_to_network(four_site_R2,metabolite_annotation)
 
-# 绘制网络图
+# Translated comment.
 plot_metabolite_network(graph)

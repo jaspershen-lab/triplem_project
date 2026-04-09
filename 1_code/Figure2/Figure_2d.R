@@ -53,7 +53,7 @@ FBIP_metabolome_annotation <- read.table(
   sep = "\t"
 )
 
-# 过滤没有HMDB ID的代谢物
+# Translated comment.
 
 FBIP_metabolome_annotation <- subset(FBIP_metabolome_annotation, HMDB !=
                                        c(""))
@@ -63,7 +63,7 @@ FBIP_metabolome <- FBIP_metabolome[, FBIP_metabolome_annotation$ID]
 colnames(FBIP_metabolome) <- FBIP_metabolome_annotation$HMDB
 
 
-# 读取iPOP数据
+# Translated comment.
 
 
 library(tidyverse)
@@ -158,7 +158,7 @@ metabolomics_temp_object@expression_data <- expression_data
 
 
 
-##筛选共同的属
+## Translated comment.
 com_tax <- intersect(gut_temp_object@variable_info$Genus,
                      colnames(FBIP_metagenomic))
 
@@ -183,7 +183,7 @@ FBIP_metagenomic <-
   as.data.frame()
 
 
-### 挑选共同的代谢物
+### Translated comment.
 
 metabolome_data_ipop <- metabolomics_temp_object@expression_data
 metabolome_ann_ipop <- data.frame(metabolite_annotation)
@@ -205,14 +205,14 @@ common_samples <- intersect(colnames(metabolome_data_ipop),
 metabolome_data <- metabolome_data_ipop[, common_samples]
 microbiome_data <- microbiome_data_ipop[, common_samples]
 
-# 转置数据矩阵以便进行相关性计算
+# Translated comment.
 metabolome_t <- t(metabolome_data)
 microbiome_t <- t(microbiome_data)
 
-# 初始化一个数据框来存储所有相关性结果
+# Translated comment.
 correlation_results <- data.frame()
 
-# 计算每个代谢物与每个细菌之间的相关性
+# Translated comment.
 for (i in 1:ncol(metabolome_t)) {
   metabolite_name <- colnames(metabolome_t)[i]
   metabolite_data <- metabolome_t[, i]
@@ -221,15 +221,15 @@ for (i in 1:ncol(metabolome_t)) {
     microbe_name <- colnames(microbiome_t)[j]
     microbe_data <- microbiome_t[, j]
     
-    # 使用complete.cases移除任何含有NA值的样本
+    # Translated comment.
     valid_indices <- complete.cases(metabolite_data, microbe_data)
     
     if (sum(valid_indices) > 5) {
-      # 确保至少有足够的有效样本
-      # 计算Spearman相关系数和p值
+      # Translated comment.
+      # Translated comment.
       cor_test <- cor.test(metabolite_data[valid_indices], microbe_data[valid_indices], method = "spearman")
       
-      # 存储结果
+      # Translated comment.
       result <- data.frame(
         Metabolite = metabolite_name,
         Microbe = microbe_name,
@@ -242,16 +242,16 @@ for (i in 1:ncol(metabolome_t)) {
   }
 }
 
-# 计算校正后的p值（FDR校正）
+# Translated comment.
 correlation_results$FDR <- p.adjust(correlation_results$P_value, method = "BH")
 
-# 计算相关性的绝对值，用于排序
+# Translated comment.
 correlation_results$Abs_Correlation <- abs(correlation_results$Correlation)
 
-# 按相关性绝对值降序排序
+# Translated comment.
 correlation_results <- correlation_results[order(correlation_results$Abs_Correlation, decreasing = TRUE), ]
 
-# 选择相关性最强的前100个
+# Translated comment.
 top_100_correlations <- head(correlation_results, 500)
 
 
@@ -274,52 +274,52 @@ top_100_correlations <- top_100_correlations %>%
 
 
 
-library(tidyverse)  # 数据处理
+library(tidyverse)  # translated comment
 library(Hmisc)
 
 #######FBIP
-# 读取数据
-# 假设您的数据存储在CSV文件中，请根据实际情况修改文件路径
+# Translated comment.
+# Translated comment.
 metagenomic_data <- FBIP_metagenomic
 metabolome_data <- data.frame(t(FBIP_metabolome))
 
-# 检查数据结构
+# Translated comment.
 cat("代谢物数据维度:", dim(metagenomic_data), "\n")
 cat("细菌数据维度:", dim(metabolome_data), "\n")
 
-# 确保样本列名一致并按相同顺序排列
-# 提取公共样本
+# Translated comment.
+# Translated comment.
 common_samples <- intersect(colnames(metagenomic_data), colnames(metabolome_data))
 
-# 如果没有共同样本，则停止程序
+# Translated comment.
 if (length(common_samples) == 0) {
   stop("没有共同的样本名在两个数据集中")
 }
 
-# 使用公共样本筛选数据集
+# Translated comment.
 metagenomic_filtered <- metagenomic_data[, common_samples]
 metabolome_filtered <- metabolome_data[, common_samples]
 
-# 相关性分析
-# 转置使样本在行，特征在列
+# Translated comment.
+# Translated comment.
 metagenomic_t <- t(metagenomic_filtered)
 metabolome_t <- t(metabolome_filtered)
 
-# 计算相关性矩阵（Spearman相关系数）
+# Translated comment.
 correlation_result <- rcorr(as.matrix(metagenomic_t), as.matrix(metabolome_t), type = "spearman")
 
-# 提取相关系数和P值
+# Translated comment.
 cor_coef <- correlation_result$r
 cor_pval <- correlation_result$P
 
-# 提取代谢物和细菌之间的相关系数部分
-# 假设metagenomic_t包含代谢物，metabolome_t包含细菌
+# Translated comment.
+# Translated comment.
 cor_subset <- cor_coef[1:ncol(metagenomic_t), (ncol(metagenomic_t) + 1):(ncol(metagenomic_t) +
                                                                            ncol(metabolome_t))]
 pval_subset <- cor_pval[1:ncol(metagenomic_t), (ncol(metagenomic_t) + 1):(ncol(metagenomic_t) +
                                                                             ncol(metabolome_t))]
 
-# 将相关矩阵转换为表格形式
+# Translated comment.
 correlation_table <- data.frame()
 
 for (i in 1:nrow(cor_subset)) {
@@ -341,13 +341,13 @@ for (i in 1:nrow(cor_subset)) {
   }
 }
 
-# 按p值排序
+# Translated comment.
 correlation_table <- correlation_table[order(correlation_table$Pvalue), ]
 
-# 添加FDR校正的p值
+# Translated comment.
 correlation_table$AdjustedPvalue <- p.adjust(correlation_table$Pvalue, method = "BH")
 
-# 添加显著性标记
+# Translated comment.
 correlation_table$Significance <- ""
 correlation_table$Significance[correlation_table$Pvalue < 0.05] <- "*"
 correlation_table$Significance[correlation_table$Pvalue < 0.01] <- "**"
@@ -389,19 +389,19 @@ plot <-
   geom_smooth(method = "lm", colour = "grey50") + theme_light() + stat_cor(method = "spearman") +
   theme(
     legend.position = "none",
-    #不需要图例
+    # Translated comment.
     axis.text.x =
       element_text(colour = "black", size = 14),
-    #设置x轴刻度标签的字体属性
+    # Translated comment.
     axis.text.y =
       element_text(size = 14, face = "plain"),
-    #设置x轴刻度标签的字体属性
+    # Translated comment.
     axis.title.y =
       element_text(size = 14, face = "plain"),
-    #设置y轴的标题的字体属性
+    # Translated comment.
     axis.title.x =
       element_text(size = 14, face = "plain"),
-    #设置x轴的标题的字体属性
+    # Translated comment.
     plot.title = element_text(size =
                                 15, face = "bold", hjust = 0.5)
   ) + xlab("iPOP_Rho") + ylab("FBIP_Rho")

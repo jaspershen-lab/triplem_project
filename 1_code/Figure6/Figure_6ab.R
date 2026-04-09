@@ -38,7 +38,7 @@ oral_phyloseq<- phyloseq(OTU, TAX, samples)
 
 
 
-## 计算alpha多样性
+## Translated comment.
 
 
 alpha_meas = c("Shannon")
@@ -55,22 +55,22 @@ library(ggpubr)
 p$data$IRIS <- factor(p$data$IRIS, levels = c("IS", "IR"))
 
 gut_alpha<-
-  ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设置填充颜色
-  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ #由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
-  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ #size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
-  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ #设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
-  scale_fill_manual(values = c("#E69F00", "#0072B2"))+  #设置填充的颜色
-  scale_color_manual(values=c("black","black","black"))+ #设置散点图的圆圈的颜色为黑色
-  # ggtitle("Gut microbiome")+ #设置总的标题
-  theme_bw()+ #背景变为白色
-  theme(legend.position="none", #不需要图例
-        axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-        axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-        axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-        axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
-        plot.title = element_text(size=15,face="bold",hjust = 0.5), #设置总标题的字体属
+  ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ # translated comment
+  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ # translated comment
+  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ # translated comment
+  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ # translated comment
+  scale_fill_manual(values = c("# translated comment
+  scale_color_manual(values=c("black","black","black"))+ # translated comment
+  # Translated comment.
+  theme_bw()+ # translated comment
+  theme(legend.position="none", # translated comment
+        axis.text.x=element_text(colour="black",size=14), # translated comment
+        axis.text.y=element_text(size=14,face="plain"), # translated comment
+        axis.title.y=element_text(size = 14,face="plain"), # translated comment
+        axis.title.x=element_text(size = 14,face="plain"), # translated comment
+        plot.title = element_text(size=15,face="bold",hjust = 0.5), # translated comment
         panel.grid.minor = element_blank())+
-  ylab("Alpha Diversity Index")+xlab("")+ #设置x轴和y轴的标题
+  ylab("Alpha Diversity Index")+xlab("")+ # translated comment
   stat_compare_means(comparisons=my_comparisons,label = "p.value")+
   facet_wrap(~variable,scales = "free")
 
@@ -97,22 +97,22 @@ p<-plot_richness(oral_phyloseq_filt, "IRIS", "IRIS",nrow = 1,measures=alpha_meas
 
 p$data$IRIS <- factor(p$data$IRIS, levels = c("IS", "IR"))
 
-oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ #”fill=“设置填充颜色
-  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ #由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
-  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ #size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
-  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ #设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
-  scale_fill_manual(values = c("#E69F00", "#0072B2"))+  #设置填充的颜色
-  scale_color_manual(values=c("black","black","black"))+ #设置散点图的圆圈的颜色为黑色
-  # ggtitle("oral microbiome")+ #设置总的标题
-  theme_bw()+ #背景变为白色
-  theme(legend.position="none", #不需要图例
-        axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-        axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-        axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-        axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
-        plot.title = element_text(size=15,face="bold",hjust = 0.5), #设置总标题的字体属
+oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ # translated comment
+  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ # translated comment
+  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ # translated comment
+  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ # translated comment
+  scale_fill_manual(values = c("# translated comment
+  scale_color_manual(values=c("black","black","black"))+ # translated comment
+  # Translated comment.
+  theme_bw()+ # translated comment
+  theme(legend.position="none", # translated comment
+        axis.text.x=element_text(colour="black",size=14), # translated comment
+        axis.text.y=element_text(size=14,face="plain"), # translated comment
+        axis.title.y=element_text(size = 14,face="plain"), # translated comment
+        axis.title.x=element_text(size = 14,face="plain"), # translated comment
+        plot.title = element_text(size=15,face="bold",hjust = 0.5), # translated comment
         panel.grid.minor = element_blank())+
-  ylab("Alpha Diversity Index")+xlab("")+ #设置x轴和y轴的标题
+  ylab("Alpha Diversity Index")+xlab("")+ # translated comment
   stat_compare_means(comparisons=my_comparisons,label = "p.value")+facet_wrap(~variable,scales = "free")
 oral_alpha
 ggsave(
@@ -131,19 +131,19 @@ ggsave(
 
 dis_bray<- phyloseq::distance(gut_phyloseq_filt, "bray")
 
-## 采用PCoA的方法对距离矩阵进行降维
+## Translated comment.
 dis_bray.pcoa = ordinate(gut_phyloseq_filt, method="NMDS", distance=dis_bray)
 
-## 绘制初始图形
+## Translated comment.
 bray.pcoa <- plot_ordination(gut_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
 
-## 提取图形数据
+## Translated comment.
 data<-bray.pcoa$data
 
-## 修改列名
+## Translated comment.
 colnames(data)[1:2]<-c("NMDS1","NMDS2")
 
-## 获取主坐标轴1,2的解释度
+## Translated comment.
 pc1<-""
 pc2<-""
 
@@ -151,18 +151,18 @@ data$IRIS <- factor(data$IRIS, levels = c("IS", "IR"))
 
 gut_beta<-
   ggplot(data, aes(NMDS1, NMDS2)) +
-  #绘制样本点，根据分组匹配颜色和形状，size调整点的大小
+  # Translated comment.
   geom_point(aes(fill=IRIS),size=2.5, shape = 21)+
-  #匹配形状、边框和填充的图例+
+  # Translated comment.
   scale_fill_manual(values=c("#E69F00", "#0072B2"))+
   scale_color_manual(values=c("#E69F00", "#0072B2"))+
-  #设置标题和横纵坐标label文字
+  # Translated comment.
   labs(title="NMDS - The composition of gut microbiome") +
   theme(text=element_text(size=30))+
-  #添加横纵两条虚线
+  # Translated comment.
   geom_vline(aes(xintercept = 0),linetype="dotted")+
   geom_hline(aes(yintercept = 0),linetype="dotted")+
-  #调整背景、坐标轴、图例的格式
+  # Translated comment.
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid=element_blank(),
         axis.title = element_text(color='black',size=14),
@@ -177,7 +177,7 @@ gut_beta<-
         legend.key=element_blank(),
         legend.background = element_rect(colour = "black"),
         legend.key.height=unit(1.6,"cm"))+
-  #设置标题的格式
+  # Translated comment.
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = IRIS),geom = "polygon",level = 0.5,alpha = 0,size=2)
 gut_beta
 ggsave(
@@ -193,19 +193,19 @@ ggsave(
 
 dis_bray<- phyloseq::distance(oral_phyloseq_filt, "bray")
 
-## 采用PCoA的方法对距离矩阵进行降维
+## Translated comment.
 dis_bray.pcoa = ordinate(oral_phyloseq_filt, method="NMDS", distance=dis_bray)
 
-## 绘制初始图形
+## Translated comment.
 bray.pcoa <- plot_ordination(oral_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
 
-## 提取图形数据
+## Translated comment.
 data<-bray.pcoa$data
 
-## 修改列名
+## Translated comment.
 colnames(data)[1:2]<-c("NMDS1","NMDS2")
 
-## 获取主坐标轴1,2的解释度
+## Translated comment.
 pc1<-""
 pc2<-""
 
@@ -213,18 +213,18 @@ data$IRIS <- factor(data$IRIS, levels = c("IS", "IR"))
 
 gut_beta<-
   ggplot(data, aes(NMDS1, NMDS2)) +
-  #绘制样本点，根据分组匹配颜色和形状，size调整点的大小
+  # Translated comment.
   geom_point(aes(fill=IRIS),size=2.5, shape = 21)+
-  #匹配形状、边框和填充的图例+
+  # Translated comment.
   scale_fill_manual(values=c("#E69F00", "#0072B2"))+
   scale_color_manual(values=c("#E69F00", "#0072B2"))+
-  #设置标题和横纵坐标label文字
+  # Translated comment.
   labs(title="NMDS - The composition of gut microbiome") +
   theme(text=element_text(size=30))+
-  #添加横纵两条虚线
+  # Translated comment.
   geom_vline(aes(xintercept = 0),linetype="dotted")+
   geom_hline(aes(yintercept = 0),linetype="dotted")+
-  #调整背景、坐标轴、图例的格式
+  # Translated comment.
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid=element_blank(),
         axis.title = element_text(color='black',size=14),
@@ -239,7 +239,7 @@ gut_beta<-
         legend.key=element_blank(),
         legend.background = element_rect(colour = "black"),
         legend.key.height=unit(1.6,"cm"))+
-  #设置标题的格式
+  # Translated comment.
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = IRIS),geom = "polygon",level = 0.5,alpha = 0,size=2)
 gut_beta
 ggsave(
@@ -253,7 +253,7 @@ ggsave(
 )
 
 
-# 生成属水平表
+# Translated comment.
 ####only remain the genus level
 library(microbiomedataset)
 
@@ -493,10 +493,10 @@ nasal_object <-
   nasal_object %>%
   transform2relative_intensity()
 
-# 合并四个部位的微生物组数据绘制PCOA图
+# Translated comment.
 
-# 读取四个不同区域的微生物组数据
-# 假设文件路径为当前工作目录
+# Translated comment.
+# Translated comment.
 gut_genus<-gut_object@expression_data
 rownames(gut_genus)<-gut_object@variable_info$Genus
 
@@ -509,35 +509,35 @@ rownames(skin_genus)<-skin_object@variable_info$Genus
 nasal_genus<-nasal_object@expression_data
 rownames(nasal_genus)<-nasal_object@variable_info$Genus
 
-# 加载必要的R包
-library(vegan)      # 用于计算生态距离和NMDS
-library(ggplot2)    # 用于绘图
-library(readr)      # 用于读取CSV文件
-library(dplyr)      # 用于数据处理
-library(tidyr)      # 用于数据整理
+# Translated comment.
+library(vegan)      # translated comment
+library(ggplot2)    # translated comment
+library(readr)      # translated comment
+library(dplyr)      # translated comment
+library(tidyr)      # translated comment
 
 
-# 为每个数据集添加来源标签
+# Translated comment.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# 整合所有数据
-# 转置矩阵使行为样本，列为物种
+# Translated comment.
+# Translated comment.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# 修改样本名称以避免重复，同时保留原始信息
-# 假设相同样本名表示来自同一个人的不同部位
+# Translated comment.
+# Translated comment.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# 创建样本类型标记
+# Translated comment.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -547,48 +547,48 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# 合并所有物种
-# 首先确保所有表格有相同的物种列
+# Translated comment.
+# Translated comment.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# 修改填充缺失物种的函数，避免索引错误
+# Translated comment.
 fill_missing_species <- function(df, all_species) {
-  # 创建一个新的数据框，包含所有可能的物种
+  # Translated comment.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # 填充现有数据
+  # Translated comment.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # 转换为数据框并返回
+  # Translated comment.
   return(as.data.frame(result))
 }
 
-# 应用修改后的函数
+# Translated comment.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# 合并所有样本数据
+# Translated comment.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# 合并样本标签
+# Translated comment.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# 确保样本顺序匹配
+# Translated comment.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
 
 
 
 
-# 筛选肠道和口腔样本
+# Translated comment.
 
 sample_metadata<-subset(sample_metadata,Site%in%c("Gut","Oral"))
 sample_metadata<-merge(sample_metadata,oral_object@sample_info,by.x="Subject",by.y="sample_id")
@@ -599,7 +599,7 @@ sample_metadata$IRIS[5]<-"IR"
 sample_metadata$IRIS[6]<-"IR"
 sample_metadata$IRIS[9]<-"IR"
 sample_metadata$IRIS[10]<-"IR"
-## 筛选配对的口腔和肠道样本
+## Translated comment.
 com_samples<-intersect(gut_object@sample_info$sample_id, oral_object@sample_info$sample_id)
 
 
@@ -611,14 +611,14 @@ all_data<-all_data[sample_metadata$Sample,]
 
 
 
-# 计算Bray-Curtis距离
+# Translated comment.
 bray_dist <- vegdist(all_data, method = "bray")
 
-# 进行NMDS分析
-set.seed(123)  # 设置随机种子以确保结果可重复
+# Translated comment.
+set.seed(123)  # translated comment
 nmds_result <- metaMDS(bray_dist, k = 2, trymax = 100, autotransform = FALSE)
 
-# 检查NMDS分析是否收敛，并输出应力值(stress)
+# Translated comment.
 cat("NMDS Stress:", nmds_result$stress, "\n")
 if(nmds_result$stress > 0.2) {
   warning("NMDS 应力值 > 0.2，表明排序质量较差")
@@ -628,11 +628,11 @@ if(nmds_result$stress > 0.2) {
   cat("NMDS 应力值 < 0.1，表明排序质量良好\n")
 }
 
-# 提取NMDS坐标
+# Translated comment.
 nmds_df <- as.data.frame(nmds_result$points)
 colnames(nmds_df) <- c("NMDS1", "NMDS2")
 
-# 将样本信息添加到NMDS数据
+# Translated comment.
 nmds_df$Sample <- rownames(nmds_df)
 nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
@@ -641,7 +641,7 @@ nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
 
 
-# 绘制NMDS图
+# Translated comment.
 nmds_plot<-
   ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = IRIS, shape = Site),
          color = "black") +
@@ -687,25 +687,25 @@ paired_distances <- data.frame(Subject=character(),
                                IRIS=character(),
                                stringsAsFactors=FALSE)
 
-# 2. 对每个受试者，计算其口腔和肠道样本之间的Bray-Curtis距离
+# Translated comment.
 for(subj in subjects) {
-  # 获取该受试者的样本
+  # Translated comment.
   subj_samples <- sample_metadata[sample_metadata$Subject == subj, ]
   
-  # 确保有口腔和肠道两种样本
+  # Translated comment.
   if(nrow(subj_samples) == 2 && all(c("Gut", "Oral") %in% subj_samples$Site)) {
-    # 获取样本名称
+    # Translated comment.
     gut_sample <- subj_samples$Sample[subj_samples$Site == "Gut"]
     oral_sample <- subj_samples$Sample[subj_samples$Site == "Oral"]
     
-    # 提取样本数据
+    # Translated comment.
     gut_data <- all_data[gut_sample, , drop=FALSE]
     oral_data <- all_data[oral_sample, , drop=FALSE]
     
-    # 计算Bray-Curtis距离
+    # Translated comment.
     bc_dist <- vegdist(rbind(gut_data, oral_data), method="bray")[1]
     
-    # 保存结果，包括IRIS分组信息
+    # Translated comment.
     iris_group <- unique(subj_samples$IRIS)
     paired_distances <- rbind(paired_distances, 
                               data.frame(Subject=subj, 
@@ -714,10 +714,10 @@ for(subj in subjects) {
   }
 }
 
-# 3. 绘制箱线图比较IR和IS两组的距离差异
+# Translated comment.
 library(ggplot2)
 
-# 创建箱线图
+# Translated comment.
 paired_distances$IRIS <- factor(paired_distances$IRIS, levels = c("IS", "IR"))
 box_plot <- 
   ggplot(paired_distances, aes(x=IRIS, y=Distance, fill=IRIS)) +

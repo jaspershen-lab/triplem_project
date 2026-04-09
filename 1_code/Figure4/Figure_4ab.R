@@ -6,7 +6,7 @@ setwd("1_code/4_site_merge/")
 library(tidyverse)
 library(readxl)
 
-##### 合并 gut 和 oral 的GBDT数据
+##### Translated comment.
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_nest_results")
 oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_nest_results")
 metabolite_annotation <- read_excel(
@@ -133,54 +133,54 @@ ggsave(
 )
 
 
-# 读取数据
+# Translated comment.
 data <- gut_oral_results_summary_co_influence
 
-# 数据处理
+# Translated comment.
 library(tidyr)
 library(dplyr)
 library(ggplot2)
-# 处理重复的HMDB.Name
+# Translated comment.
 data$HMDB.Name <- make.unique(data$HMDB.Name, sep = "_")
-# 对数据进行排序并选择前30个代谢物
+# Translated comment.
 data_sorted <- data %>%
   arrange(desc(r2_mean)) %>%
   slice(1:30)
 
-# 创建长格式数据用于堆叠图
+# Translated comment.
 data_long <- data_sorted %>%
   dplyr::select(HMDB.Name, gut_R2, oral_R2, r2_mean) %>%
   gather(key = "source", value = "value", c(gut_R2, oral_R2))
 
-# 为r2_mean创建单独的长格式数据
+# Translated comment.
 r2_mean_long <- data_sorted %>%
   dplyr::select(HMDB.Name, r2_mean) %>%
   dplyr::mutate(source = "r2_mean") %>%
   dplyr::rename(value = r2_mean)
 
-# 创建因子水平顺序
+# Translated comment.
 level_order <- data_sorted$HMDB.Name
 
-# 将HMDB.Name转换为因子，并设置水平顺序
+# Translated comment.
 data_long$HMDB.Name <- factor(data_long$HMDB.Name, levels = level_order)
 r2_mean_long$HMDB.Name <- factor(r2_mean_long$HMDB.Name, levels = level_order)
 
-# 创建堆叠条形图和r2_mean对比图
+# Translated comment.
 a <- ggplot() +
-  # 堆叠的gut_R2和oral_R2
+  # Translated comment.
   geom_col(
     data = data_long,
     aes(x = HMDB.Name, y = value, fill = source),
     position = "stack",
     width = 0.4
   ) +
-  # r2_mean的柱子
+  # Translated comment.
   geom_col(
     data = r2_mean_long,
     aes(x = HMDB.Name, y = value, fill = source),
     width = 0.4,
     position = position_nudge(x = 0.4)
-  ) +  # 将r2_mean柱子向右偏移
+  ) +  # translated comment
   scale_fill_manual(
     values = c(
       "gut_R2" = "#edd064",
@@ -202,43 +202,43 @@ a <- ggplot() +
 
 a
 
-# 计算每个代谢物模型中不同特征类型的重要性占比
+# Translated comment.
 calculate_feature_importance_proportions <- function(results) {
-  # 创建一个数据框来存储结果
+  # Translated comment.
   importance_summary <- data.frame()
   
-  # 遍历每个代谢物的结果
+  # Translated comment.
   for (i in 1:length(results$detailed_results)) {
     metabolite <- results$detailed_results[[i]]$metabolite
     feature_importance <- results$detailed_results[[i]]$feature_importance
     
-    # 检查是否有特征重要性数据
+    # Translated comment.
     if (!is.null(feature_importance) &&
         nrow(feature_importance) > 0) {
-      # 添加特征类型
+      # Translated comment.
       feature_importance$feature_type <- "other"
       feature_importance$feature_type[grepl("^gut_", feature_importance$var)] <- "gut"
       feature_importance$feature_type[grepl("^oral_", feature_importance$var)] <- "oral"
       feature_importance$feature_type[grepl("^int_", feature_importance$var)] <- "interaction"
       
-      # 按特征类型汇总重要性
+      # Translated comment.
       importance_by_type <- aggregate(rel.inf ~ feature_type, data = feature_importance, sum)
       
-      # 计算总重要性
+      # Translated comment.
       total_importance <- sum(importance_by_type$rel.inf)
       
-      # 计算每种类型的占比
+      # Translated comment.
       importance_by_type$proportion <- importance_by_type$rel.inf / total_importance * 100
       
-      # 添加代谢物信息
+      # Translated comment.
       importance_by_type$metabolite <- metabolite
       
-      # 合并到总结果中
+      # Translated comment.
       importance_summary <- rbind(importance_summary, importance_by_type)
     }
   }
   
-  # 转换为宽格式，使每个代谢物有一行，每种特征类型有一列
+  # Translated comment.
   importance_wide <- reshape(
     importance_summary,
     idvar = "metabolite",
@@ -246,11 +246,11 @@ calculate_feature_importance_proportions <- function(results) {
     direction = "wide"
   )
   
-  # 重命名列
+  # Translated comment.
   names(importance_wide) <- gsub("rel.inf\\.", "", names(importance_wide))
   names(importance_wide) <- gsub("proportion\\.", "proportion_", names(importance_wide))
   
-  # 确保所有特征类型列都存在，如果不存在则设置为0
+  # Translated comment.
   for (type in c("gut", "oral", "interaction", "other")) {
     if (!type %in% names(importance_wide)) {
       importance_wide[, type] <- 0
@@ -264,7 +264,7 @@ calculate_feature_importance_proportions <- function(results) {
 }
 
 
-# 计算并显示重要性占比
+# Translated comment.
 feature_importance_proportions <- calculate_feature_importance_proportions(gut_oral_interaction)
 
 
@@ -273,7 +273,7 @@ viz_data <- merge(data_sorted, feature_importance_proportions, by = "metabolite"
 
 
 library(reshape2)
-# 准备用于可视化的数据
+# Translated comment.
 viz_data <- melt(
   viz_data[, c("HMDB.Name", grep("proportion_", names(feature_importance_proportions), value = TRUE))],
   id.vars = "HMDB.Name",
@@ -281,7 +281,7 @@ viz_data <- melt(
   value.name = "proportion"
 )
 
-# 清理特征类型名称
+# Translated comment.
 viz_data$feature_type <- gsub("proportion_", "", viz_data$feature_type)
 
 viz_data <- subset(viz_data, !(feature_type == "other"))

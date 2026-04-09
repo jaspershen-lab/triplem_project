@@ -19,7 +19,7 @@ gut_microbiome_table<-expression_data
 gut_microbiome_metadata<-sample_info
 gut_microbiome_tax<-variable_info
 
-# 标准化微生物组数据
+# Translated comment.
 
 gut_microbiome_metadata <- gut_microbiome_metadata %>% filter(!is.na(Gender))
 gut_microbiome_metadata <- gut_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -50,7 +50,7 @@ oral_microbiome_table<-expression_data
 oral_microbiome_metadata<-sample_info
 oral_microbiome_tax<-variable_info
 
-# 标准化微生物组数据
+# Translated comment.
 
 oral_microbiome_metadata <- oral_microbiome_metadata %>% filter(!is.na(Gender))
 oral_microbiome_metadata <- oral_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -82,7 +82,7 @@ skin_microbiome_table<-expression_data
 skin_microbiome_metadata<-sample_info
 skin_microbiome_tax<-variable_info
 
-# 标准化微生物组数据
+# Translated comment.
 
 skin_microbiome_metadata <- skin_microbiome_metadata %>% filter(!is.na(Gender))
 skin_microbiome_metadata <- skin_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -115,7 +115,7 @@ nasal_microbiome_metadata<-sample_info
 nasal_microbiome_tax<-variable_info
 
 
-# 标准化微生物组数据
+# Translated comment.
 
 nasal_microbiome_metadata <- nasal_microbiome_metadata %>% filter(!is.na(Gender))
 nasal_microbiome_metadata <- nasal_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -140,13 +140,13 @@ nasal_microbiome_table<-data.frame(t(nasal_microbiome_table))
 MM_adonis <- function(gut_microbiome_table, expression_data_metabolome) {
   library(compositions)
   library(vegan)
-  # 与表达数据的交集
+  # Translated comment.
   
   shared_samples <- intersect(row.names(gut_microbiome_table), row.names(expression_data_metabolome))
   expression_data_metabolome <- expression_data_metabolome[shared_samples, ]
   gut_microbiome_table<-gut_microbiome_table[shared_samples,]
   
-  # 计算距离并执行adonis分析
+  # Translated comment.
   metabolome_dist <- vegdist(expression_data_metabolome, method = "euclidean")
   results <- NULL
   for (i in colnames(gut_microbiome_table)) {
@@ -217,7 +217,7 @@ metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_prep
 metabolite_annotation<-subset(metabolite_annotation,metabolite_annotation$HMDB.Source.Microbial=="TRUE")
 expression_data_metabolome_microbial<-expression_data_metabolome[,metabolite_annotation$variable_id]
 
-# 计算微生物来源的代谢物的解释度
+# Translated comment.
 
 gut_adonis_micro<-MM_adonis(gut_microbiome_table,expression_data_metabolome_microbial)
 oral_adonis_micro<-MM_adonis(oral_microbiome_table,expression_data_metabolome_microbial)

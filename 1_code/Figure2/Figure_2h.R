@@ -286,21 +286,21 @@ expression_data <-
 metabolomics_temp_object <- metabolomics_object
 metabolomics_temp_object@expression_data <- expression_data
 
-# 加载必要的包
-library(Hmisc)      # 用于计算相关性
-library(igraph)     # 用于构建网络
-library(ggplot2)    # 用于绘图
-library(reshape2)   # 用于数据重构
-library(tidyverse)  # 数据处理
+# Translated comment.
+library(Hmisc)      # translated comment
+library(igraph)     # translated comment
+library(ggplot2)    # translated comment
+library(reshape2)   # translated comment
+library(tidyverse)  # translated comment
 
-# 假设您的数据存储在以下数据框中:
-# gut_data: gut菌群数据
-# oral_data: oral菌群数据
-# skin_data: skin菌群数据
-# nasal_data: nasal菌群数据
-# metabolites: 代谢物数据
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
+# Translated comment.
 
-# 函数：计算相关性并筛选显著结果
+# Translated comment.
 calculate_correlations <- function(microbiome_data,
                                    taxdata,
                                    metabolite_data,
@@ -308,10 +308,10 @@ calculate_correlations <- function(microbiome_data,
                                    site,
                                    threshold = 0.3,
                                    p_value = 0.05) {
-  # 确保样本行匹配
+  # Translated comment.
   common_samples <- intersect(rownames(microbiome_data), rownames(metabolite_data))
   
-  # 子集化数据
+  # Translated comment.
   microbiome_subset <- microbiome_data[common_samples, ]
   
   colnames(microbiome_subset) <-  paste(site, taxdata$Genus, sep = "_")
@@ -320,7 +320,7 @@ calculate_correlations <- function(microbiome_data,
   
   
   colnames(metabolite_subset) <-  metabolite_anno$HMDB.Name
-  # 计算相关性矩阵和p值
+  # Translated comment.
   cors <- matrix(NA,
                  nrow = ncol(microbiome_subset),
                  ncol = ncol(metabolite_subset))
@@ -328,7 +328,7 @@ calculate_correlations <- function(microbiome_data,
                   nrow = ncol(microbiome_subset),
                   ncol = ncol(metabolite_subset))
   
-  # 逐个计算相关性
+  # Translated comment.
   for (i in 1:ncol(microbiome_subset)) {
     for (j in 1:ncol(metabolite_subset)) {
       test_result <- cor.test(microbiome_subset[, i],
@@ -340,17 +340,17 @@ calculate_correlations <- function(microbiome_data,
     }
   }
   
-  # 设置行列名
+  # Translated comment.
   rownames(cors) <- colnames(microbiome_subset)
   colnames(cors) <- colnames(metabolite_subset)
   rownames(pvals) <- colnames(microbiome_subset)
   colnames(pvals) <- colnames(metabolite_subset)
   
-  # 转换为长数据格式
+  # Translated comment.
   cors_df <- melt(cors)
   pvals_df <- melt(pvals)
   
-  # 合并相关系数和p值
+  # Translated comment.
   result_df <- data.frame(
     Microbiome = cors_df$Var1,
     Metabolite = cors_df$Var2,
@@ -359,14 +359,14 @@ calculate_correlations <- function(microbiome_data,
     Site = site
   )
   
-  # 筛选显著相关的结果
+  # Translated comment.
   significant_cors <- result_df %>%
     filter(abs(Correlation) >= threshold & P_value <= p_value)
   
   return(significant_cors)
 }
 
-# 对每个部位计算相关性
+# Translated comment.
 gut_cors <- calculate_correlations(
   t(gut_temp_object@expression_data),
   gut_temp_object@variable_info,
@@ -396,17 +396,17 @@ nasal_cors <- calculate_correlations(
   "Nasal"
 )
 
-# 合并所有相关性结果
+# Translated comment.
 all_cors <- rbind(gut_cors, oral_cors, skin_cors, nasal_cors)
 
 correlation_data <- all_cors
 
 
-# 使用ggraph创建网络图
+# Translated comment.
 edges <- correlation_data %>%
   select(Microbiome, Metabolite, Correlation, Site)
 
-# 创建节点列表
+# Translated comment.
 nodes <- data.frame(
   name = unique(c(
     correlation_data$Microbiome, correlation_data$Metabolite
@@ -429,75 +429,75 @@ nodes <- data.frame(
   )
 )
 
-# 创建igraph对象
+# Translated comment.
 graph <- graph_from_data_frame(d = edges,
                                vertices = nodes,
                                directed = FALSE)
-# 计算每个节点的degree
-# 计算degree
+# Translated comment.
+# Translated comment.
 node_degrees <- degree(graph)
 nodes$degree <- node_degrees[match(nodes$name, names(node_degrees))]
 
-# 筛选top 20节点
+# Translated comment.
 top_nodes <- nodes %>%
   group_by(site) %>%
   top_n(10, degree) %>%
   ungroup()
 
-# 筛选包含top节点的边
+# Translated comment.
 filtered_edges <- edges %>%
   filter(Microbiome %in% top_nodes$name |
            Metabolite %in% top_nodes$name)
 
-# 创建新的节点列表（包含所有在筛选后的边中出现的节点）
+# Translated comment.
 filtered_nodes <- nodes %>%
   filter(name %in% unique(c(
     filtered_edges$Microbiome, filtered_edges$Metabolite
   )))
 
 
-# 获取每个site的前10个节点的名字
+# Translated comment.
 top_10_nodes <- filtered_nodes %>%
   group_by(site) %>%
   top_n(10, degree) %>%
   ungroup() %>%
   pull(name)
 
-# 添加是否显示标签的列
+# Translated comment.
 filtered_nodes$show_label <- filtered_nodes$name %in% top_10_nodes
 
-# 创建筛选后的igraph对象
+# Translated comment.
 filtered_graph <- graph_from_data_frame(d = filtered_edges,
                                         vertices = filtered_nodes,
                                         directed = FALSE)
 
-# 重新计算degree
+# Translated comment.
 filtered_degrees <- degree(filtered_graph)
 V(filtered_graph)$degree <- filtered_degrees
 V(filtered_graph)$show_label <- filtered_nodes$show_label
-# 创建ggraph可视化
+# Translated comment.
 
 library(ggraph)
 plot <-
   ggraph(filtered_graph, layout = "stress") +
-  # 添加边
+  # Translated comment.
   geom_edge_link(aes(
     edge_alpha = abs(Correlation),
     edge_width = abs(Correlation),
     color = Correlation > 0
   ),
   show.legend = TRUE) +
-  # 添加节点
+  # Translated comment.
   geom_node_point(aes(fill = site, size = degree, shape = type), color =
                     "white") +
-  # 添加节点标签
+  # Translated comment.
   geom_node_text(
     aes(label = ifelse(show_label, name, "")),
     repel = TRUE,
     size = 2,
     max.overlaps = 20
   ) +
-  # 设置配色
+  # Translated comment.
   scale_edge_color_manual(
     values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
     name = "Correlation",
@@ -512,14 +512,14 @@ plot <-
       "Metabolite" = "#FF9999"
     )
   ) +
-  # 设置节点大小
+  # Translated comment.
   scale_size_continuous(range = c(2, 10), name = "Degree") +
-  # 设置节点形状
+  # Translated comment.
   scale_shape_manual(values = c("Microbiome" = 21, "Metabolite" = 22)) +
-  # 设置边的透明度和宽度
+  # Translated comment.
   scale_edge_alpha(range = c(0.2, 0.8)) +
   scale_edge_width(range = c(0.3, 2)) +
-  # 主题设置
+  # Translated comment.
   theme_graph() +
   theme(legend.position = "none") +
   guides(
@@ -533,11 +533,11 @@ plot <-
 
 plot
 
-# 直接筛选原始数据
+# Translated comment.
 correlation_data <- subset(all_cors,
                            Microbiome %in% c("Gut_Oscillibacter", "Gut_Phocaeicola"))
 
-# 然后继续使用原来的代码
+# Translated comment.
 edges <- correlation_data %>%
   select(Microbiome, Metabolite, Correlation, Site, P_value)
 
@@ -563,20 +563,20 @@ nodes <- data.frame(
   )
 )
 
-# 所有节点都显示标签
+# Translated comment.
 nodes$show_label <- TRUE
 
-# 创建igraph对象
+# Translated comment.
 graph <- graph_from_data_frame(d = edges,
                                vertices = nodes,
                                directed = FALSE)
 
-# 计算degree
+# Translated comment.
 node_degrees <- degree(graph)
 V(graph)$degree <- node_degrees
 V(graph)$show_label <- TRUE
 
-# 创建ggraph可视化
+# Translated comment.
 plot <-
   ggraph(graph, layout = "stress") +
   geom_edge_bend(

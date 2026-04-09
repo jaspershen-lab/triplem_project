@@ -39,7 +39,7 @@ FBIP_metagenomic<-FBIP_metagenomic[rownames(FBIP_metabolome),]
 
 FBIP_metabolome_annotation<-read.table("2_data/FBIP-main/metabolites data/plasma_metabolites_name_group.txt",header = TRUE,sep = "\t")
 
-# 过滤没有HMDB ID的代谢物
+# Translated comment.
 
 FBIP_metabolome_annotation<-subset(FBIP_metabolome_annotation,HMDB!=c(""))
 
@@ -48,7 +48,7 @@ FBIP_metabolome<-FBIP_metabolome[,FBIP_metabolome_annotation$ID]
 colnames(FBIP_metabolome)<-FBIP_metabolome_annotation$HMDB
 
 
-# 读取iPOP数据
+# Translated comment.
 
 
 library(tidyverse)
@@ -139,7 +139,7 @@ metabolomics_temp_object@expression_data <- expression_data
 
 
 
-##筛选共同的属
+## Translated comment.
 com_tax<-intersect(gut_temp_object@variable_info$Genus,colnames(FBIP_metagenomic))
 
 
@@ -163,7 +163,7 @@ FBIP_metagenomic <-
   as.data.frame()
 
 
-### 挑选共同的代谢物
+### Translated comment.
 
 metabolome_data_ipop<-metabolomics_temp_object@expression_data
 metabolome_ann_ipop<-data.frame(metabolite_annotation)
@@ -220,18 +220,18 @@ results <- analyze_metabolite_ev(
 
 ### 
 predict_metabolites <- function(models_directory, new_data) {
-  # 获取目录下所有RDS模型文件
+  # Translated comment.
   model_files <- list.files(models_directory, pattern = "\\.rds$", full.names = TRUE)
   
-  # 初始化结果列表
+  # Translated comment.
   predictions_list <- list()
   
-  # 遍历每个模型文件
+  # Translated comment.
   for (model_file in model_files) {
-    # 加载模型信息
+    # Translated comment.
     model_info <- readRDS(model_file)
     
-    # 确保输入数据包含所需的特征
+    # Translated comment.
     required_features <- model_info$selected_features
     missing_features <- setdiff(required_features, colnames(new_data))
     
@@ -241,13 +241,13 @@ predict_metabolites <- function(models_directory, new_data) {
       next
     }
     
-    # 选择需要的特征并确保顺序正确
+    # Translated comment.
     filtered_data <- new_data[, required_features, drop = FALSE]
     
-    # 进行预测
+    # Translated comment.
     predictions <- predict(model_info$model, filtered_data, n.trees = model_info$parameters$n.trees)
     
-    # 保存预测结果
+    # Translated comment.
     predictions_list[[basename(model_file)]] <- list(
       predictions = predictions,
       model_performance = model_info$performance,
@@ -258,65 +258,65 @@ predict_metabolites <- function(models_directory, new_data) {
   return(predictions_list)
 }
 
-# 调用函数并提供模型目录和数据
+# Translated comment.
 models_directory <- "metabolite_models_FBIP"
 
-# 1. 预测代谢物浓度
+# Translated comment.
 predict_metabolites_pipeline <- function(models_directory, metagenomic_data) {
-  # 转置输入数据
+  # Translated comment.
   new_data <- data.frame(t(metagenomic_data))
   
-  # 预测代谢物
+  # Translated comment.
   results <- predict_metabolites(models_directory, new_data)
   
-  # 处理预测结果
+  # Translated comment.
   predictions_df <- do.call(cbind, lapply(results, function(x) x$predictions))
   colnames(predictions_df) <- gsub("_model.rds", "", names(results))
   
-  # 获取R2值
+  # Translated comment.
   R2_df <- do.call(cbind, lapply(results, function(x) x$model_performance$mean_r2))
   colnames(R2_df) <- names(results)
   
   list(predictions = predictions_df, r2 = R2_df)
 }
 
-# 2. 数据预处理函数
+# Translated comment.
 prepare_prediction_data <- function(predictions_df, metagenomic_data, metabolite_annotation) {
   predictions_df <- data.frame(t(predictions_df))
   colnames(predictions_df) <- colnames(metagenomic_data)
   predictions_df$variable_id <- rownames(predictions_df)
   
-  # 合并注释信息
+  # Translated comment.
   merged_predictions <- merge(predictions_df, metabolite_annotation, by = "variable_id")
   
   merged_predictions
 }
 
-# 3. 相关性分析函数
+# Translated comment.
 calculate_correlations <- function(predictions_df, metabolites_name, 
                                    MetaCardis_metabome_annotation, MetaCardis_metabolome) {
-  # 预分配结果数据框
+  # Translated comment.
   results_list <- vector("list", length(metabolites_name))
   
-  # 并行处理每个代谢物
+  # Translated comment.
   results_list <- parallel::mclapply(metabolites_name, function(i) {
-    # 提取预测数据
+    # Translated comment.
     predictions_data <- colSums(subset(predictions_df, HMDB == i)[, 2:(length(rownames(MetaCardis_metabolome))+1)])
     
-    # 获取观察样本名称
+    # Translated comment.
     observed_sample_names <- subset(MetaCardis_metabome_annotation, HMDB == i)$HMDB
     
-    # 处理每个观察样本
+    # Translated comment.
     do.call(rbind, lapply(observed_sample_names, function(z) {
       observed_data <- MetaCardis_metabolome[, z]
       
-      # 合并和处理数据
+      # Translated comment.
       merge_data <- na.omit(data.frame(
         predictions = predictions_data,
         observed = observed_data
       ))
       
-      # 只在有足够数据时进行相关性测试
+      # Translated comment.
       if(nrow(merge_data) > 3) {
         cor_result <- cor.test(merge_data$predictions, merge_data$observed,method="spearman")
         
@@ -332,31 +332,31 @@ calculate_correlations <- function(predictions_df, metabolites_name,
     }))
   }, mc.cores = parallel::detectCores() - 1)
   
-  # 合并所有结果
+  # Translated comment.
   results_cor_name <- do.call(rbind, results_list)
   rownames(results_cor_name) <- NULL
   
   results_cor_name
 }
 
-# 主函数
+# Translated comment.
 main_analysis <- function(models_directory, MetaCardis_metagenomic, 
                           metabolite_annotation, MetaCardis_metabome_annotation,
                           MetaCardis_metabolome) {
-  # 1. 预测代谢物
+  # Translated comment.
   prediction_results <- predict_metabolites_pipeline(models_directory, MetaCardis_metagenomic)
   
-  # 2. 准备数据
+  # Translated comment.
   processed_predictions <- prepare_prediction_data(
     prediction_results$predictions, 
     MetaCardis_metagenomic, 
     metabolite_annotation
   )
   
-  # 3. 获取唯一的代谢物名称
+  # Translated comment.
   metabolites_name <- unique(processed_predictions$HMDB)
   
-  # 4. 计算相关性
+  # Translated comment.
   correlation_results <- calculate_correlations(
     processed_predictions, 
     metabolites_name,
@@ -364,7 +364,7 @@ main_analysis <- function(models_directory, MetaCardis_metagenomic,
     MetaCardis_metabolome
   )
   
-  # 返回所有结果
+  # Translated comment.
   list(
     predictions = processed_predictions,
     correlations = correlation_results,
@@ -372,7 +372,7 @@ main_analysis <- function(models_directory, MetaCardis_metagenomic,
   )
 }
 
-# 使用示例
+# Translated comment.
 results <- main_analysis(
   models_directory = models_directory,
   MetaCardis_metagenomic = FBIP_metagenomic,
@@ -398,7 +398,7 @@ predictions_oberserve<-predictions_oberserve%>%filter(predictions_oberserve$mode
 
 
 
-# 统计成功预测的代谢物
+# Translated comment.
 
 predict_TF<-predictions_oberserve[,c("p.value","HMDB_Name","model_performance")]
 
@@ -412,44 +412,44 @@ predict_TF<-predict_TF[,c("Predict","model_performance")]
 library(ggplot2)
 library(dplyr)
 
-# 假设您的数据框名为 df
-# 首先处理数据
+# Translated comment.
+# Translated comment.
 library(ggplot2)
 library(dplyr)
 
-# 假设您的数据框名为 predict_TF
+# Translated comment.
 processed_data <- predict_TF %>%
-  # 按R2值排序
+  # Translated comment.
   arrange(model_performance) %>%
-  # 对每个唯一的R2值计算统计量
+  # Translated comment.
   dplyr::group_by(model_performance) %>%
   dplyr::summarise(
-    # 计算大于等于当前R2值的样本数量和复制率
+    # Translated comment.
     cumulative_count = n(),
     cumulative_replication = sum(Predict == "Replicated") / n() * 100
   ) %>%
-  # 计算累计数量
+  # Translated comment.
   mutate(
     cumulative_count = rev(cumsum(rev(cumulative_count))),
     cumulative_replication = rev(cumsum(rev(cumulative_replication * cumulative_count)) / cumsum(rev(cumulative_count)))
   )
 
 
-# 创建图表
+# Translated comment.
 p<-ggplot(processed_data) +
-  # 添加复制率的平滑曲线
+  # Translated comment.
   geom_smooth(aes(x = model_performance, y = cumulative_replication), 
               color = "#007b7a", se = FALSE, span = 0.2) +
-  # 添加样本数量的平滑曲线
+  # Translated comment.
   geom_smooth(aes(x = model_performance, 
                   y = (cumulative_count - min(cumulative_count)) * 
                     (80/(max(cumulative_count)-min(cumulative_count))) + 20), 
               color = "#af5497", se = FALSE, span = 0.2) +
-  # 主y轴（复制率）
+  # Translated comment.
   scale_y_continuous(
     name = "Percentage replicated",
     limits = c(20, 100),
-    # 第二个y轴（样本数量）
+    # Translated comment.
     sec.axis = sec_axis(
       ~ (. - 20) * ((max(processed_data$cumulative_count)-min(processed_data$cumulative_count))/80) + 
         min(processed_data$cumulative_count),
@@ -457,13 +457,13 @@ p<-ggplot(processed_data) +
       breaks = seq(0, 250, by = 50)
     )
   ) +
-  # x轴标签
+  # Translated comment.
   scale_x_continuous(
     name = "Measured versus predicted R²",
     limits = c(0.1, 0.5),
     breaks = seq(0.1, 0.5, by = 0.1)
   ) +
-  # 设置主题
+  # Translated comment.
   theme_bw() +
   theme(
     panel.grid = element_line(color = "gray90"),
@@ -471,10 +471,10 @@ p<-ggplot(processed_data) +
     axis.text.y.left = element_text(color = "#007b7a"),
     axis.title.y.right = element_text(color = "#af5497"),
     axis.text.y.right = element_text(color = "#af5497"),
-    axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-    axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-    axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-    axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+    axis.text.x=element_text(colour="black",size=14), # translated comment
+    axis.text.y=element_text(size=14,face="plain"), # translated comment
+    axis.title.y=element_text(size = 14,face="plain"), # translated comment
+    axis.title.x=element_text(size = 14,face="plain"), # translated comment
     plot.title = element_text(size=15,face="bold",hjust = 0.5)
   )
 
@@ -486,16 +486,16 @@ ggsave(p,
 
 ggplot(predictions_oberserve, aes(x=predictions_oberserve$estimate, y= predictions_oberserve$model_performance)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "spearman")+theme(legend.position="none", #不需要图例
-                                                                                                 axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-                                                                                                 axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-                                                                                                 axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-                                                                                                 axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "spearman")+theme(legend.position="none", # translated comment
+                                                                                                 axis.text.x=element_text(colour="black",size=14), # translated comment
+                                                                                                 axis.text.y=element_text(size=14,face="plain"), # translated comment
+                                                                                                 axis.title.y=element_text(size = 14,face="plain"), # translated comment
+                                                                                                 axis.title.x=element_text(size = 14,face="plain"), # translated comment
                                                                                                  plot.title = element_text(size=15,face="bold",hjust = 0.5))
 
 
 
-## 绘制前几个重复预测的代谢物
+## Translated comment.
 
 
 predictions_oberserve_dup<-predictions_oberserve[!duplicated(predictions_oberserve$HMDB_Name),]
@@ -506,15 +506,15 @@ top_10_metabolites <- predictions_oberserve_dup %>%
   arrange(desc(abs_estimate)) %>%
   slice_head(n = 15)
 
-# 保持metabolite因子水平的顺序与排序后的顺序一致
+# Translated comment.
 top_10_metabolites <- top_10_metabolites %>%
   mutate(HMDB.Name = factor(HMDB.Name, levels = HMDB.Name))
 
-# 创建棒棒糖图
+# Translated comment.
 p<-ggplot(top_10_metabolites, aes(x = HMDB.Name, y = abs(estimate)+0.1)) +
   geom_segment(aes(xend = HMDB.Name, yend = 0), color = "gray50") +
   geom_point(size = 3, color = "steelblue") +
-  coord_flip() + # 水平显示
+  coord_flip() + # translated comment
   theme_bw() +
   labs(
     title = "Top 15 Estimate Metabolites ",
@@ -551,11 +551,11 @@ predictions_data_oberserve_data<-data.frame(cbind(oberserve_data,predictions_dat
 
 ggplot(predictions_data_oberserve_data, aes(x=predictions_data_oberserve_data$HMDB0011743, y= predictions_data_oberserve_data$HMDB0011743.1)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_bw() +stat_cor(method = "spearman")+theme(legend.position="none", #不需要图例
-                                                                                                 axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-                                                                                                 axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-                                                                                                 axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-                                                                                                 axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+  geom_smooth(method="lm",colour = "grey50") +theme_bw() +stat_cor(method = "spearman")+theme(legend.position="none", # translated comment
+                                                                                                 axis.text.x=element_text(colour="black",size=14), # translated comment
+                                                                                                 axis.text.y=element_text(size=14,face="plain"), # translated comment
+                                                                                                 axis.title.y=element_text(size = 14,face="plain"), # translated comment
+                                                                                                 axis.title.x=element_text(size = 14,face="plain"), # translated comment
                                                                                                  plot.title = element_text(size=15,face="bold",hjust = 0.5))+ylim(c(-0.25,0.75))
 
 

@@ -115,7 +115,7 @@ gut_data <- gut_temp_object@expression_data
 metabolome_data <- metabolomics_temp_object@expression_data
 sample_info <- metabolomics_temp_object@sample_info
 rownames(sample_info)<-sample_info$sample_id
-# 1. 筛选显著相关的代谢物
+# Translated comment.
 selection_results <- select_significant_metabolites(
   gut_microbiome = gut_data,
   metabolome = metabolome_data,
@@ -123,16 +123,16 @@ selection_results <- select_significant_metabolites(
   p_threshold = 0.05
 )
 
-# 2. 可视化代谢物筛选结果
+# Translated comment.
 metabolite_plot <- plot_metabolite_selection(selection_results)
 
-# 3. 分析关联
+# Translated comment.
 results <- analyze_associations(
   gut_microbiome = gut_data, 
   metabolome = metabolome_data,
   selected_metabolites = selection_results$significant_metabolites,
-  metadata =  sample_info  # 包含IRIS列的元数据
+  metadata =  sample_info  # translated comment
 )
 
-# 4. 绘制结果
+# Translated comment.
 plots <- plot_associations(results)

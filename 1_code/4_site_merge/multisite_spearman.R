@@ -2,7 +2,7 @@
 
 
 
-# 假设我们有四个部位的选择结果
+# Translated comment.
 selection_results_list <- list(
   "Gut" = gut_result,
   "Oral" = oral_result,
@@ -10,10 +10,10 @@ selection_results_list <- list(
   "Nasal" = nasal_result
 )
 
-# 定义部位名称
+# Translated comment.
 sites <- c("Gut", "Oral", "Skin", "Nasal")
 
-# 绘制多部位比较图
+# Translated comment.
 p <- plot_quadrant_metabolite_selection(
   selection_results_list = selection_results_list,
   metabolomics_class = metabolomics_class,
@@ -28,7 +28,7 @@ summary_data<-cbind(Coinertia_RV,Species_num,site)
 
 
 
-# 绘制四个身体部位的统计图
+# Translated comment.
 
 
 

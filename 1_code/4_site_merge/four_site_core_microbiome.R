@@ -154,10 +154,10 @@ nasal_object <-
 
 
 
-# 合并四个部位的微生物组数据绘制PCOA图
+# Translated comment.
 
-# 读取四个不同区域的微生物组数据
-# 假设文件路径为当前工作目录
+# Translated comment.
+# Translated comment.
 gut_genus<-gut_object@expression_data
 rownames(gut_genus)<-gut_object@variable_info$Genus
 
@@ -170,35 +170,35 @@ rownames(skin_genus)<-skin_object@variable_info$Genus
 nasal_genus<-nasal_object@expression_data
 rownames(nasal_genus)<-nasal_object@variable_info$Genus
 
-# 加载必要的R包
-library(vegan)      # 用于计算生态距离和NMDS
-library(ggplot2)    # 用于绘图
-library(readr)      # 用于读取CSV文件
-library(dplyr)      # 用于数据处理
-library(tidyr)      # 用于数据整理
+# Translated comment.
+library(vegan)      # translated comment
+library(ggplot2)    # translated comment
+library(readr)      # translated comment
+library(dplyr)      # translated comment
+library(tidyr)      # translated comment
 
 
-# 为每个数据集添加来源标签
+# Translated comment.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# 整合所有数据
-# 转置矩阵使行为样本，列为物种
+# Translated comment.
+# Translated comment.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# 修改样本名称以避免重复，同时保留原始信息
-# 假设相同样本名表示来自同一个人的不同部位
+# Translated comment.
+# Translated comment.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# 创建样本类型标记
+# Translated comment.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -208,115 +208,115 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# 合并所有物种
-# 首先确保所有表格有相同的物种列
+# Translated comment.
+# Translated comment.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# 修改填充缺失物种的函数，避免索引错误
+# Translated comment.
 fill_missing_species <- function(df, all_species) {
-  # 创建一个新的数据框，包含所有可能的物种
+  # Translated comment.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # 填充现有数据
+  # Translated comment.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # 转换为数据框并返回
+  # Translated comment.
   return(as.data.frame(result))
 }
 
-# 应用修改后的函数
+# Translated comment.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# 合并所有样本数据
+# Translated comment.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# 合并样本标签
+# Translated comment.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# 确保样本顺序匹配
+# Translated comment.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
-# 加载必要的包
+# Translated comment.
 library(microbiome)
 library(phyloseq)
 library(dplyr)
 library(ggplot2)
-library(gridExtra) # 用于组合多个图形
+library(gridExtra) # translated comment
 
 
 
-# 创建OTU表
+# Translated comment.
 otu_table <- otu_table(as.matrix(t(all_data)), taxa_are_rows = TRUE)
 
-# 创建样本数据表
+# Translated comment.
 sample_data <- sample_data(sample_metadata)
 
-# 创建phyloseq对象
+# Translated comment.
 physeq <- phyloseq(otu_table, sample_data)
 
-# 按位点分组
+# Translated comment.
 site_list <- c("Gut", "Oral", "Skin", "Nasal")
 core_taxa_results <- list()
 
-#------------------------ 第一部分：识别核心物种 ------------------------#
+# Translated comment.
 
-# 为每个位点确定核心物种
+# Translated comment.
 for (site in site_list) {
-  # 筛选特定位点的样本
+  # Translated comment.
   site_samples <- subset_samples(physeq, Site == site)
   
-  # 使用microbiome包的core_members函数找出核心物种
-  # detection参数：相对丰度阈值
-  # prevalence参数：在该组中出现的样本百分比阈值
-  core_detection <- 0.001  # 相对丰度至少0.1%
-  core_prevalence <- 0.5   # 在至少50%的样本中出现
+  # Translated comment.
+  # Translated comment.
+  # Translated comment.
+  core_detection <- 0.001  # translated comment
+  core_prevalence <- 0.5   # translated comment
   
-  # 计算核心分类群
+  # Translated comment.
   core_taxa <- core_members(site_samples, 
                             detection = core_detection, 
                             prevalence = core_prevalence)
   
-  # 如果核心物种超过10个，只取丰度最高的10个
+  # Translated comment.
   if (length(core_taxa) > 10) {
-    # 计算每个分类群的平均丰度
+    # Translated comment.
     taxa_sums <- taxa_sums(site_samples)
     taxa_sums <- taxa_sums[names(taxa_sums) %in% core_taxa]
     taxa_sums <- sort(taxa_sums, decreasing = TRUE)
     core_taxa <- names(taxa_sums)[1:10]
   }
   
-  # 储存结果
+  # Translated comment.
   core_taxa_results[[site]] <- core_taxa
   
-  # 打印结果
+  # Translated comment.
   cat("\n", site, "核心物种 (", length(core_taxa), "):\n", sep="")
   print(core_taxa)
 }
 
-# 合并所有位点的核心物种
+# Translated comment.
 all_core_taxa <- unique(unlist(core_taxa_results))
 cat("\n总共识别出", length(all_core_taxa), "个核心物种\n")
 
-#------------------------ 第二部分：使用plot_core可视化 ------------------------#
+# Translated comment.
 library(RColorBrewer)
-# 创建一个函数来绘制每个位点的核心物种图
+# Translated comment.
 plot_site_core <- function(physeq, site, core_taxa) {
-  # 筛选特定位点的样本
+  # Translated comment.
   site_samples <- subset_samples(physeq, Site == site)
   
-  # 转换为相对丰度
+  # Translated comment.
   site_samples_rel <- site_samples
   
-  # 只保留该位点的核心物种
+  # Translated comment.
   site_samples_rel <- prune_taxa(all_core_taxa, site_samples_rel)
   
   
@@ -327,8 +327,8 @@ plot_site_core <- function(physeq, site, core_taxa) {
   # Also define gray color palette
   gray <- rev(brewer.pal(5, "RdBu"))
   
-  # 使用plot_core函数绘图
-  # 这将创建一个热图显示核心物种在不同检测和流行阈值下的存在情况
+  # Translated comment.
+  # Translated comment.
   p <- plot_core(site_samples_rel,
                  plot.type = "heatmap", 
                  colours = gray,
@@ -347,13 +347,13 @@ plot_site_core <- function(physeq, site, core_taxa) {
   return(p)
 }
 
-# 为每个位点绘制核心物种图
+# Translated comment.
 plot_list <- list()
 for (site in site_list) {
   plot_list[[site]] <- plot_site_core(physeq, site, core_taxa_results[[site]])
 }
 
-# 将四个图组合在一起
+# Translated comment.
 combined_plot <- grid.arrange(
   plot_list[["Gut"]],
   plot_list[["Oral"]],

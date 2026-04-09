@@ -19,13 +19,13 @@ GBDT_R2[,]
 
 
 
-# 载入必要的包
+# Translated comment.
 library(ggplot2)
 library(dplyr)
 library(scales)
 library(ggrepel)
 
-# 创建自定义转换函数来压缩0-0.1区间
+# Translated comment.
 compress_trans <- function(from = 0, to = 0.1, factor = 0.2) {
   trans_new(
     name = "compress",
@@ -43,27 +43,27 @@ compress_trans <- function(from = 0, to = 0.1, factor = 0.2) {
   )
 }
 
-# 数据预处理
+# Translated comment.
 plot_data <- GBDT_R2 %>%
-  # 计算每个类别的代谢物数量并过滤
+  # Translated comment.
   group_by(HMDB.Class) %>%
   mutate(
     class_size = n(),
-    # 只为Indoles and derivatives类中显著的代谢物添加标签
+    # Translated comment.
     label = ifelse(HMDB.Class == "Indoles and derivatives" & r2_mean >= 0.05, 
                    HMDB.Name, "")
   ) %>%
   ungroup() %>%
   filter(class_size >= 20) %>%
-  # 按HMDB.Class排序
+  # Translated comment.
   arrange(HMDB.Class) %>%
-  # 添加显著性标记
+  # Translated comment.
   mutate(significant = ifelse(r2_mean >= 0.05, "significant", "not_significant"))
 
-# 为每个代谢物分配序号
+# Translated comment.
 plot_data$metabolite_sort <- 1:nrow(plot_data)
 
-# 计算每个类别的范围和标签位置
+# Translated comment.
 class_num <- table(plot_data$HMDB.Class)
 class_range <- c(0)
 class_name <- numeric(length(class_num))
@@ -73,9 +73,9 @@ for (i in 1:length(class_num)) {
   class_name[i] <- class_range[i] + class_num[i] / 2
 }
 
-# 创建基础图形
+# Translated comment.
 p <- ggplot(plot_data, aes(x = metabolite_sort, y = r2_mean)) +
-  # 设置基本主题
+  # Translated comment.
   theme_bw() +
   theme(
     panel.grid = element_blank(),
@@ -84,25 +84,25 @@ p <- ggplot(plot_data, aes(x = metabolite_sort, y = r2_mean)) +
     legend.key = element_rect(fill = 'transparent'),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)
   ) +
-  # 设置x轴
+  # Translated comment.
   scale_x_continuous(
     breaks = class_name,
     labels = names(class_num),
     expand = c(0, 0)
   ) +
-  # 设置y轴，使用自定义转换
+  # Translated comment.
   scale_y_continuous(
     trans = compress_trans(),
     breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
   ) +
-  # 设置标签
+  # Translated comment.
   labs(
     x = NULL,
     y = "R² Value",
     size = "R² value"
   )
 
-# 添加交替背景
+# Translated comment.
 for (i in 1:(length(class_range) - 1)) {
   p <- p + annotate('rect',
                     xmin = class_range[i],
@@ -114,23 +114,23 @@ for (i in 1:(length(class_range) - 1)) {
   )
 }
 
-# 添加散点和标签
+# Translated comment.
 p <- p +
-  # 先绘制R²<0.1的点（灰色）
+  # Translated comment.
   geom_point(
     data = subset(plot_data, significant == "not_significant"),
     aes(size = 2),
     color = "grey70",
     alpha = 0.6
   ) +
-  # 再绘制R²>=0.1的点（彩色），根据微生物来源设置形状
+  # Translated comment.
   geom_point(
     data = subset(plot_data, significant == "significant"),
     aes(size = 2, color = HMDB.Class, 
         shape = HMDB.Source.Microbial),
     alpha = 0.8
   ) +
-  # 添加标签（只为Indoles and derivatives类的显著代谢物）
+  # Translated comment.
   geom_text_repel(
     data = subset(plot_data, label != ""),
     aes(label = label),
@@ -142,7 +142,7 @@ p <- p +
   ) +
   scale_shape_manual(values = c("FALSE" = 16, "TRUE" = 17,"NA"=16)) +
   scale_size(range = c(2, 2)) +
-  # 添加参考线
+  # Translated comment.
   geom_hline(
     yintercept = 0.05,
     color = 'gray',
@@ -150,10 +150,10 @@ p <- p +
     size = 1
   )
 
-# 显示图片
+# Translated comment.
 print(p)
 
-# 打印被标记的代谢物信息
+# Translated comment.
 labeled_metabolites <- plot_data %>%
   filter(label != "") %>%
   select(HMDB.Name, r2_mean, HMDB.Source.Microbial)

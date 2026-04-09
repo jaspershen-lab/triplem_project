@@ -112,7 +112,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## 计算所有genus与代谢组数据PC1之间的相关性
+## Translated comment.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -125,25 +125,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# 假设 'metabolomics_pc' 和 'gut_pc' 是您的数据框，并已正确设置
-# 确保两个数据框的样本（行名）相同且顺序一致
+# Translated comment.
+# Translated comment.
 
-# 将数据框转换为矩阵以便进行相关性计算
+# Translated comment.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# 将结果转换为数据框
+# Translated comment.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -154,7 +154,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# 选取top100的代谢物
+# Translated comment.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -175,14 +175,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -200,7 +200,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # 创建一个绝对值列
+  mutate(abs_rho = abs(rho)) %>% # translated comment
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -324,7 +324,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## 计算所有genus与代谢组数据PC1之间的相关性
+## Translated comment.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -337,25 +337,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# 假设 'metabolomics_pc' 和 'gut_pc' 是您的数据框，并已正确设置
-# 确保两个数据框的样本（行名）相同且顺序一致
+# Translated comment.
+# Translated comment.
 
-# 将数据框转换为矩阵以便进行相关性计算
+# Translated comment.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# 将结果转换为数据框
+# Translated comment.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -366,7 +366,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# 选取top100的代谢物
+# Translated comment.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -387,14 +387,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -412,7 +412,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # 创建一个绝对值列
+  mutate(abs_rho = abs(rho)) %>% # translated comment
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -536,7 +536,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## 计算所有genus与代谢组数据PC1之间的相关性
+## Translated comment.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -549,25 +549,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# 假设 'metabolomics_pc' 和 'gut_pc' 是您的数据框，并已正确设置
-# 确保两个数据框的样本（行名）相同且顺序一致
+# Translated comment.
+# Translated comment.
 
-# 将数据框转换为矩阵以便进行相关性计算
+# Translated comment.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# 将结果转换为数据框
+# Translated comment.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -578,7 +578,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# 选取top100的代谢物
+# Translated comment.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -599,14 +599,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -624,7 +624,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # 创建一个绝对值列
+  mutate(abs_rho = abs(rho)) %>% # translated comment
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -748,7 +748,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## 计算所有genus与代谢组数据PC1之间的相关性
+## Translated comment.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -761,25 +761,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# 假设 'metabolomics_pc' 和 'gut_pc' 是您的数据框，并已正确设置
-# 确保两个数据框的样本（行名）相同且顺序一致
+# Translated comment.
+# Translated comment.
 
-# 将数据框转换为矩阵以便进行相关性计算
+# Translated comment.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# 将结果转换为数据框
+# Translated comment.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -790,7 +790,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# 选取top100的代谢物
+# Translated comment.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -811,14 +811,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -836,7 +836,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # 创建一个绝对值列
+  mutate(abs_rho = abs(rho)) %>% # translated comment
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -866,7 +866,7 @@ all_genus<-merge(all_genus,nasal_cor_PC1[,c("abs_rho","Genus")],by.x="all_genus"
 colnames(all_genus)<-c("Genus","gut","oral","skin","nasal")
 
 
-# 筛选全部为0的物种
+# Translated comment.
 
 
 all_genus[is.na(all_genus)] <- 0

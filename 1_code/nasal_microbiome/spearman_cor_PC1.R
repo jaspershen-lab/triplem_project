@@ -114,7 +114,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## 计算所有genus与代谢组数据PC1之间的相关性
+## Translated comment.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -127,25 +127,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# 假设 'metabolomics_pc' 和 'gut_pc' 是您的数据框，并已正确设置
-# 确保两个数据框的样本（行名）相同且顺序一致
+# Translated comment.
+# Translated comment.
 
-# 将数据框转换为矩阵以便进行相关性计算
+# Translated comment.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# 将结果转换为数据框
+# Translated comment.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -156,7 +156,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# 选取top100的代谢物
+# Translated comment.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -177,14 +177,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# 计算相关性矩阵
+# Translated comment.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# 提取相关系数和p值
+# Translated comment.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -202,9 +202,9 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # 创建一个绝对值列
-  arrange(desc(abs_rho)) %>%       # 根据绝对值降序排序
-  slice_head(n = 20)           # 选择前20行
+  mutate(abs_rho = abs(rho)) %>% # translated comment
+  arrange(desc(abs_rho)) %>%       # translated comment
+  slice_head(n = 20)           # translated comment
 
 variable_info<-gut_temp_object@variable_info
 
@@ -216,11 +216,11 @@ genus_top30_mete <- genus_top30_mete %>%
 
 
 ggplot(genus_top30_mete, aes(x = reorder(Genus, rho), y = rho, group = Genus)) +
-  geom_segment(aes(y = 0, yend = rho, xend = Genus), color = "#00A1D5FF", size = 1.5) +  # 棒部分
-  geom_point(aes(color = Phylum), size = 3) +  # 圆球部分，颜色根据phylum
-  scale_color_manual(values = phylum_color) +  # 自定义phylum颜色
-  labs(x = "Bacteria", y = "Rho Value") +    # 添加坐标轴标签
-  theme_light(base_size = 14) +  # 使用light主题，基础字体大小为14
+  geom_segment(aes(y = 0, yend = rho, xend = Genus), color = "# translated comment
+  geom_point(aes(color = Phylum), size = 3) +  # translated comment
+  scale_color_manual(values = phylum_color) +  # translated comment
+  labs(x = "Bacteria", y = "Rho Value") +    # translated comment
+  theme_light(base_size = 14) +  # translated comment
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 10, color = "grey30",face = "italic"),
     axis.text.y = element_text(size = 12, color = "grey30"),
@@ -234,7 +234,7 @@ ggplot(genus_top30_mete, aes(x = reorder(Genus, rho), y = rho, group = Genus)) +
 
 
 
-## 绘制相关性最高的两个物种和PC1之间的相关性点图
+## Translated comment.
 
 ##cor_plot<-cbind(metabolomics_top100_PC1[,"PC1"],gut_matrix[,c("ASV5121","ASV8746")])
 ##colnames(cor_plot)<-c("PC1","ASV5121","ASV8746")

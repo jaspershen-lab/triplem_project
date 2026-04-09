@@ -132,11 +132,11 @@ sample_info_mm<-subset(sample_info_mm,!IRIS=="IS")
 
 ggplot(sample_info_mm, aes(x=adjusted_age, y= M263T353_NEG_HILIC)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", #不需要图例
-                                                                                                axis.text.x=element_text(colour="black",size=14), #设置x轴刻度标签的字体属性
-                                                                                                axis.text.y=element_text(size=14,face="plain"), #设置x轴刻度标签的字体属性
-                                                                                                axis.title.y=element_text(size = 14,face="plain"), #设置y轴的标题的字体属性
-                                                                                                axis.title.x=element_text(size = 14,face="plain"), #设置x轴的标题的字体属性
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # translated comment
+                                                                                                axis.text.x=element_text(colour="black",size=14), # translated comment
+                                                                                                axis.text.y=element_text(size=14,face="plain"), # translated comment
+                                                                                                axis.title.y=element_text(size = 14,face="plain"), # translated comment
+                                                                                                axis.title.x=element_text(size = 14,face="plain"), # translated comment
                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+
   labs(title = "Phenylacetylglutamine",
        y = "Standar Adundance",

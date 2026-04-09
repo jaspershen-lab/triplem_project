@@ -81,11 +81,11 @@ select_significant_metabolites <- function(gut_microbiome, metabolome,
 #' @param selection_results Results from select_significant_metabolites function
 #' @param metabolomics_class Data frame containing metabolite class information
 plot_metabolite_selection <- function(selection_results, metabolomics_class) {
-  # 创建代谢物ID和名称的对应关系
+  # Translated comment.
   id_to_name <- setNames(metabolomics_class$Compound.name, 
                          rownames(metabolomics_class))
   
-  # 添加代谢物名称到结果数据框
+  # Translated comment.
   results_df <- selection_results$all_results
   results_df$compound_name <- id_to_name[results_df$metabolite]
   
@@ -101,7 +101,7 @@ plot_metabolite_selection <- function(selection_results, metabolomics_class) {
     geom_vline(xintercept = 0.3, linetype = "dashed", color = "red") +
     ggrepel::geom_text_repel(
       data = head(results_df[order(-results_df$n_sig_cors),], 10),
-      aes(label = compound_name),  # 使用compound_name而不是metabolite
+      aes(label = compound_name),  # translated comment
       size = 3,
       box.padding = 0.5,
       force = 10,
@@ -260,14 +260,14 @@ library(ggrepel)
 #' @param metabolomics_class Data frame containing metabolite information
 #' @param sites Names of body sites in order: (+,+), (-,+), (-,-), (+,-)
 plot_quadrant_metabolite_selection <- function(selection_results_list, metabolomics_class, sites) {
-  # 创建代谢物ID和名称的对应关系
+  # Translated comment.
   id_to_name <- setNames(metabolomics_class$Compound.name, 
                          rownames(metabolomics_class))
   
-  # 创建空的数据框来存储所有结果
+  # Translated comment.
   plot_data <- data.frame()
   
-  # 处理每个部位的数据
+  # Translated comment.
   for(i in seq_along(sites)) {
     site <- sites[i]
     temp_data <- selection_results_list[[site]]$all_results
@@ -275,22 +275,22 @@ plot_quadrant_metabolite_selection <- function(selection_results_list, metabolom
     temp_data$site <- site
     temp_data$selected <- temp_data$n_sig_cors > 0
     
-    # 根据象限设置坐标
-    if(i == 1) {  # 第一象限
+    # Translated comment.
+    if(i == 1) {  # translated comment
       temp_data$plot_x <- abs(temp_data$max_cor)
       temp_data$plot_y <- temp_data$n_sig_cors
-    } else if(i == 2) {  # 第二象限
+    } else if(i == 2) {  # translated comment
       temp_data$plot_x <- -abs(temp_data$max_cor)
       temp_data$plot_y <- temp_data$n_sig_cors
-    } else if(i == 3) {  # 第三象限
+    } else if(i == 3) {  # translated comment
       temp_data$plot_x <- -abs(temp_data$max_cor)
       temp_data$plot_y <- -temp_data$n_sig_cors
-    } else {  # 第四象限
+    } else {  # translated comment
       temp_data$plot_x <- abs(temp_data$max_cor)
       temp_data$plot_y <- -temp_data$n_sig_cors
     }
     
-    # 标记每个部位的前10个代谢物
+    # Translated comment.
     temp_data$is_top10 <- FALSE
     temp_data$is_top10[order(-temp_data$n_sig_cors)[1:10]] <- TRUE
     

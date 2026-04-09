@@ -152,10 +152,10 @@ nasal_object <-
 
 
 
-# 合并四个部位的微生物组数据绘制PCOA图
+# Translated comment.
 
-# 读取四个不同区域的微生物组数据
-# 假设文件路径为当前工作目录
+# Translated comment.
+# Translated comment.
 gut_genus<-gut_object@expression_data
 rownames(gut_genus)<-gut_object@variable_info$Genus
 
@@ -168,35 +168,35 @@ rownames(skin_genus)<-skin_object@variable_info$Genus
 nasal_genus<-nasal_object@expression_data
 rownames(nasal_genus)<-nasal_object@variable_info$Genus
 
-# 加载必要的R包
-library(vegan)      # 用于计算生态距离和NMDS
-library(ggplot2)    # 用于绘图
-library(readr)      # 用于读取CSV文件
-library(dplyr)      # 用于数据处理
-library(tidyr)      # 用于数据整理
+# Translated comment.
+library(vegan)      # translated comment
+library(ggplot2)    # translated comment
+library(readr)      # translated comment
+library(dplyr)      # translated comment
+library(tidyr)      # translated comment
 
 
-# 为每个数据集添加来源标签
+# Translated comment.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# 整合所有数据
-# 转置矩阵使行为样本，列为物种
+# Translated comment.
+# Translated comment.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# 修改样本名称以避免重复，同时保留原始信息
-# 假设相同样本名表示来自同一个人的不同部位
+# Translated comment.
+# Translated comment.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# 创建样本类型标记
+# Translated comment.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -206,51 +206,51 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# 合并所有物种
-# 首先确保所有表格有相同的物种列
+# Translated comment.
+# Translated comment.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# 修改填充缺失物种的函数，避免索引错误
+# Translated comment.
 fill_missing_species <- function(df, all_species) {
-  # 创建一个新的数据框，包含所有可能的物种
+  # Translated comment.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # 填充现有数据
+  # Translated comment.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # 转换为数据框并返回
+  # Translated comment.
   return(as.data.frame(result))
 }
 
-# 应用修改后的函数
+# Translated comment.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# 合并所有样本数据
+# Translated comment.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# 合并样本标签
+# Translated comment.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# 确保样本顺序匹配
+# Translated comment.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
-# 计算Bray-Curtis距离
+# Translated comment.
 bray_dist <- vegdist(all_data, method = "bray")
 
-# 进行NMDS分析
-set.seed(123)  # 设置随机种子以确保结果可重复
+# Translated comment.
+set.seed(123)  # translated comment
 nmds_result <- metaMDS(bray_dist, k = 2, trymax = 100, autotransform = FALSE)
 
-# 检查NMDS分析是否收敛，并输出应力值(stress)
+# Translated comment.
 cat("NMDS Stress:", nmds_result$stress, "\n")
 if(nmds_result$stress > 0.2) {
   warning("NMDS 应力值 > 0.2，表明排序质量较差")
@@ -260,15 +260,15 @@ if(nmds_result$stress > 0.2) {
   cat("NMDS 应力值 < 0.1，表明排序质量良好\n")
 }
 
-# 提取NMDS坐标
+# Translated comment.
 nmds_df <- as.data.frame(nmds_result$points)
 colnames(nmds_df) <- c("NMDS1", "NMDS2")
 
-# 将样本信息添加到NMDS数据
+# Translated comment.
 nmds_df$Sample <- rownames(nmds_df)
 nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
-# 绘制NMDS图
+# Translated comment.
 nmds_plot <- ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Site, shape = Site)) +
   geom_point(size = 3, alpha = 0.8) +
   stat_ellipse(aes(group = Site), level = 0.95, linetype = 2) +
@@ -289,27 +289,27 @@ nmds_plot <- ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Site, shape = Sit
     panel.grid.minor = element_blank()
   )
 
-# 为每个数据集添加来源标签
+# Translated comment.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# 整合所有数据
-# 转置矩阵使行为样本，列为物种
+# Translated comment.
+# Translated comment.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# 修改样本名称以避免重复，同时保留原始信息
-# 假设相同样本名表示来自同一个人的不同部位
+# Translated comment.
+# Translated comment.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# 创建样本类型标记
+# Translated comment.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -319,51 +319,51 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# 合并所有物种
-# 首先确保所有表格有相同的物种列
+# Translated comment.
+# Translated comment.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# 修改填充缺失物种的函数，避免索引错误
+# Translated comment.
 fill_missing_species <- function(df, all_species) {
-  # 创建一个新的数据框，包含所有可能的物种
+  # Translated comment.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # 填充现有数据
+  # Translated comment.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # 转换为数据框并返回
+  # Translated comment.
   return(as.data.frame(result))
 }
 
-# 应用修改后的函数
+# Translated comment.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# 合并所有样本数据
+# Translated comment.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# 合并样本标签
+# Translated comment.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# 确保样本顺序匹配
+# Translated comment.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
-# 计算Bray-Curtis距离
+# Translated comment.
 bray_dist <- vegdist(all_data, method = "bray")
 
-# 进行NMDS分析
-set.seed(123)  # 设置随机种子以确保结果可重复
+# Translated comment.
+set.seed(123)  # translated comment
 nmds_result <- metaMDS(bray_dist, k = 2, trymax = 100, autotransform = FALSE)
 
-# 检查NMDS分析是否收敛，并输出应力值(stress)
+# Translated comment.
 cat("NMDS Stress:", nmds_result$stress, "\n")
 if(nmds_result$stress > 0.2) {
   warning("NMDS 应力值 > 0.2，表明排序质量较差")
@@ -373,15 +373,15 @@ if(nmds_result$stress > 0.2) {
   cat("NMDS 应力值 < 0.1，表明排序质量良好\n")
 }
 
-# 提取NMDS坐标
+# Translated comment.
 nmds_df <- as.data.frame(nmds_result$points)
 colnames(nmds_df) <- c("NMDS1", "NMDS2")
 
-# 将样本信息添加到NMDS数据
+# Translated comment.
 nmds_df$Sample <- rownames(nmds_df)
 nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
-# 绘制NMDS图
+# Translated comment.
 nmds_plot<-ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = Site,color=Site)) +
   geom_point(size = 4, alpha = 0.8,colour = "white",shape = 21) +
   stat_ellipse(aes(group = Site), level = 0.95, linetype = 2) +
@@ -406,10 +406,10 @@ nmds_plot<-ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = Site,color=Site)) +
 nmds_plot
 ggsave("../../4_manuscript/Figures/Figure_1/figure_1c.pdf", plot=nmds_plot, width=7, height=6, units="in")
 
-## 统计代谢物检测的种类
+## Translated comment.
 
 
-# 加载必要的包
+# Translated comment.
 library(ggplot2)
 library(dplyr)
 
@@ -422,12 +422,12 @@ class_counts<-subset(class_counts,!(HMDB.Source.Microbial=="NA"))
 class_counts<-subset(class_counts,Count>=3)
 
 total_by_class <- aggregate(Count ~ HMDB.Class, data = class_counts, sum)
-# 按总计数从小到大排序
+# Translated comment.
 class_order <- total_by_class$HMDB.Class[order(total_by_class$Count)]
-# 将 HMDB.Class 转换为有序因子
+# Translated comment.
 class_counts$HMDB.Class <- factor(class_counts$HMDB.Class, levels = class_order)
 
-# 然后绘图
+# Translated comment.
 p<-ggplot(class_counts, aes(x = HMDB.Class, y = Count, fill=HMDB.Source.Microbial)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(values = c("#3d95d2", "#f16147"))+
@@ -442,7 +442,7 @@ p<-ggplot(class_counts, aes(x = HMDB.Class, y = Count, fill=HMDB.Source.Microbia
   )
 p
 ggsave("../../4_manuscript/Figures/Figure_1/figure_1b.pdf", plot=p, width=7, height=7, units="in")
-### 来源维恩图
+### Translated comment.
 
 metabolite_annotation_Source<-metabolite_annotation[,29:31]
 
