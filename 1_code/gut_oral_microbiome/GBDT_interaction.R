@@ -6,6 +6,8 @@ library(tidyverse)
 library(tidymass)
 library(parallel)
 library(progress)
+library(readxl)
+library(gbm)
 ###load("data)
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 

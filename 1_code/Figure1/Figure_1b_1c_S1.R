@@ -25,7 +25,7 @@ skin_object<-object_cross_section
 
 load("../../3_data_analysis/nasal_microbiome/data_preparation/object_cross_section")
 nasal_object<-object_cross_section
-metabolite_annotation<-read_excel("../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
+metabolite_annotation<-read_excel("../../1_code/revise_code/metabolite_annotation.xlsx")
 ####only remain the genus level
 library(microbiomedataset)
 
@@ -419,7 +419,7 @@ colnames(class_counts) <- c("HMDB.Class","HMDB.Source.Microbial", "Count")
 
 class_counts<-subset(class_counts,!(HMDB.Class=="NA"))
 class_counts<-subset(class_counts,!(HMDB.Source.Microbial=="NA"))
-class_counts<-subset(class_counts,Count>=5)
+class_counts<-subset(class_counts,Count>=3)
 
 total_by_class <- aggregate(Count ~ HMDB.Class, data = class_counts, sum)
 # 按总计数从小到大排序

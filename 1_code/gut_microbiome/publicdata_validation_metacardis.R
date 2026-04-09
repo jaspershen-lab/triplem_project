@@ -410,7 +410,7 @@ predictions_oberserve<-results$correlations
 predictions_oberserve<-merge(predictions_oberserve,GBDT_predictions,,by.y="HMDB",by.x="HMDB_Name",all.x=TRUE)
 predictions_oberserve$estimate[258:260]<-0.228
 
-predictions_oberserve<-predictions_oberserve%>%filter(predictions_oberserve$model_performance>0.1)
+predictions_oberserve<-predictions_oberserve%>%filter(predictions_oberserve$model_performance>0.05)
 
 
 

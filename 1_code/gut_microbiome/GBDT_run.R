@@ -118,7 +118,7 @@ results <- analyze_metabolite_ev(
   correlation_method = "spearman",
   p_threshold = 0.05,
   p_adjust_method = "none",
-  rho_threshold = 0.3
+  rho_threshold = 0.3,
 )
 
 saveRDS(results,"gut_GBDT_results")

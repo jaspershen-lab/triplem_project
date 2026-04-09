@@ -2,7 +2,6 @@
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
-source("1_code/mantel_Procrustes_code.R")
 library(tidyverse)
 library(tidymass)
 library(readxl)
@@ -151,7 +150,7 @@ MM_adonis <- function(gut_microbiome_table, expression_data_metabolome) {
   metabolome_dist <- vegdist(expression_data_metabolome, method = "euclidean")
   results <- NULL
   for (i in colnames(gut_microbiome_table)) {
-    adonis_result <- adonis2(metabolome_dist ~ gut_microbiome_table[, i], permutations = 1000,parallel=15)
+    adonis_result <- adonis2(metabolome_dist ~ gut_microbiome_table[, i], permutations = 100,parallel=15)
     results <- rbind(results, adonis_result$`Pr(>F)`[1])
   }
   results<-data.frame(results)
@@ -160,7 +159,7 @@ MM_adonis <- function(gut_microbiome_table, expression_data_metabolome) {
   significant_results <- subset(results, `Pr(>F)` < 0.05)
   
   adonis_micro_sig <- gut_microbiome_table[, row.names(significant_results)]
-  final_result <- adonis2(metabolome_dist ~ ., data = adonis_micro_sig, permutations = 1000,parallel=15)
+  final_result <- adonis2(metabolome_dist ~ ., data = adonis_micro_sig, permutations = 100,parallel=15)
   
   return(list(final_result = final_result, significant_results = significant_results))
 }

@@ -881,7 +881,7 @@ group_comparison_results <- analyze_group_differences_metabolite_interactions(
 )
 
 saveRDS(group_comparison_results,"group_comparison_results")
-
+group_comparison_results<-readRDS("group_comparison_results")
 # 生成可视化结果
 visualization_results <- plot_group_comparison_results(group_comparison_results)
 

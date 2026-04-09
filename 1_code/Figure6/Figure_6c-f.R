@@ -405,98 +405,97 @@ Figure_6d<-
 Figure_6c
 Figure_6d
 
-metabolites_index<-c("HMDB0001870","HMDB0000637","HMDB0001856","HMDB0059655","HMDB0002466","HMDB0000707","HMDB0000258","HMDB0002820","HMDB0000078","HMDB0002320","HMDB0001859","HMDB0001870","HMDB0000159","HMDB0000517","HMDB0000715","HMDB0000158","HMDB0002466","HMDB0000707","HMDB0001190","HMDB0000039","HMDB0002212")
+metabolites_index<-c("HMDB0001870","HMDB0000637","HMDB0001856","HMDB0059655","HMDB0002466","HMDB0000707","HMDB0000258","HMDB0002820","HMDB0000078","HMDB0002320","HMDB0001859","HMDB0001870","HMDB0000159","HMDB0000517","HMDB0000715","HMDB0000158","HMDB0002466","HMDB0000707","HMDB0001190","HMDB0003903","HMDB0002212")
 
 
 significant_metabolites<-subset(significant_metabolites,HMDB%in%metabolites_index)
 
 
 
-# plot_metabolites_mirror_style <- function(significant_metabolites, top_n = 30) {
-#   library(ggplot2)
-#   library(dplyr)
-#   
-#   # 准备数据
-#   if(nrow(significant_metabolites) > top_n) {
-#     plot_data <- significant_metabolites %>%
-#       arrange(desc(abs(r2_difference))) %>%
-#       head(top_n)
-#   } else {
-#     plot_data <- significant_metabolites %>%
-#       arrange(desc(abs(r2_difference)))
-#   }
-#   
-#   # 按原图风格排序：先正值（降序），后负值（从小到大，即从最负开始）
-#   positive_data <- plot_data[plot_data$r2_difference > 0, ] %>%
-#     arrange(desc(r2_difference))
-#   negative_data <- plot_data[plot_data$r2_difference < 0, ] %>%
-#     arrange(desc(r2_difference))  # 负值从最小（最负）到最大（接近0）
-#   
-#   # 重新组合数据
-#   plot_data_ordered <- rbind(positive_data, negative_data)
-#   
-#   # 创建x轴位置
-#   plot_data_ordered$x_pos <- 1:nrow(plot_data_ordered)
-#   
-#   # 为双向显示创建数据
-#   plot_data_ordered$y_upper <- ifelse(plot_data_ordered$r2_difference > 0, 
-#                                       plot_data_ordered$r2_difference, 0)
-#   plot_data_ordered$y_lower <- ifelse(plot_data_ordered$r2_difference < 0, 
-#                                       -plot_data_ordered$r2_difference, 0)  # 取绝对值显示在下方
-#   
-#   # 找到最大值用于设置y轴
-#   max_val <- max(abs(plot_data_ordered$r2_difference))
-#   
-#   p <- ggplot(plot_data_ordered, aes(x = x_pos)) +
-#     # 上方条形（IR优势，绿色）
-#     geom_col(aes(y = y_upper), fill = "#E69F00", alpha = 0.9, width = 0.8) +
-#     # 下方条形（IS优势，红色，向下显示）
-#     geom_col(aes(y = -y_lower), fill = "#0072B2", alpha = 0.9, width = 0.8) +
-#     # 零线
-#     geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
-#     # 设置y轴范围
-#     scale_y_continuous(
-#       limits = c(-max_val * 1.1, max_val * 1.1),
-#       breaks = seq(-max_val, max_val, length.out = 7),
-#       labels = function(x) sprintf("%.1f", abs(x))  # 显示绝对值
-#     ) +
-#     # x轴设置
-#     scale_x_continuous(
-#       breaks = plot_data_ordered$x_pos,
-#       labels = plot_data_ordered$HMDB.Name,
-#       expand = c(0.01, 0.01)
-#     ) +
-#     # 主题
-#     theme_minimal() +
-#     theme(
-#       axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),
-#       axis.text.y = element_text(size = 10),
-#       axis.title.y = element_text(size = 12, face = "bold"),
-#       plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
-#       panel.grid.major.x = element_blank(),
-#       panel.grid.minor = element_blank(),
-#       panel.grid.major.y = element_line(color = "gray90", size = 0.3),
-#       axis.line.x = element_line(color = "black", size = 0.5),
-#       plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
-#     ) +
-#     # 标签
-#     labs(
-#       title = "Metabolite R² Differences: IR vs IS Groups",
-#       x = "",
-#       y = "R² Difference",
-#       caption = ""
-#     ) +
-#     # 添加颜色图例标注
-#     annotate("text", x = length(plot_data_ordered$metabolite) * 0.05, 
-#              y = max_val * 1, label = "IR", 
-#              color = "#E69F00", size = 4, fontface = "bold") +
-#     annotate("text", x = length(plot_data_ordered$metabolite) * 0.05, 
-#              y = -max_val * 0.9, label = "IS", 
-#              color = "#0072B2", size = 4, fontface = "bold")
-#   
-#   return(p)
-# }
+ plot_metabolites_mirror_style <- function(significant_metabolites, top_n = 30) {
+library(ggplot2)
+library(dplyr)
 
+# 准备数据
+if(nrow(significant_metabolites) > top_n) {
+  plot_data <- significant_metabolites %>%
+    arrange(desc(abs(r2_difference))) %>%
+    head(top_n)
+} else {
+  plot_data <- significant_metabolites %>%
+    arrange(desc(abs(r2_difference)))
+}
+
+# 按原图风格排序：先正值（降序），后负值（从小到大，即从最负开始）
+positive_data <- plot_data[plot_data$r2_difference > 0, ] %>%
+  arrange(desc(r2_difference))
+negative_data <- plot_data[plot_data$r2_difference < 0, ] %>%
+  arrange(desc(r2_difference))  # 负值从最小（最负）到最大（接近0）
+
+# 重新组合数据
+plot_data_ordered <- rbind(positive_data, negative_data)
+
+# 创建x轴位置
+plot_data_ordered$x_pos <- nrow(plot_data_ordered):1
+
+# 为双向显示创建数据
+plot_data_ordered$y_upper <- ifelse(plot_data_ordered$r2_difference > 0, 
+                                    plot_data_ordered$r2_difference, 0)
+plot_data_ordered$y_lower <- ifelse(plot_data_ordered$r2_difference < 0, 
+                                    -plot_data_ordered$r2_difference, 0)  # 取绝对值显示在下方
+
+# 找到最大值用于设置y轴
+max_val <- max(abs(plot_data_ordered$r2_difference))
+
+p <- ggplot(plot_data_ordered, aes(x = x_pos)) +
+  # 上方条形（IR优势，绿色）
+  geom_col(aes(y = y_upper), fill = "#E69F00", alpha = 0.9, width = 0.8) +
+  # 下方条形（IS优势，红色，向下显示）
+  geom_col(aes(y = -y_lower), fill = "#0072B2", alpha = 0.9, width = 0.8) +
+  # 零线
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
+  # 设置y轴范围
+  scale_y_continuous(
+    limits = c(-max_val * 1.1, max_val * 1.1),
+    breaks = seq(-max_val, max_val, length.out = 7),
+    labels = function(x) sprintf("%.1f", abs(x))  # 显示绝对值
+  ) +
+  # x轴设置
+  scale_x_continuous(
+    breaks = plot_data_ordered$x_pos,
+    labels = plot_data_ordered$HMDB.Name,
+    expand = c(0.01, 0.01)
+  ) +
+  # 主题
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8),
+    axis.text.y = element_text(size = 10),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "gray90", size = 0.3),
+    axis.line.x = element_line(color = "black", size = 0.5),
+    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
+  ) +
+  # 标签
+  labs(
+    title = "Metabolite R² Differences: IR vs IS Groups",
+    x = "",
+    y = "R² Difference",
+    caption = ""
+  ) +
+  # 添加颜色图例标注
+  annotate("text", x = length(plot_data_ordered$metabolite) * 0.05, 
+           y = max_val * 1, label = "IR", 
+           color = "#E69F00", size = 4, fontface = "bold") +
+  annotate("text", x = length(plot_data_ordered$metabolite) * 0.05, 
+           y = -max_val * 0.9, label = "IS", 
+           color = "#0072B2", size = 4, fontface = "bold")
+
+return(p)
+}
 Figure_6e <- plot_metabolites_mirror_style(significant_metabolites, top_n = 25)
 
 Figure_6e
@@ -544,7 +543,7 @@ filtered_compound_list
 hmdb_pathway@compound_list<-filtered_compound_list
 
 result = 
-  enrich_hmdb(query_id = significant_metabolites$HMDB, 
+  enrich_hmdb(query_id = metabolites_index, 
               query_type = "compound", 
               id_type = "HMDB",
               pathway_database = hmdb_pathway,

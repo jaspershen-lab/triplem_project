@@ -17,7 +17,7 @@ metabolomics_object <- object_cross_section
 ### 计算四个身体部位菌群的alpha多样性
 
 metabolite_annotation <- read_excel(
-  "3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
+  "1_code/revise_code/metabolite_annotation.xlsx"
 )
 
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
@@ -571,7 +571,7 @@ p <-
   stat_compare_means()
 p
 ggsave(p,
-       filename = "4_manuscript/Figures/Figure_1/figure_1f.pdf",
+       filename = "4_manuscript/submission/Microbiome/revision_Figure/figure_1f.pdf",
        width = 8,
        height = 6)
 
@@ -1135,3 +1135,795 @@ significance_summary <- result_df %>%
 
 # 打印摘要表
 print(significance_summary)
+
+
+
+######revise
+
+#稀释曲线
+library(vegan)
+library(tidyverse)
+
+rare_list <- rarecurve(
+  otu_table,
+  step   = 200,
+  sample = min(rowSums(otu_table)),
+  label  = FALSE,
+  draw   = FALSE   # ⭐ 关键
+)
+
+
+rare_df <- purrr::imap_dfr(rare_list, function(x, sam) {
+  data.frame(
+    Sample  = sam,
+    Reads   = attr(x, "Subsample"),
+    Species = as.numeric(x)
+  )
+})
+
+ggplot(rare_df, aes(Reads, Species, group = Sample)) +
+  geom_line(alpha = 0.3, color = "#2C7BB6", linewidth = 0.6) +
+  geom_vline(
+    xintercept = min(rowSums(otu_t)),
+    linetype = "dashed",
+    color = "grey40"
+  ) +
+  theme_classic(base_size = 14) +
+  labs(
+    x = "Sequencing depth (reads)",
+    y = "Observed species"
+  )
+
+
+# 加载必要的R包
+library(tidyverse)
+library(boot)
+
+# Bootstrap function for correlation
+boot_cor <- function(data, indices, x_col, y_col) {
+  d <- data[indices, ]
+  cor(d[[x_col]], d[[y_col]], method = "pearson", use = "complete.obs")
+}
+
+# 确保样本ID是匹配的
+common_samples <- intersect(rownames(alpha_diversity), rownames(metabolome_data))
+if (length(common_samples) == 0) {
+  stop("两个数据集没有共同的样本ID")
+}
+cat("共有", length(common_samples), "个样本可用于分析\n")
+
+# 使用共同样本筛选数据
+alpha_diversity_filtered <- alpha_diversity[common_samples, ]
+metabolome_data_filtered <- metabolome_data[common_samples, ]
+
+# 计算每个位点alpha多样性与代谢物的Pearson相关性及Bootstrap 95% CI
+sites <- colnames(alpha_diversity_filtered)
+metabolites <- colnames(metabolome_data_filtered)
+
+# 准备存储结果的数据框
+results <- data.frame(
+  Site = character(),
+  Metabolite = character(),
+  Rho = numeric(),
+  P_value = numeric(),
+  CI_lower = numeric(),
+  CI_upper = numeric(),
+  Adjusted_P_value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# 设置Bootstrap参数
+n_bootstrap <- 1000  # Bootstrap重采样次数
+set.seed(123)  # 设置随机种子以保证结果可重复
+
+# 计算相关性和Bootstrap置信区间
+cat("开始计算相关性和Bootstrap 95% CI...\n")
+
+for (site in sites) {
+  cat("处理位点:", site, "\n")
+  
+  for (metabolite in metabolites) {
+    # 准备数据
+    temp_data <- data.frame(
+      alpha = alpha_diversity_filtered[[site]],
+      metabolite = metabolome_data_filtered[[metabolite]]
+    )
+    
+    # 移除缺失值
+    temp_data <- temp_data[complete.cases(temp_data), ]
+    
+    if (nrow(temp_data) < 3) {
+      warning(paste("样本数不足:", site, "-", metabolite))
+      next
+    }
+    
+    # 计算Pearson相关性
+    cor_test <- cor.test(temp_data$alpha,
+                         temp_data$metabolite,
+                         method = "pearson")
+    
+    # Bootstrap计算95% CI
+    boot_results <- boot(
+      data = temp_data,
+      statistic = boot_cor,
+      R = n_bootstrap,
+      x_col = "alpha",
+      y_col = "metabolite"
+    )
+    
+    # 计算95% CI (使用percentile方法)
+    boot_ci <- boot.ci(boot_results, type = "perc", conf = 0.95)
+    
+    # 提取CI边界
+    ci_lower <- boot_ci$percent[4]
+    ci_upper <- boot_ci$percent[5]
+    
+    # 添加结果到数据框
+    results <- rbind(
+      results,
+      data.frame(
+        Site = site,
+        Metabolite = metabolite,
+        Rho = cor_test$estimate,
+        P_value = cor_test$p.value,
+        CI_lower = ci_lower,
+        CI_upper = ci_upper,
+        Adjusted_P_value = NA,
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+}
+
+cat("计算完成!\n")
+
+# 对p值进行BH校正
+results$Adjusted_P_value <- p.adjust(results$P_value, method = "BH")
+
+# 筛选显著结果
+results_significant <- subset(results, P_value < 0.05)
+
+# 添加代谢物注释信息
+results_significant <- merge(
+  results_significant,
+  metabolite_annotation[, c("variable_id",
+                            "HMDB.Name",
+                            "HMDB.Class",
+                            "HMDB.Source.Microbial")],
+  by.x = "Metabolite",
+  by.y = "variable_id",
+  all.x = TRUE
+)
+
+# 移除HMDB.Class为NA的行
+results_significant <- subset(results_significant, !(HMDB.Class == "NA"))
+
+# 保存完整结果
+write.csv(results, 
+          "correlation_results_with_bootstrap_CI.csv", 
+          row.names = FALSE)
+
+write.csv(results_significant, 
+          "correlation_results_significant_with_bootstrap_CI.csv", 
+          row.names = FALSE)
+
+# 显示结果摘要
+cat("\n=== 结果摘要 ===\n")
+cat("总共测试的相关性对数:", nrow(results), "\n")
+cat("显著相关性数量 (P < 0.05):", nrow(results_significant), "\n")
+cat("\n各位点显著相关性数量:\n")
+print(table(results_significant$Site))
+
+# 显示前几行结果
+cat("\n前10个显著结果:\n")
+print(head(results_significant[order(results_significant$P_value), ], 10))
+
+# 可视化: 带有置信区间的相关性森林图
+library(ggplot2)
+
+# 选择每个位点前10个最显著的结果进行可视化
+top_results <- results_significant %>%
+  group_by(Site) %>%
+  arrange(P_value) %>%
+  slice_head(n = 10) %>%
+  ungroup()
+
+# 创建森林图
+p_forest <- ggplot(top_results, 
+                   aes(x = Rho, 
+                       y = reorder(paste(Site, HMDB.Name, sep = " - "), Rho),
+                       color = Site)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_errorbarh(aes(xmin = CI_lower, xmax = CI_upper), 
+                 height = 0.3, 
+                 size = 0.8) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c(
+    "gut" = "#edd064",
+    "oral" = "#a1d5b9",
+    "skin" = "#f2ccac",
+    "nasal" = "#a17db4"
+  )) +
+  labs(
+    title = "Top Correlations with 95% Bootstrap CI",
+    x = "Pearson Correlation Coefficient",
+    y = NULL
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    legend.position = "right"
+  )
+
+print(p_forest)
+
+ggsave(p_forest,
+       filename = "4_manuscript/Figures/Figure_1/correlation_forest_plot_with_CI.pdf",
+       width = 10,
+       height = 8)
+
+cat("\n分析完成! 结果已保存。\n")
+
+# ===== 使用Bootstrap CI结果绘制原始风格的图 =====
+
+# 定义保留的类别
+keep_classes <- c(
+  "Benzene and substituted derivatives",
+  "Carboxylic acids and derivatives",
+  "Fatty Acyls",
+  "Glycerophospholipids",
+  "Organic sulfuric acids and derivatives",
+  "Organooxygen compounds",
+  "Piperidines",
+  "Steroids and steroid derivatives"
+)
+
+# 准备绘图数据
+plot_data <- results_significant %>%
+  # 将不在保留类别列表中的HMDB.Class值重新分类为"Others"
+  dplyr::mutate(
+    HMDB.Class = ifelse(HMDB.Class %in% keep_classes, HMDB.Class, "Others"),
+    # Transform p-values for better visualization
+    neg_log_p = -log10(P_value),
+    # Size based on p-value significance
+    p_size = case_when(
+      P_value < 0.001 ~ 4,
+      P_value < 0.01 ~ 3,
+      P_value < 0.05 ~ 2,
+      TRUE ~ 1
+    )
+  ) %>%
+  # Calculate the number of metabolites per class and filter
+  dplyr::group_by(HMDB.Class) %>%
+  dplyr::mutate(
+    class_size = n(),
+    class_median_rho = median(Rho, na.rm = TRUE),
+    class_pct_significant = mean(Adjusted_P_value < 0.05, na.rm = TRUE) * 100,
+    # Rank within each class by absolute correlation (for labeling purposes)
+    class_rank = rank(-abs(Rho))
+  ) %>%
+  ungroup() %>%
+  # Filter classes with at least 10 members
+  filter(class_size >= 10) %>%
+  # Sort by median Rho within class
+  arrange(HMDB.Class, desc(Rho)) %>%
+  # Add significance markers and labels
+  dplyr::mutate(
+    # Label top 3 metabolites in each class
+    label = ifelse(class_rank <= 3 & Adjusted_P_value < 0.05, HMDB.Name, "")
+  )
+
+# Assign sequential numbers for x-axis
+plot_data$metabolite_sort <- 1:nrow(plot_data)
+
+# Calculate class ranges for background shading
+class_summary <- plot_data %>%
+  dplyr::group_by(HMDB.Class) %>%
+  dplyr::summarise(
+    start = min(metabolite_sort),
+    end = max(metabolite_sort),
+    mid = mean(c(min(metabolite_sort), max(metabolite_sort))),
+    median_rho = median(Rho, na.rm = TRUE),
+    pct_significant = mean(Adjusted_P_value < 0.05, na.rm = TRUE) * 100,
+    n = n()
+  )
+
+# Custom color palette for sites
+site_colors <- c(
+  "gut" = "#edd064",
+  "oral" = "#a1d5b9",
+  "skin" = "#f2ccac",
+  "nasal" = "#a17db4"
+)
+
+# Main plot with Bootstrap CI
+p1 <- ggplot(plot_data, aes(x = metabolite_sort, y = Rho)) +
+  # Add alternating backgrounds for classes
+  geom_rect(
+    data = class_summary,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = "gray95",
+    alpha = 0.5,
+    inherit.aes = FALSE
+  ) +
+  # Add zero line to distinguish positive from negative correlations
+  geom_hline(
+    yintercept = 0,
+    linetype = "solid",
+    color = "gray50",
+    size = 0.7
+  ) +
+  # Add 95% CI error bars (50% smaller)
+  geom_errorbar(
+    aes(
+      ymin = Rho - (Rho - CI_lower) * 0.5, 
+      ymax = Rho + (CI_upper - Rho) * 0.5, 
+      color = Site
+    ),
+    width = 0.5,
+    alpha = 0.3,
+    size = 0.7
+  ) +
+  # Add points with site colors
+  geom_point(aes(color = Site, size = p_size), alpha = 0.85) +
+  # Add FDR significance thresholds (both for positive and negative correlations)
+  geom_hline(
+    yintercept = median(subset(plot_data, Adjusted_P_value == 0.05 & Rho > 0)$Rho, na.rm = TRUE),
+    linetype = "dashed",
+    color = "darkred",
+    size = 0.5
+  ) +
+  geom_hline(
+    yintercept = median(subset(plot_data, Adjusted_P_value == 0.05 & Rho < 0)$Rho, na.rm = TRUE),
+    linetype = "dashed",
+    color = "darkblue",
+    size = 0.5
+  ) +
+  # Add labels for top metabolites
+  geom_text_repel(
+    data = subset(plot_data, label != ""),
+    aes(label = label),
+    size = 3.5,
+    box.padding = 0.4,
+    point.padding = 0.3,
+    force = 8,
+    max.overlaps = 30,
+    segment.color = "grey50",
+    segment.size = 0.2,
+    min.segment.length = 0.1
+  ) +
+  # Customize scales
+  scale_color_manual(values = site_colors, name = "Site") +
+  scale_size_continuous(
+    name = "P-value",
+    breaks = c(1, 2, 3, 4),
+    labels = c("ns", "P < 0.05", "P < 0.01", "P < 0.001"),
+    range = c(2, 5)
+  ) +
+  scale_y_continuous(
+    breaks = seq(-1, 1, by = 0.1),
+    minor_breaks = seq(-1, 1, by = 0.05),
+    limits = c(min(plot_data$CI_lower, na.rm = TRUE) * 1.05, 
+               max(plot_data$CI_upper, na.rm = TRUE) * 1.05),
+    expand = expansion(mult = c(0.02, 0.02))
+  ) +
+  # Customize theme
+  theme_bw() +
+  theme(
+    panel.grid.minor = element_line(color = "gray95"),
+    panel.grid.major = element_line(color = "gray90"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right",
+    legend.box = "vertical",
+    plot.caption = element_text(hjust = 0)
+  ) +
+  # Add class names as x-axis labels
+  scale_x_continuous(
+    breaks = class_summary$mid,
+    labels = class_summary$HMDB.Class,
+    expand = c(0.01, 0.01)
+  ) +
+  # Add informative labels
+  labs(
+    x = "HMDB Class",
+    y = "Correlation (Rho) with 95% Bootstrap CI",
+    title = "Metabolite Correlations by HMDB Class",
+    subtitle = paste0(
+      "Showing ",
+      nrow(plot_data),
+      " metabolites across ",
+      length(unique(plot_data$HMDB.Class)),
+      " HMDB classes (with 95% Bootstrap CI)"
+    )
+  )
+
+# Display the plot
+print(p1)
+
+ggsave(p1,
+       filename = "4_manuscript/submission/Microbiome/revision_Figure//figure_1e_with_bootstrap_CI.pdf",
+       width = 10,
+       height = 6)
+
+cat("\n带有Bootstrap CI的相关性图已保存!\n")
+
+
+
+
+rownames(sample_info)<-sample_info$sample_id
+# 加载必要的R包
+library(tidyverse)
+library(boot)
+library(broom)
+
+# ===== 第一部分: Spearman相关性分析 (作为对照) =====
+
+cat("=== 开始Spearman相关性分析 ===\n")
+
+# 确保样本ID是匹配的
+common_samples <- intersect(rownames(alpha_diversity), rownames(metabolome_data))
+if (length(common_samples) == 0) {
+  stop("两个数据集没有共同的样本ID")
+}
+cat("共有", length(common_samples), "个样本可用于分析\n")
+
+# 使用共同样本筛选数据
+alpha_diversity_filtered <- alpha_diversity[common_samples, ]
+metabolome_data_filtered <- metabolome_data[common_samples, ]
+
+# 获取协变量信息
+sample_info_filtered <- sample_info[common_samples, ]
+
+# 计算每个位点alpha多样性与代谢物的Spearman相关性
+sites <- colnames(alpha_diversity_filtered)
+metabolites <- colnames(metabolome_data_filtered)
+
+# Spearman结果
+results_spearman <- data.frame(
+  Site = character(),
+  Metabolite = character(),
+  Rho_spearman = numeric(),
+  P_value_spearman = numeric(),
+  stringsAsFactors = FALSE
+)
+
+cat("计算Spearman相关性...\n")
+for (site in sites) {
+  for (metabolite in metabolites) {
+    alpha_values <- alpha_diversity_filtered[[site]]
+    metabolite_values <- metabolome_data_filtered[[metabolite]]
+    
+    # 计算Spearman相关性
+    cor_test <- cor.test(alpha_values, metabolite_values, 
+                         method = "spearman", exact = FALSE)
+    
+    results_spearman <- rbind(
+      results_spearman,
+      data.frame(
+        Site = site,
+        Metabolite = metabolite,
+        Rho_spearman = cor_test$estimate,
+        P_value_spearman = cor_test$p.value,
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+}
+
+# BH校正
+results_spearman$Adjusted_P_spearman <- p.adjust(results_spearman$P_value_spearman, 
+                                                 method = "BH")
+
+cat("Spearman分析完成!\n\n")
+
+# ===== 第二部分: 回归模型分析 (控制协变量) =====
+
+cat("=== 开始回归模型分析 (控制协变量) ===\n")
+
+# Bootstrap function for regression coefficient
+boot_reg <- function(data, indices, formula_str) {
+  d <- data[indices, ]
+  model <- lm(as.formula(formula_str), data = d)
+  # 返回alpha diversity的系数
+  coef(model)["alpha_div"]
+}
+
+# 回归结果
+results_regression <- data.frame(
+  Site = character(),
+  Metabolite = character(),
+  Beta = numeric(),
+  SE = numeric(),
+  P_value_regression = numeric(),
+  CI_lower = numeric(),
+  CI_upper = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# 设置Bootstrap参数
+n_bootstrap <- 1000
+set.seed(123)
+
+cat("开始回归分析并计算Bootstrap 95% CI...\n")
+
+for (site in sites) {
+  cat("处理位点:", site, "\n")
+  
+  for (metabolite in metabolites) {
+    # 准备回归数据
+    reg_data <- data.frame(
+      metabolite_value = metabolome_data_filtered[[metabolite]],
+      alpha_div = alpha_diversity_filtered[[site]],
+      age = sample_info_filtered$adjusted_age,
+      sex = sample_info_filtered$Gender,
+      bmi = sample_info_filtered$BMI,
+      ethnicity = sample_info_filtered$Ethnicity
+    )
+    
+    # 移除缺失值
+    reg_data <- reg_data[complete.cases(reg_data), ]
+    
+    if (nrow(reg_data) < 10) {
+      warning(paste("样本数不足:", site, "-", metabolite))
+      next
+    }
+    
+    # 拟合线性回归模型 (控制age, sex, bmi, ethnicity)
+    model <- lm(metabolite_value ~ alpha_div + age + sex + bmi + ethnicity, 
+                data = reg_data)
+    
+    # 提取结果
+    model_summary <- summary(model)
+    coef_table <- coef(model_summary)
+    
+    # 获取alpha_div的系数
+    if ("alpha_div" %in% rownames(coef_table)) {
+      beta <- coef_table["alpha_div", "Estimate"]
+      se <- coef_table["alpha_div", "Std. Error"]
+      p_value <- coef_table["alpha_div", "Pr(>|t|)"]
+      
+      # Bootstrap计算95% CI
+      formula_str <- "metabolite_value ~ alpha_div + age + sex + bmi + ethnicity"
+      
+      boot_results <- tryCatch({
+        boot(data = reg_data, 
+             statistic = boot_reg, 
+             R = n_bootstrap,
+             formula_str = formula_str)
+      }, error = function(e) {
+        warning(paste("Bootstrap failed for", site, "-", metabolite, ":", e$message))
+        return(NULL)
+      })
+      
+      if (!is.null(boot_results)) {
+        # 计算95% CI
+        boot_ci <- boot.ci(boot_results, type = "perc", conf = 0.95)
+        ci_lower <- boot_ci$percent[4]
+        ci_upper <- boot_ci$percent[5]
+      } else {
+        ci_lower <- NA
+        ci_upper <- NA
+      }
+      
+      # 添加结果
+      results_regression <- rbind(
+        results_regression,
+        data.frame(
+          Site = site,
+          Metabolite = metabolite,
+          Beta = beta,
+          SE = se,
+          P_value_regression = p_value,
+          CI_lower = ci_lower,
+          CI_upper = ci_upper,
+          stringsAsFactors = FALSE
+        )
+      )
+    }
+  }
+}
+
+# BH校正
+results_regression$Adjusted_P_regression <- p.adjust(results_regression$P_value_regression, 
+                                                     method = "BH")
+
+cat("回归分析完成!\n\n")
+
+# ===== 第三部分: 合并和对比两种方法的结果 =====
+
+cat("=== 合并和对比结果 ===\n")
+
+# 合并结果
+results_combined <- full_join(
+  results_spearman,
+  results_regression,
+  by = c("Site", "Metabolite")
+)
+
+# 添加代谢物注释
+results_combined <- merge(
+  results_combined,
+  metabolite_annotation[, c("variable_id", "HMDB.Name", "HMDB.Class", 
+                            "HMDB.Source.Microbial")],
+  by.x = "Metabolite",
+  by.y = "variable_id",
+  all.x = TRUE
+)
+
+# 筛选在两种方法中至少有一个显著的结果
+results_combined_sig <- results_combined %>%
+  filter(P_value_spearman < 0.05 | P_value_regression < 0.05) %>%
+  filter(!is.na(HMDB.Class) & HMDB.Class != "NA")
+
+# 添加一致性标记
+results_combined_sig <- results_combined_sig %>%
+  mutate(
+    # 方向一致性 (两者的符号是否相同)
+    direction_consistent = sign(Rho_spearman) == sign(Beta),
+    # 双方法显著
+    both_significant = (P_value_spearman < 0.05) & (P_value_regression < 0.05),
+    # 仅Spearman显著
+    only_spearman_sig = (P_value_spearman < 0.05) & (P_value_regression >= 0.05),
+    # 仅回归显著
+    only_regression_sig = (P_value_spearman >= 0.05) & (P_value_regression < 0.05),
+    # 一致性类型
+    consistency_type = case_when(
+      both_significant & direction_consistent ~ "Both significant & consistent",
+      both_significant & !direction_consistent ~ "Both significant but inconsistent",
+      only_spearman_sig ~ "Only Spearman significant",
+      only_regression_sig ~ "Only Regression significant",
+      TRUE ~ "Neither significant"
+    )
+  )
+
+# 保存结果
+write.csv(results_combined_sig, 
+          "correlation_comparison_spearman_vs_regression.csv", 
+          row.names = FALSE)
+
+# 统计摘要
+cat("\n=== 结果统计 ===\n")
+cat("总共比较的关联数:", nrow(results_combined_sig), "\n\n")
+
+consistency_table <- table(results_combined_sig$consistency_type)
+print(consistency_table)
+
+cat("\n方向一致性比例:", 
+    round(mean(results_combined_sig$direction_consistent, na.rm = TRUE) * 100, 2), "%\n")
+
+# ===== 第四部分: 可视化对比 =====
+
+library(ggplot2)
+library(ggrepel)
+
+# 1. Spearman Rho vs Regression Beta散点图
+p_scatter <- ggplot(results_combined_sig, 
+                    aes(x = Rho_spearman, y = Beta, color = consistency_type)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_point(alpha = 0.6, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "black", linetype = "dashed") +
+  scale_color_manual(
+    values = c(
+      "Both significant & consistent" = "#2E7D32",
+      "Both significant but inconsistent" = "#D32F2F",
+      "Only Spearman significant" = "#1976D2",
+      "Only Regression significant" = "#F57C00"
+    )
+  ) +
+  labs(
+    title = "Spearman Correlation vs Linear Regression",
+    subtitle = "Comparing unadjusted vs covariate-adjusted associations",
+    x = "Spearman Rho (unadjusted)",
+    y = "Regression Beta (adjusted for age, sex, BMI, ethnicity)",
+    color = "Consistency"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+print(p_scatter)
+ggsave(p_scatter,
+       filename = "4_manuscript/Figures/Figure_1/spearman_vs_regression_scatter.pdf",
+       width = 10,
+       height = 8)
+
+# 2. 按位点分面的对比图
+p_facet <- ggplot(results_combined_sig, 
+                  aes(x = Rho_spearman, y = Beta, color = both_significant)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_point(alpha = 0.6, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  facet_wrap(~ Site, scales = "free") +
+  scale_color_manual(
+    values = c("TRUE" = "#2E7D32", "FALSE" = "#999999"),
+    labels = c("TRUE" = "Both significant", "FALSE" = "At least one NS")
+  ) +
+  labs(
+    title = "Method Comparison by Body Site",
+    x = "Spearman Rho",
+    y = "Regression Beta",
+    color = NULL
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+print(p_facet)
+ggsave(p_facet,
+       filename = "4_manuscript/Figures/Figure_1/spearman_vs_regression_by_site.pdf",
+       width = 10,
+       height = 8)
+
+# 3. 一致性条形图
+consistency_summary <- results_combined_sig %>%
+  group_by(Site, consistency_type) %>%
+  summarise(count = n(), .groups = "drop")
+
+p_bar <- ggplot(consistency_summary, 
+                aes(x = Site, y = count, fill = consistency_type)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(
+    values = c(
+      "Both significant & consistent" = "#2E7D32",
+      "Both significant but inconsistent" = "#D32F2F",
+      "Only Spearman significant" = "#1976D2",
+      "Only Regression significant" = "#F57C00"
+    )
+  ) +
+  labs(
+    title = "Consistency of Spearman vs Regression Results",
+    x = "Body Site",
+    y = "Number of Associations",
+    fill = "Consistency Type"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+print(p_bar)
+ggsave(p_bar,
+       filename = "4_manuscript/Figures/Figure_1/consistency_by_site_barplot.pdf",
+       width = 10,
+       height = 6)
+
+# 4. P值对比图
+p_pvalue <- ggplot(results_combined_sig,
+                   aes(x = -log10(P_value_spearman), 
+                       y = -log10(P_value_regression),
+                       color = direction_consistent)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  geom_point(alpha = 0.6, size = 2) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+  geom_vline(xintercept = -log10(0.05), linetype = "dashed", color = "red") +
+  scale_color_manual(
+    values = c("TRUE" = "#2E7D32", "FALSE" = "#D32F2F"),
+    labels = c("TRUE" = "Same direction", "FALSE" = "Opposite direction")
+  ) +
+  labs(
+    title = "P-value Comparison",
+    x = "-log10(P-value) Spearman",
+    y = "-log10(P-value) Regression",
+    color = "Direction"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+print(p_pvalue)
+ggsave(p_pvalue,
+       filename = "4_manuscript/Figures/Figure_1/pvalue_comparison.pdf",
+       width = 8,
+       height = 8)
+
+# 5. 相关性热图 - 展示两种方法的Spearman相关系数
+cor_methods <- cor(results_combined_sig$Rho_spearman, 
+                   results_combined_sig$Beta, 
+                   use = "complete.obs", 
+                   method = "spearman")
+
+cat("\n两种方法结果的Spearman相关系数:", round(cor_methods, 3), "\n")
+
+cat("\n分析完成! 所有结果和图表已保存。\n")

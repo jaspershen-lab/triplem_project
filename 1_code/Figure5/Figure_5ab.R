@@ -275,7 +275,7 @@ for (i in 1:nrow(oral_gut_associations)) {
         treat = "oral",
         mediator = "gut",
         boot = TRUE,
-        sims = 10
+        sims = 100
       )
       
       # 保存结果

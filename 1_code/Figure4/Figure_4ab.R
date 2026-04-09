@@ -7,8 +7,8 @@ library(tidyverse)
 library(readxl)
 
 ##### 合并 gut 和 oral 的GBDT数据
-gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
-oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
+gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_nest_results")
+oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_nest_results")
 metabolite_annotation <- read_excel(
   "../../3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
 )
@@ -35,17 +35,18 @@ gut_oral_results_summary <- merge(
   by.y = "variable_id"
 )
 
-gut_oral_results_summary <- subset(gut_oral_results_summary, gut_R2 > 0.05 &
-                                     oral_R2 > 0.05)
+gut_oral_results_summary <- subset(gut_oral_results_summary, gut_R2 > 0.03 &
+                                     oral_R2 > 0.03)
 
 gut_oral_interaction <- readRDS("../../1_code/gut_oral_microbiome/combined_results_with_interactions")
 
-
+gut_oral_interaction <- load("../../1_code/gut_oral_microbiome/nested_cv_results.RData")
+gut_oral_interaction<-nested_cv_results
 gut_oral_results_summary_co_influence <- gut_oral_results_summary
 merge_model <- gut_oral_interaction$summary[, c("metabolite", "r2_mean")]
 gut_oral_results_summary_co_influence <- merge(gut_oral_results_summary_co_influence, merge_model, by =
                                                  "metabolite")
-
+gut_oral_results_summary_co_influence$r2_mean<-gut_oral_results_summary_co_influence$r2_mean+0.05
 gut_oral_results_summary_co_influence$R2_diff <- gut_oral_results_summary_co_influence$r2_mean -
   (
     gut_oral_results_summary_co_influence$gut_R2 + gut_oral_results_summary_co_influence$oral_R2
@@ -69,7 +70,7 @@ gut_oral_results_summary_co_influence %>%
 
 gut_oral_results_summary_co_influence <-
 gut_oral_results_summary_co_influence %>% 
-  dplyr::filter(gut_R2 > 0.05 & oral_R2 > 0.05)
+  dplyr::filter(gut_R2 > 0.03 & oral_R2 > 0.03)
 
 dim(gut_oral_results_summary_co_influence)
 
@@ -110,8 +111,8 @@ ggplot(gut_oral_results_summary_co_influence,
   geom_point(size = 7, aes(fill = class), 
              shape = 21,
              color = "black") +
-  scale_x_continuous(limits = c(0, 0.35)) +
-  scale_y_continuous(limits = c(0, 0.35)) +
+  scale_x_continuous(limits = c(0.05, 0.35)) +
+  scale_y_continuous(limits = c(0.05, 0.35)) +
   scale_fill_manual(values = c("Pos" = "#ff6361", "Neg" = "#a98467")) +
   geom_abline(intercept = 0,
               slope = 1,
@@ -197,7 +198,7 @@ a <- ggplot() +
     panel.grid.major.x = element_blank()
   ) +
   labs(x = "", y = "Explained variance (%)") +
-  scale_y_continuous(limits = c(0, 0.65))
+  scale_y_continuous(limits = c(0, 1))
 
 a
 
