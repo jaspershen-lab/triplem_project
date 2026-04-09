@@ -176,7 +176,7 @@ sample_info$IRIS[21]<-"IR"
 sample_info$IRIS[24]<-"IR"
 
 
-# Translated comment.
+# results.
 # plot_group_comparison_results <- function(results) {
 #   library(ggplot2)
 #   library(dplyr)
@@ -187,7 +187,7 @@ sample_info$IRIS[24]<-"IR"
 #   group1_name <- results$group1_name
 #   group2_name <- results$group2_name
 #   
-# Translated comment.
+# 1. R-squaredscatter plot.
 #   p1 <- ggplot(summary_df, aes(x = group1_r2, y = group2_r2)) +
 #     geom_point(aes(color = p_diff_adjusted < 0.05), alpha = 0.7, size = 2) +
 #     geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray") +
@@ -200,7 +200,7 @@ sample_info$IRIS[24]<-"IR"
 #          color = "Group Difference") +
 #     coord_equal()
 #   
-# Translated comment.
+# 2. R-squared.
 #   p2 <- ggplot(summary_df, aes(x = r2_difference)) +
 #     geom_histogram(bins = 30, alpha = 0.7, fill = "steelblue") +
 #     geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
@@ -209,7 +209,7 @@ sample_info$IRIS[24]<-"IR"
 #          x = paste("R² Difference (", group1_name, "-", group2_name, ")"),
 #          y = "Count")
 #   
-# Translated comment.
+# 3. interaction features.
 #   interaction_data <- summary_df %>%
 #     select(metabolite, group1_n_interaction, group2_n_interaction) %>%
 #     melt(id.vars = "metabolite", 
@@ -227,7 +227,7 @@ sample_info$IRIS[24]<-"IR"
 #          y = "Number of Interaction Features",
 #          fill = "Group")+stat_compare_means(label = "p.format")
 #   
-# Translated comment.
+# 4. vssignificance.
 #   p4 <- ggplot(summary_df, aes(x = effect_size, y = -log10(p_diff_adjusted))) +
 #     geom_point(aes(color = abs(effect_size) > 0.5 & p_diff_adjusted < 0.05), 
 #                alpha = 0.7, size = 2) +
@@ -241,7 +241,7 @@ sample_info$IRIS[24]<-"IR"
 #          y = "-log10(Adjusted p-value)",
 #          color = "Classification")
 #   
-# Translated comment.
+# 5. R-squared.
 #   p5 <- ggplot(summary_df, aes(x = r2_difference, y = -log10(p_diff_adjusted))) +
 #     geom_point(aes(color = p_diff_adjusted < 0.05 & abs(r2_difference) > 0.1), 
 #                alpha = 0.7, size = 2) +
@@ -255,7 +255,7 @@ sample_info$IRIS[24]<-"IR"
 #          y = "-log10(Adjusted p-value)",
 #          color = "Significance")
 #   
-# Translated comment.
+# 6. correlationheatmap: interaction featuresand R-squared.
 #   correlation_data <- summary_df %>%
 #     select(group1_r2, group2_r2, group1_n_interaction, group2_n_interaction, 
 #            r2_difference, interaction_difference) %>%
@@ -273,7 +273,6 @@ sample_info$IRIS[24]<-"IR"
 #     labs(title = "Correlation Matrix",
 #          x = "", y = "", fill = "Correlation")
 #   
-# Translated comment.
 #   combined_plots <- (p1 + p2) / (p3 + p4) / (p5 + p6) +
 #     plot_layout(heights = c(1, 1, 1))
 #   
@@ -288,19 +287,18 @@ sample_info$IRIS[24]<-"IR"
 #   ))
 # }
 
-# Translated comment.
 generate_group_comparison_report <- function(results, top_n = 10) {
   summary_df <- results$summary
   group1_name <- results$group1_name
   group2_name <- results$group2_name
   
-  # Translated comment.
+  # Summarize.
   cat("=== GROUP COMPARISON ANALYSIS REPORT ===\n\n")
   cat(sprintf("Group 1 (%s): %d samples\n", group1_name, length(results$group_info$group1_samples)))
   cat(sprintf("Group 2 (%s): %d samples\n", group2_name, length(results$group_info$group2_samples)))
   cat(sprintf("Total metabolites analyzed: %d\n\n", nrow(summary_df)))
   
-  # Translated comment.
+  # SignificantSummarize.
   significant_diffs <- sum(summary_df$p_diff_adjusted < 0.05, na.rm = TRUE)
   cat(sprintf("Metabolites with significant group differences (p < 0.05): %d (%.1f%%)\n", 
               significant_diffs, 100 * significant_diffs / nrow(summary_df)))
@@ -309,7 +307,7 @@ generate_group_comparison_report <- function(results, top_n = 10) {
   cat(sprintf("Metabolites with large effect size (|d| > 0.5) and significant: %d (%.1f%%)\n\n", 
               large_effect, 100 * large_effect / nrow(summary_df)))
   
-  # Translated comment.
+  # R-squared.
   cat("=== R² PERFORMANCE COMPARISON ===\n")
   cat(sprintf("Mean R² in %s: %.3f ± %.3f\n", 
               group1_name, mean(summary_df$group1_r2, na.rm = TRUE), sd(summary_df$group1_r2, na.rm = TRUE)))
@@ -318,7 +316,7 @@ generate_group_comparison_report <- function(results, top_n = 10) {
   cat(sprintf("Mean R² difference: %.3f ± %.3f\n\n", 
               mean(summary_df$r2_difference, na.rm = TRUE), sd(summary_df$r2_difference, na.rm = TRUE)))
   
-  # Translated comment.
+  # Interaction featuresUse.
   cat("=== INTERACTION FEATURES USAGE ===\n")
   cat(sprintf("Mean interaction features in %s: %.1f ± %.1f\n", 
               group1_name, mean(summary_df$group1_n_interaction, na.rm = TRUE), 
@@ -330,7 +328,7 @@ generate_group_comparison_report <- function(results, top_n = 10) {
               mean(summary_df$interaction_difference, na.rm = TRUE), 
               sd(summary_df$interaction_difference, na.rm = TRUE)))
   
-  # Translated comment.
+  # Topmetabolites.
   cat(sprintf("=== TOP %d METABOLITES WITH LARGEST GROUP DIFFERENCES ===\n", top_n))
   top_metabolites <- summary_df %>%
     arrange(p_diff_adjusted, desc(abs(r2_difference))) %>%
@@ -351,7 +349,7 @@ generate_group_comparison_report <- function(results, top_n = 10) {
                 row$interaction_difference))
   }
   
-  # Translated comment.
+  # ReturnFilterafterresults.
   return(list(
     significant_metabolites = summary_df[summary_df$p_diff_adjusted < 0.05, ],
     large_effect_metabolites = summary_df[abs(summary_df$effect_size) > 0.5 & 
@@ -371,20 +369,18 @@ generate_group_comparison_report <- function(results, top_n = 10) {
 
 
 
-# Translated comment.
+# results.
 visualization_results <- 
   plot_group_comparison_results(group_comparison_results)
 
-# Translated comment.
 print(visualization_results$combined)
 
 visualization_results$r2_comparison
 visualization_results$combined
 
-# Translated comment.
 detailed_report <- generate_group_comparison_report(group_comparison_results, top_n = 15)
 
-# Translated comment.
+# Viewsignificantmetabolites.
 significant_metabolites <- detailed_report$significant_metabolites
 print(head(significant_metabolites, 10))
 
@@ -393,7 +389,7 @@ significant_metabolites<-
   merge(significant_metabolites,metabolite_annotation,by.x="metabolite",by.y="variable_id")
 
 
-# Translated comment.
+# metabolites.
 
 Figure_6c <-
   visualization_results$interaction_features 
@@ -416,7 +412,7 @@ significant_metabolites<-subset(significant_metabolites,HMDB%in%metabolites_inde
 library(ggplot2)
 library(dplyr)
 
-# Translated comment.
+# data.
 if(nrow(significant_metabolites) > top_n) {
   plot_data <- significant_metabolites %>%
     arrange(desc(abs(r2_difference))) %>%
@@ -426,47 +422,47 @@ if(nrow(significant_metabolites) > top_n) {
     arrange(desc(abs(r2_difference)))
 }
 
-# Translated comment.
+# sort: (descending order),after(,).
 positive_data <- plot_data[plot_data$r2_difference > 0, ] %>%
   arrange(desc(r2_difference))
 negative_data <- plot_data[plot_data$r2_difference < 0, ] %>%
-  arrange(desc(r2_difference))  # translated comment
+  arrange(desc(r2_difference))  # ()(0).
 
-# Translated comment.
+# data.
 plot_data_ordered <- rbind(positive_data, negative_data)
 
-# Translated comment.
+# Createx.
 plot_data_ordered$x_pos <- nrow(plot_data_ordered):1
 
-# Translated comment.
+# bidirectionalCreatedata.
 plot_data_ordered$y_upper <- ifelse(plot_data_ordered$r2_difference > 0, 
                                     plot_data_ordered$r2_difference, 0)
 plot_data_ordered$y_lower <- ifelse(plot_data_ordered$r2_difference < 0, 
-                                    -plot_data_ordered$r2_difference, 0)  # translated comment
+                                    -plot_data_ordered$r2_difference, 0)  # for under .
 
-# Translated comment.
+# Sety.
 max_val <- max(abs(plot_data_ordered$r2_difference))
 
 p <- ggplot(plot_data_ordered, aes(x = x_pos)) +
-  # Translated comment.
+  # (IR,).
   geom_col(aes(y = y_upper), fill = "#E69F00", alpha = 0.9, width = 0.8) +
-  # Translated comment.
+  # Under (IS,,under ).
   geom_col(aes(y = -y_lower), fill = "#0072B2", alpha = 0.9, width = 0.8) +
-  # Translated comment.
+
   geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
-  # Translated comment.
+  # Sety.
   scale_y_continuous(
     limits = c(-max_val * 1.1, max_val * 1.1),
     breaks = seq(-max_val, max_val, length.out = 7),
-    labels = function(x) sprintf("%.1f", abs(x))  # translated comment
+    labels = function(x) sprintf("%.1f", abs(x))  # for .
   ) +
-  # Translated comment.
+  # XSet.
   scale_x_continuous(
     breaks = plot_data_ordered$x_pos,
     labels = plot_data_ordered$HMDB.Name,
     expand = c(0.01, 0.01)
   ) +
-  # Translated comment.
+  # Theme.
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8),
@@ -479,14 +475,14 @@ p <- ggplot(plot_data_ordered, aes(x = x_pos)) +
     axis.line.x = element_line(color = "black", size = 0.5),
     plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
   ) +
-  # Translated comment.
+  # Labels.
   labs(
     title = "Metabolite R² Differences: IR vs IS Groups",
     x = "",
     y = "R² Difference",
     caption = ""
   ) +
-  # Translated comment.
+  # Addcolorslegend.
   annotate("text", x = length(plot_data_ordered$metabolite) * 0.05, 
            y = max_val * 1, label = "IR", 
            color = "#E69F00", size = 4, fontface = "bold") +
@@ -519,12 +515,11 @@ hmdb_pathway =
 compound_list<-hmdb_pathway@compound_list
 
 
-# Translated comment.
+# Filter HMDB.ID .
 
-# Translated comment.
 detailed_report <- generate_group_comparison_report(group_comparison_results, top_n = 15)
 
-# Translated comment.
+# Viewsignificantmetabolites.
 significant_metabolites <- detailed_report$significant_metabolites
 print(head(significant_metabolites, 10))
 
@@ -532,12 +527,12 @@ significant_metabolites<-merge(significant_metabolites,metabolite_annotation,by.
 
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -557,42 +552,42 @@ enrich_results$p_value<-enrich_results$p_value/enrich_results$mapped_number
 
 enrich_results<-subset(enrich_results,p_value<0.05)
 
-# Translated comment.
+# Load.
 library(ggplot2)
 library(dplyr)
 
-# Translated comment.
+# Createdata.
 data <- enrich_results
 
-# Translated comment.
+# Calculate-log10(p_value)colors.
 data$neg_log10_p <- -log10(data$p_value)
 
-# Translated comment.
+# mapped_percentagesort.
 data <- data %>%
   arrange(desc(mapped_percentage)) %>%
   slice_head(n = 12)
 
-# Translated comment.
+# Createbar chart.
 Figure_6f<- ggplot(data, aes(x = reorder(pathway_name, mapped_percentage), 
                             y = mapped_percentage, 
                             fill = neg_log10_p)) +
   
-  # Translated comment.
+  # Addbar chart.
   geom_col(alpha = 0.8, width = 0.7) +
   
-  # Translated comment.
+  # Setcolors.
   scale_fill_gradient(low = "lightblue", high = "darkred", 
                       name = "-log10(P-value)") +
   
-  # Translated comment.
+  # coordinates,Y.
   coord_flip() +
   
-  # Translated comment.
+  # Addlabels.
   labs(title = "",
        x = "Pathway",
        y = "Mapped_percentage (%)") +
   
-  # Translated comment.
+  # Definetheme.
   theme_bw() +
   theme(
     plot.title = element_text(size = 16, face = "bold", hjust = 0.5),

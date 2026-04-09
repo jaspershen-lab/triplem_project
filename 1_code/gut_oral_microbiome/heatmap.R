@@ -1,47 +1,47 @@
   preprocess_combined_data <- function(gut_data, oral_data, metabolite_data) {
-    # Translated comment.
+    # Getsample IDs.
     gut_samples <- colnames(gut_data)
     oral_samples <- colnames(oral_data)
     meta_samples <- colnames(metabolite_data)
     
-    # Translated comment.
+    # Checksample IDs.
     message("Initial sample counts:")
     message(sprintf("Gut microbiome samples: %d", length(gut_samples)))
     message(sprintf("Oral microbiome samples: %d", length(oral_samples)))
     message(sprintf("Metabolite samples: %d", length(meta_samples)))
     
-    # Translated comment.
+    # samples.
     common_samples <- Reduce(intersect, list(gut_samples, oral_samples, meta_samples))
     message(sprintf("Common samples across all datasets: %d", length(common_samples)))
     
-    # Translated comment.
+    # Extractsamplesdata.
     gut_matched <- gut_data[, common_samples]
     oral_matched <- oral_data[, common_samples]
     metabolite_matched <- metabolite_data[, common_samples]
     
-    # Translated comment.
+    # ConvertCheckdata.
     gut_df <- as.data.frame(t(gut_matched))
     oral_df <- as.data.frame(t(oral_matched))
     
-    # Translated comment.
+    # Add.
     colnames(gut_df) <- paste0("gut_", colnames(gut_df))
     colnames(oral_df) <- paste0("oral_", colnames(oral_df))
     
-    # Translated comment.
+    # Check.
     message(sprintf("Gut features: %d", ncol(gut_df)))
     message(sprintf("Oral features: %d", ncol(oral_df)))
     
-    # Translated comment.
+    # Mergedata.
     combined_microbiome <- cbind(gut_df, oral_df)
     
-    # Translated comment.
+    # If  source ,Add().
     if ("source" %in% colnames(combined_microbiome)) {
       colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)] <- 
         paste0(combined_microbiome$source, "_", 
                colnames(combined_microbiome)[1:(ncol(combined_microbiome)-1)])
     }
     
-    # Translated comment.
+    # Ensure sample order matches.
     rownames(combined_microbiome) <- common_samples
     
     return(list(
@@ -58,28 +58,28 @@
                                              p_threshold = 0.05,
                                              p_adjust_method = "BH",
                                              rho_threshold = 0.1) {
-    # Translated comment.
+    # Set.
     set.seed(seed)
     
-    # Translated comment.
+    # Set.
     n_boots <- 100
     n_folds <- 10
     
-    # Translated comment.
+    # Setparallel.
     if(is.null(n_cores)) {
       n_cores <- detectCores() - 1
     }
     cl <- makeCluster(n_cores)
     registerDoParallel(cl)
     
-    # Translated comment.
+    # Data preprocessing.
     processed_data <- preprocess_combined_data(gut_data, oral_data, metabolite_data)
     
-    # Translated comment.
+    # data.
     X <- as.matrix(processed_data$combined_microbiome)
     Y <- processed_data$metabolite
     
-    # Translated comment.
+
     message("\nAnalysis settings:")
     message(sprintf("Feature selection: %s", if(do_feature_selection) "Yes" else "No"))
     if(do_feature_selection) {
@@ -95,7 +95,7 @@
     message(sprintf("Metabolites: %d", ncol(Y)))
     message(sprintf("Using %d cores", n_cores))
     
-    # Translated comment.
+    # GBDT.
     gbdt_params <- list(
       n.trees = 100,
       interaction.depth = 15,
@@ -105,24 +105,24 @@
       train.fraction = 0.8
     )
     
-    # Translated comment.
+    # parallel.
     clusterExport(cl, c("single_cv", "calculate_r2"), envir = environment())
     
-    # Translated comment.
+    # results.
     results <- list()
     
-    # Translated comment.
+    # Set.
     pb <- progress_bar$new(
       format = "[:bar] :percent | Metabolite :current/:total | Elapsed: :elapsed | ETA: :eta",
       total = ncol(Y)
     )
     
-    # Translated comment.
+    # Analyzemetabolites.
     for(i in 1:ncol(Y)) {
       start_time <- Sys.time()
       current_y <- Y[, i]
       
-      # Translated comment.
+      # Feature selection.
       if(do_feature_selection) {
         feature_selection <- select_relevant_features(
           X, current_y,
@@ -138,7 +138,7 @@
           X_selected <- X
         }
         
-        # Translated comment.
+        # Summarizein featuresin oralgutproportion.
         n_gut <- sum(grepl("^gut_", selected_features))
         n_oral <- sum(grepl("^oral_", selected_features))
       } else {
@@ -147,9 +147,9 @@
         n_oral <- sum(grepl("^oral_", colnames(X)))
       }
       
-      # Translated comment.
+      # featuresAnalyze.
       if(ncol(X_selected) > 0) {
-        # Translated comment.
+        # ParallelBootstrap.
         boot_results <- foreach(b = 1:n_boots,
                                 .combine = 'c',
                                 .packages = c("gbm", "caret")) %dopar% {
@@ -162,13 +162,13 @@
                                   single_cv(boot_X, boot_y, n_folds, gbdt_params, seed = local_seed)
                                 }
         
-        # Translated comment.
+        # CalculateSummarize.
         mean_r2 <- mean(boot_results)
         ci <- quantile(boot_results, probs = c(0.025, 0.975))
         t_stat <- mean_r2 / (sd(boot_results) / sqrt(n_boots))
         p_value <- 2 * pt(-abs(t_stat), df = n_boots - 1)
         
-        # Translated comment.
+        # UsefeaturesGBDT,Calculatefeaturesimportance.
         final_data <- data.frame(current_y, X_selected)
         final_model <- gbm(
           current_y ~ ., data = final_data,
@@ -190,7 +190,7 @@
         feature_importance <- NULL
       }
       
-      # Translated comment.
+      # results.
       results[[i]] <- list(
         metabolite = colnames(Y)[i],
         mean_r2 = mean_r2,
@@ -202,10 +202,10 @@
         n_selected_features = if(do_feature_selection) length(selected_features) else ncol(X),
         n_gut_features = n_gut,
         n_oral_features = n_oral,
-        feature_importance = feature_importance  # translated comment
+        feature_importance = feature_importance  # Addfeaturesimportanceresults.
       )
       
-      # Translated comment.
+      # results.
       pb$tick()
       end_time <- Sys.time()
       time_taken <- difftime(end_time, start_time, units = "mins")
@@ -218,10 +218,10 @@
       message(sprintf("Time: %.2f mins", time_taken))
     }
     
-    # Translated comment.
+    # Stop the parallel cluster.
     stopCluster(cl)
     
-    # Translated comment.
+    # Organize the results into a data frame.
     summary_df <- do.call(rbind, lapply(results, function(x) {
       data.frame(
         metabolite = x$metabolite,
@@ -235,7 +235,7 @@
       )
     }))
     
-    # Translated comment.
+    # AddAnalyze.
     if(do_feature_selection) {
       viz_results <- plot_combined_feature_selection_results(list(
         detailed_results = results,
@@ -254,7 +254,7 @@
   }
   
   plot_combined_feature_selection_results <- function(results) {
-    # Translated comment.
+    # data.
     feature_summary <- do.call(rbind, lapply(results$detailed_results, function(x) {
       data.frame(
         metabolite = x$metabolite,
@@ -265,7 +265,7 @@
       )
     }))
     
-    # Translated comment.
+    # 1. featuresand R-squared.
     p1 <- ggplot(feature_summary, aes(x = n_features, y = r2)) +
       geom_point(alpha = 0.6) +
       geom_smooth(method = "loess", se = TRUE) +
@@ -274,7 +274,7 @@
            x = "Number of Selected Features",
            y = "R² Score")
     
-    # Translated comment.
+    # 2. oralvsgutfeaturesproportion.
     p2 <- ggplot(feature_summary, aes(x = n_gut / (n_gut + n_oral), y = r2)) +
       geom_point(alpha = 0.6) +
       geom_smooth(method = "loess", se = TRUE) +
@@ -283,7 +283,7 @@
            x = "Proportion of Gut Features",
            y = "R² Score")
     
-    # Translated comment.
+    # 3. features.
     feature_source_data <- data.frame(
       Source = rep(c("Gut", "Oral"), nrow(feature_summary)),
       Count = c(feature_summary$n_gut, feature_summary$n_oral),
@@ -296,7 +296,7 @@
       labs(title = "Distribution of Selected Features by Source",
            y = "Number of Selected Features")
     
-    # Translated comment.
+
     combined_plots <- (p1 + p2) / p3 +
       plot_layout(heights = c(1, 0.8))
     
@@ -331,39 +331,39 @@
    
    
    
-   # Translated comment.
+   # Extractmetabolitesfeaturesimportancedata frame.
    get_feature_importance_df <- function(combined_results) {
-     # Translated comment.
+     # metabolitesimportancedata.
      importance_list <- list()
      
-     # Translated comment.
+     # Iterate over each metabolite result.
      for (i in seq_along(combined_results$detailed_results)) {
        metabolite_name <- combined_results$detailed_results[[i]]$metabolite
        feature_importance <- combined_results$detailed_results[[i]]$feature_importance
        
-       # Translated comment.
+       # If feature_importance ,.
        if (is.null(feature_importance)) next
        
-       # Translated comment.
+       # Add metabolite information.
        feature_importance$metabolite <- metabolite_name
        
-       # Translated comment.
+
        importance_list[[i]] <- feature_importance
      }
      
-     # Translated comment.
+     # Mergemetabolitesdata.
      importance_df <- do.call(rbind, importance_list)
      
-     # Translated comment.
+     # column names.
      colnames(importance_df) <- c("species", "importance", "metabolite")
      
      return(importance_df)
    }
    
-   # Translated comment.
+   # RunGetdata frame.
    feature_importance_df <- get_feature_importance_df(combined_results)
    
-   # Translated comment.
+
    head(feature_importance_df)
    
    
@@ -390,50 +390,50 @@
    
    
    
-   # Translated comment.
+   # Read the data.
    data <- gut_oral_results_summary_co_influence
    
-   # Translated comment.
+   # Process the data.
    library(tidyr)
    library(dplyr)
    library(ggplot2)
-   # Translated comment.
+   # Handle duplicated HMDB.Name entries.
    data$HMDB.Name <- make.unique(data$HMDB.Name, sep = "_")
-   # Translated comment.
+   # Sort the data and select the top 30 metabolites.
    data_sorted <- data %>%
      arrange(desc(r2_mean)) %>%
      slice(1:30)
    
-   # Translated comment.
+   # Create long-format data for the stacked plot.
    data_long <- data_sorted %>%
      select(HMDB.Name, gut_R2, oral_R2, r2_mean) %>%
      gather(key = "source", value = "value", c(gut_R2, oral_R2))
    
-   # Translated comment.
+   # Create a separate long-format table for r2_mean.
    r2_mean_long <- data_sorted %>%
      select(HMDB.Name, r2_mean) %>%
      mutate(source = "r2_mean") %>%
      rename(value = r2_mean)
    
-   # Translated comment.
+   # Create the factor level order.
    level_order <- data_sorted$HMDB.Name
    
-   # Translated comment.
+   # Convert HMDB.Name to a factor and set the level order.
    data_long$HMDB.Name <- factor(data_long$HMDB.Name, levels = level_order)
    r2_mean_long$HMDB.Name <- factor(r2_mean_long$HMDB.Name, levels = level_order)
    
-   # Translated comment.
+   # Create the stacked bar chart and r2_mean comparison plot.
    ggplot() +
-     # Translated comment.
+     # Stacked gut_R2 and oral_R2.
      geom_col(data = data_long, 
               aes(x = HMDB.Name, y = value, fill = source),
               position = "stack",
               width = 0.4) +
-     # Translated comment.
+     # Bars for r2_mean.
      geom_col(data = r2_mean_long,
               aes(x = HMDB.Name, y = value, fill = source),
               width = 0.4,
-              position = position_nudge(x = 0.4)) +  # translated comment
+              position = position_nudge(x = 0.4)) +  # Shift the r2_mean bars to the right.
      scale_fill_manual(values = c("gut_R2" = "#edd064", 
                                   "oral_R2" = "#a1d5b9",
                                   "r2_mean" = "grey50"),
@@ -452,33 +452,33 @@
      ) +
      scale_y_continuous(limits = c(0, 0.65))
    
-   # Translated comment.
+   # Summarize.
    data_sorted$sum_R2 <- data_sorted$gut_R2 + data_sorted$oral_R2
    print("Summary of gut_R2 + oral_R2 vs r2_mean:")
    data_sorted$difference <- data_sorted$sum_R2 - data_sorted$r2_mean
    summary(data_sorted$difference)
    
-   # Translated comment.
+   # Createbar chart.
    
    
    
    
    
-   # Translated comment.
+   # Filteroralgutmetabolites.
    
    feature_importance_df_co_influence<-feature_importance_df
    
-   # Translated comment.
+   # Filterimportancetaxa.
    
    feature_importance_df_co_influence<-subset(feature_importance_df_co_influence,importance>1)
    
    
    feature_importance_df_co_influence<-merge(feature_importance_df_co_influence,metabolite_annotation[,c("variable_id","HMDB.Name","HMDB.Class")],by.x="metabolite",by.y="variable_id")
-   # Translated comment.
+   # gut  oral shared taxa.
    
    merge_tax<-data.frame(rbind(gut_temp_object@variable_info,oral_temp_object@variable_info))
    
-   # Translated comment.
+   # species.
    feature_importance_df_co_influence <- separate(feature_importance_df_co_influence, "species", into = c("group", "variable_id"), sep = "_",extra = "merge")
   
    feature_importance_df_co_influence<-merge(feature_importance_df_co_influence,merge_tax[,c("Genus","variable_id")],by="variable_id",all=TRUE)
@@ -490,21 +490,21 @@
    
   
    
-  # Translated comment.
+  # Load required packages.
   library(ComplexHeatmap)
   library(circlize)
   library(tidyr)
   library(dplyr)
   
-  # Translated comment.
-  # Translated comment.
+  # datafeature_importance_df_co_influence.
+  # groupGenus,andHMDB.Namemetabolite.
   feature_importance_df_co_influence <- feature_importance_df_co_influence %>%
     mutate(
       group_genus = paste(group, Genus, sep = "_"),
       hmdb_metabolite = paste(HMDB.Name, metabolite, sep = "_")
     )
   
-  # Translated comment.
+  # datamatrix.
   heatmap_matrix <- feature_importance_df_co_influence %>%
     select(hmdb_metabolite, group_genus, importance) %>%
     pivot_wider(names_from = group_genus,
@@ -512,41 +512,41 @@
                 values_fill = list(importance = 0)) %>%
     as.data.frame()
   
-  # Translated comment.
+  # hmdb_metaboliterow names.
   rownames(heatmap_matrix) <- heatmap_matrix$hmdb_metabolite
   heatmap_matrix$hmdb_metabolite <- NULL
   
-  # Translated comment.
+  # Convertmatrix.
   matrix_data <- as.matrix(heatmap_matrix)
   
   
   cols_to_keep <- apply(matrix_data, 2, function(x) sum(x > 0) > 3)
   
-  # Translated comment.
+  # UseFiltermatrix.
   matrix_data <- matrix_data[, cols_to_keep]
-  # Translated comment.
+  # Createheatmap.
   
   
-  # Translated comment.
-  # Translated comment.
+  # Createcolors.
+  # 00,for 0.
   scale_by_row <- function(x) {
-    # Translated comment.
+    # 0.
     non_zero <- x != 0
-    if(sum(non_zero) > 0) {  # translated comment
-      # Translated comment.
+    if(sum(non_zero) > 0) {  # If in 0.
+      # for 0.
       x[non_zero] <- (x[non_zero] - min(x[non_zero])) / (max(x[non_zero]) - min(x[non_zero]))
     }
     return(x)
   }
   
-  # Translated comment.
+
   scaled_matrix <- t(apply(matrix_data, 1, scale_by_row))
   scaled_matrix[27,13]<-0
-  # Translated comment.
+  # Createcolors.
   col_fun = colorRamp2(c(0, 0.5, 1), 
-                       c("# translated comment
+                       c("# FFFFFF","99CC00","FF99CC")) .
   
-  # Translated comment.
+  # Calculateheatmap.
   cellwidth = 0.7
   cellheight = 0.7
   cn = dim(scaled_matrix)[2]
@@ -554,11 +554,11 @@
   w = cellwidth * cn
   h = cellheight * rn
   
-  # Translated comment.
+  # Calculate.
   bacteria_counts <- colSums(scaled_matrix > 0)
   metabolite_counts <- rowSums(scaled_matrix > 0)
   
-  # Translated comment.
+  # Createannotations.
   column_ha = HeatmapAnnotation(
     "Non-zero metabolites" = anno_barplot(bacteria_counts,
                                           height = unit(2, "cm"),
@@ -568,7 +568,7 @@
     annotation_name_gp = gpar(fontsize = 8)
   )
   
-  # Translated comment.
+  # Createannotations.
   row_ha = rowAnnotation(
     "Non-zero bacteria" = anno_barplot(metabolite_counts,
                                        width = unit(2, "cm"),
@@ -578,43 +578,43 @@
     annotation_name_gp = gpar(fontsize = 8)
   )
   
-  # Translated comment.
+  # Createheatmap.
   heatmap <- Heatmap(scaled_matrix,
                      name = "Scaled Importance",
                      col = col_fun,
-                     # Translated comment.
+                     # Set.
                      width = unit(w, "cm"),
                      height = unit(h, "cm"),
                      rect_gp = gpar(col = "white", lwd = 2),
                      
-                     # Translated comment.
+                     # Add.
                      border = TRUE,
                      border_gp = gpar(col = "grey", lwd = 2),
                      
-                     # Translated comment.
+                     # Setannotations.
                      cluster_rows = TRUE,
                      cluster_columns = TRUE,
                      show_row_dend = FALSE,
                      show_column_dend = FALSE,
                      
-                     # Translated comment.
+                     # Addannotations.
                      top_annotation = column_ha,
                      right_annotation = row_ha,
                      
-                     # Translated comment.
+                     # Set.
                      show_row_names = TRUE,
                      show_column_names = TRUE,
                      row_names_gp = gpar(fontsize = 8),
                      column_names_gp = gpar(fontsize = 8),
                      column_names_rot = 45,
                      
-                     # Translated comment.
+
                      row_title = "HMDB_Metabolites",
                      column_title = "Group_Genus",
                      column_title_gp = gpar(fontsize = 12, fontface = "bold"),
                      row_title_gp = gpar(fontsize = 12, fontface = "bold"),
                      
-                     # Translated comment.
+                     # Legend.
                      heatmap_legend_param = list(
                        title = "Scaled Importance",
                        title_gp = gpar(fontsize = 10, fontface = "bold"),

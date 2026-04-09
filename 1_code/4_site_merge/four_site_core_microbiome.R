@@ -154,10 +154,10 @@ nasal_object <-
 
 
 
-# Translated comment.
+# Combine microbiome data from four body sites for a PCoA plot.
 
-# Translated comment.
-# Translated comment.
+# Read microbiome data from four body regions.
+# Assume the files are in the current working directory.
 gut_genus<-gut_object@expression_data
 rownames(gut_genus)<-gut_object@variable_info$Genus
 
@@ -170,35 +170,35 @@ rownames(skin_genus)<-skin_object@variable_info$Genus
 nasal_genus<-nasal_object@expression_data
 rownames(nasal_genus)<-nasal_object@variable_info$Genus
 
-# Translated comment.
-library(vegan)      # translated comment
-library(ggplot2)    # translated comment
-library(readr)      # translated comment
-library(dplyr)      # translated comment
-library(tidyr)      # translated comment
+# Load required R packages.
+library(vegan)      # CalculateNMDS.
+library(ggplot2)    # Plot.
+library(readr)      # ReadCSV.
+library(dplyr)      # dataProcess.
+library(tidyr)      # data.
 
 
-# Translated comment.
+# Add a source label for each dataset.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Combine all data.
+# Transpose the matrix so rows are samples and columns are taxa.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Rename samples to avoid duplicates while keeping the original information.
+# Assume identical sample names represent different body sites from the same person.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# Translated comment.
+# Create sample type labels.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -208,115 +208,115 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# Translated comment.
-# Translated comment.
+# Merge all taxa.
+# First ensure all tables share the same taxa columns.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# Translated comment.
+# Update the helper that fills missing taxa to avoid index errors.
 fill_missing_species <- function(df, all_species) {
-  # Translated comment.
+  # Create a new data frame containing all possible taxa.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # Translated comment.
+  # Fill in the existing data.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # Translated comment.
+  # Convert to a data frame and return it.
   return(as.data.frame(result))
 }
 
-# Translated comment.
+# Apply the updated function.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# Translated comment.
+# Merge all sample data.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# Translated comment.
+# Merge sample labels.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# Translated comment.
+# Ensure sample order matches.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
-# Translated comment.
+# Load required packages.
 library(microbiome)
 library(phyloseq)
 library(dplyr)
 library(ggplot2)
-library(gridExtra) # translated comment
+library(gridExtra)
 
 
 
-# Translated comment.
+# CreateOTU.
 otu_table <- otu_table(as.matrix(t(all_data)), taxa_are_rows = TRUE)
 
-# Translated comment.
+# Createsamplesdata.
 sample_data <- sample_data(sample_metadata)
 
-# Translated comment.
+# Createphyloseqfor .
 physeq <- phyloseq(otu_table, sample_data)
 
-# Translated comment.
+# site.
 site_list <- c("Gut", "Oral", "Skin", "Nasal")
 core_taxa_results <- list()
 
-# Translated comment.
+# ------------------------ Part 1: core taxa ------------------------.
 
-# Translated comment.
+# sitecore taxa.
 for (site in site_list) {
-  # Translated comment.
+  # Filtersitesamples.
   site_samples <- subset_samples(physeq, Site == site)
   
-  # Translated comment.
-  # Translated comment.
-  # Translated comment.
-  core_detection <- 0.001  # translated comment
-  core_prevalence <- 0.5   # translated comment
+  # Usemicrobiomecore_memberscore taxa.
+  # Detection: relative abundancethreshold.
+  # Prevalence: in samplesthreshold.
+  core_detection <- 0.001  # Relative abundanceat least 0.1%.
+  core_prevalence <- 0.5   # at least 50%samplesin .
   
-  # Translated comment.
+  # Calculatetaxa.
   core_taxa <- core_members(site_samples, 
                             detection = core_detection, 
                             prevalence = core_prevalence)
   
-  # Translated comment.
+  # If core taxa10,10.
   if (length(core_taxa) > 10) {
-    # Translated comment.
+    # Calculatetaxa.
     taxa_sums <- taxa_sums(site_samples)
     taxa_sums <- taxa_sums[names(taxa_sums) %in% core_taxa]
     taxa_sums <- sort(taxa_sums, decreasing = TRUE)
     core_taxa <- names(taxa_sums)[1:10]
   }
   
-  # Translated comment.
+  # results.
   core_taxa_results[[site]] <- core_taxa
   
-  # Translated comment.
-  cat("\n", site, "核心物种 (", length(core_taxa), "):\n", sep="")
+  # results.
+  cat("\n", site, "Core taxa (", length(core_taxa), "):\n", sep="")
   print(core_taxa)
 }
 
-# Translated comment.
+# Mergesitecore taxa.
 all_core_taxa <- unique(unlist(core_taxa_results))
-cat("\n总共识别出", length(all_core_taxa), "个核心物种\n")
+cat("\nIdentified a total of ", length(all_core_taxa), " core taxa\n")
 
-# Translated comment.
+# ------------------------ Part 2: Useplot_core ------------------------.
 library(RColorBrewer)
-# Translated comment.
+# CreatePlotsitecore taxa.
 plot_site_core <- function(physeq, site, core_taxa) {
-  # Translated comment.
+  # Filtersitesamples.
   site_samples <- subset_samples(physeq, Site == site)
   
-  # Translated comment.
+  # Convertrelative abundance.
   site_samples_rel <- site_samples
   
-  # Translated comment.
+  # sitecore taxa.
   site_samples_rel <- prune_taxa(all_core_taxa, site_samples_rel)
   
   
@@ -327,8 +327,8 @@ plot_site_core <- function(physeq, site, core_taxa) {
   # Also define gray color palette
   gray <- rev(brewer.pal(5, "RdBu"))
   
-  # Translated comment.
-  # Translated comment.
+  # Useplot_corePlot.
+  # Createheatmapcore taxathresholdunder .
   p <- plot_core(site_samples_rel,
                  plot.type = "heatmap", 
                  colours = gray,
@@ -347,13 +347,12 @@ plot_site_core <- function(physeq, site, core_taxa) {
   return(p)
 }
 
-# Translated comment.
+# sitePlotcore taxa.
 plot_list <- list()
 for (site in site_list) {
   plot_list[[site]] <- plot_site_core(physeq, site, core_taxa_results[[site]])
 }
 
-# Translated comment.
 combined_plot <- grid.arrange(
   plot_list[["Gut"]],
   plot_list[["Oral"]],

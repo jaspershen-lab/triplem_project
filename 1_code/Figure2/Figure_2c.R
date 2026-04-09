@@ -486,14 +486,14 @@ plot_quadrant_metabolite_selection <-
   function(selection_results_list,
            metabolomics_class,
            sites) {
-    # Translated comment.
+    # CreatemetabolitesIDfor .
     id_to_name <- setNames(metabolomics_class$Compound.name,
                            metabolomics_class$variable_id)
     
-    # Translated comment.
+    # Create an empty data frame to store all results.
     plot_data <- data.frame()
     
-    # Translated comment.
+    # Processbody sitedata.
     for (i in seq_along(sites)) {
       site <- sites[i]
       temp_data <-
@@ -502,26 +502,26 @@ plot_quadrant_metabolite_selection <-
       temp_data$site <- site
       temp_data$selected <- temp_data$n_sig_cors > 0
       
-      # Translated comment.
+      # Setcoordinates.
       if (i == 1) {
-        # Translated comment.
+
         temp_data$plot_x <- abs(temp_data$max_cor)
         temp_data$plot_y <- temp_data$n_sig_cors
       } else if (i == 2) {
-        # Translated comment.
+
         temp_data$plot_x <- -abs(temp_data$max_cor)
         temp_data$plot_y <- temp_data$n_sig_cors
       } else if (i == 3) {
-        # Translated comment.
+
         temp_data$plot_x <- -abs(temp_data$max_cor)
         temp_data$plot_y <- -temp_data$n_sig_cors
       } else {
-        # Translated comment.
+
         temp_data$plot_x <- abs(temp_data$max_cor)
         temp_data$plot_y <- -temp_data$n_sig_cors
       }
       
-      # Translated comment.
+      # body sitetop 10metabolites.
       temp_data$is_top10 <- FALSE
       temp_data$is_top10[order(-temp_data$n_sig_cors)[1:10]] <- TRUE
       
@@ -597,7 +597,7 @@ skin_result <- select_significant_metabolites(skin_temp_object@expression_data,
 nasal_result <- select_significant_metabolites(nasal_temp_object@expression_data,
                                                metabolome = metabolomics_temp_object@expression_data)
 
-# Translated comment.
+# body siteresults.
 selection_results_list <- list(
   "gut" = gut_result,
   "oral" = oral_result,
@@ -605,10 +605,10 @@ selection_results_list <- list(
   "nasal" = nasal_result
 )
 
-# Translated comment.
+# Definebody site.
 sites <- c("gut", "oral", "skin", "nasal")
 rownames(metabolite_annotation) <- metabolite_annotation$variable_id
-# Translated comment.
+# Plotbody site.
 p <- plot_quadrant_metabolite_selection(
   selection_results_list = selection_results_list,
   metabolomics_class = metabolite_annotation,

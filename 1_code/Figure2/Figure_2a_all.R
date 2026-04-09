@@ -19,7 +19,7 @@ gut_microbiome_table<-expression_data
 gut_microbiome_metadata<-sample_info
 gut_microbiome_tax<-variable_info
 
-# Translated comment.
+# microbiome data.
 
 gut_microbiome_metadata <- gut_microbiome_metadata %>% filter(!is.na(Gender))
 gut_microbiome_metadata <- gut_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -52,7 +52,7 @@ oral_microbiome_table<-expression_data
 oral_microbiome_metadata<-sample_info
 oral_microbiome_tax<-variable_info
 
-# Translated comment.
+# microbiome data.
 
 oral_microbiome_metadata <- oral_microbiome_metadata %>% filter(!is.na(Gender))
 oral_microbiome_metadata <- oral_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -85,7 +85,7 @@ skin_microbiome_table<-expression_data
 skin_microbiome_metadata<-sample_info
 skin_microbiome_tax<-variable_info
 
-# Translated comment.
+# microbiome data.
 
 skin_microbiome_metadata <- skin_microbiome_metadata %>% filter(!is.na(Gender))
 skin_microbiome_metadata <- skin_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -119,7 +119,7 @@ nasal_microbiome_metadata<-sample_info
 nasal_microbiome_tax<-variable_info
 
 
-# Translated comment.
+# microbiome data.
 
 nasal_microbiome_metadata <- nasal_microbiome_metadata %>% filter(!is.na(Gender))
 nasal_microbiome_metadata <- nasal_microbiome_metadata %>% filter(!is.na(IRIS))
@@ -175,7 +175,7 @@ expression_data_metabolome<-data.frame(t(expression_data_metabolome))
 colnames(expression_data_metabolome)<-variable_info_metabolome$variable_id
 
 
-# Translated comment.
+# Mergebody sitedata.
 
 Common_sample<-Reduce(intersect,list(row.names(expression_data_metabolome),row.names(gut_microbiome_table),row.names(oral_microbiome_table),row.names(nasal_microbiome_table),row.names(skin_microbiome_table)))
 
@@ -199,13 +199,13 @@ all_microbiome_data<-cbind(gut_microbiome_table,oral_microbiome_table,nasal_micr
 MM_adonis <- function(gut_microbiome_table, expression_data_metabolome) {
   library(compositions)
   library(vegan)
-  # Translated comment.
+  # And data.
   
   shared_samples <- intersect(row.names(gut_microbiome_table), row.names(expression_data_metabolome))
   expression_data_metabolome <- expression_data_metabolome[shared_samples, ]
   gut_microbiome_table<-gut_microbiome_table[shared_samples,]
   
-  # Translated comment.
+  # CalculateadonisAnalyze.
   metabolome_dist <- vegdist(expression_data_metabolome, method = "euclidean")
   results <- NULL
   for (i in colnames(gut_microbiome_table)) {
@@ -232,6 +232,6 @@ metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_prep
 metabolite_annotation<-subset(metabolite_annotation,metabolite_annotation$HMDB.Source.Microbial=="TRUE")
 expression_data_metabolome_microbial<-expression_data_metabolome[,metabolite_annotation$variable_id]
 
-# Translated comment.
+# Calculatemicrobesmetabolitesexplained variance.
 
 all_microbiome_data_micro<-MM_adonis(all_microbiome_data,expression_data_metabolome_microbial)

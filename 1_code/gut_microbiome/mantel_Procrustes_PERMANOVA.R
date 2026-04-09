@@ -119,7 +119,7 @@ metabolomics_class<-metabolomics_class%>%filter(HMDB.Source.Microbial=="TRUE")
 metabolome_data<-metabolome_data[metabolomics_class$variable_id,]
 sample_info <- metabolomics_temp_object@sample_info
 rownames(sample_info)<-sample_info$sample_id
-# Translated comment.
+# 1. Filtersignificantmetabolites.
 selection_results <- select_significant_metabolites(
   gut_microbiome = gut_data,
   metabolome = metabolome_data,
@@ -127,20 +127,20 @@ selection_results <- select_significant_metabolites(
   p_threshold = 0.05
 )
 
-# Translated comment.
+# 2. metabolitesFilterresults.
 metabolite_plot <- plot_metabolite_selection(selection_results,metabolomics_class = metabolomics_class)
 
 gut_data<-gut_data
 
-# Translated comment.
+# 3. Analyze.
 results <- analyze_associations(
   gut_microbiome = gut_data[,], 
   metabolome = metabolome_data,
   selected_metabolites = selection_results$significant_metabolites,
-  metadata =  sample_info  # translated comment
+  metadata =  sample_info  # IRISdata.
 )
 
-# Translated comment.
+# 4. Plotresults.
 plots <- plot_associations(results)
 
 distance<-plots$distances$data
@@ -148,9 +148,9 @@ distance<-cbind(distance,gut_temp_object@sample_info[,15:22])
 distance<-subset(distance,diabetes_class=="Prediabetic")
 ggplot(distance, aes(x=distance$adjusted_age, y= coinertia_distance)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # translated comment
-                                                                                                axis.text.x=element_text(colour="black",size=14), # translated comment
-                                                                                                axis.text.y=element_text(size=14,face="plain"), # translated comment
-                                                                                                axis.title.y=element_text(size = 14,face="plain"), # translated comment
-                                                                                                axis.title.x=element_text(size = 14,face="plain"), # translated comment
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # Hide the legend.
+                                                                                                axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+                                                                                                axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+                                                                                                axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+                                                                                                axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+xlim(c(33,70))

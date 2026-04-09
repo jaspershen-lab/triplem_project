@@ -38,7 +38,7 @@ oral_phyloseq<- phyloseq(OTU, TAX, samples)
 
 
 
-## Translated comment.
+## Calculatealpha.
 
 
 alpha_meas = c("Shannon")
@@ -55,22 +55,22 @@ library(ggpubr)
 p$data$IRIS <- factor(p$data$IRIS, levels = c("IS", "IR"))
 
 gut_alpha<-
-  ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ # translated comment
-  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ # translated comment
-  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ # translated comment
-  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ # translated comment
-  scale_fill_manual(values = c("# translated comment
-  scale_color_manual(values=c("black","black","black"))+ # translated comment
-  # Translated comment.
-  theme_bw()+ # translated comment
-  theme(legend.position="none", # translated comment
-        axis.text.x=element_text(colour="black",size=14), # translated comment
-        axis.text.y=element_text(size=14,face="plain"), # translated comment
-        axis.title.y=element_text(size = 14,face="plain"), # translated comment
-        axis.title.x=element_text(size = 14,face="plain"), # translated comment
-        plot.title = element_text(size=15,face="bold",hjust = 0.5), # translated comment
+  ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ # "fill="Setcolors.
+  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ # no no ,Use.
+  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ # SizeSetboxplot,fillSetcolors,outlier.filloutlier.colorSet.
+  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ # Setscatter plot,width,.
+  scale_fill_manual(values = c("# E69F00","0072B2"))+ Setcolors.
+  scale_color_manual(values=c("black","black","black"))+ # Setscatter plotcolors.
+  # Ggtitle("Gut microbiome")+ Set.
+  theme_bw()+ # Use a white background.
+  theme(legend.position="none", # Hide the legend.
+        axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+        axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+        axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+        axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
+        plot.title = element_text(size=15,face="bold",hjust = 0.5), # Set.
         panel.grid.minor = element_blank())+
-  ylab("Alpha Diversity Index")+xlab("")+ # translated comment
+  ylab("Alpha Diversity Index")+xlab("")+ # Set x- and y-axis titles.
   stat_compare_means(comparisons=my_comparisons,label = "p.value")+
   facet_wrap(~variable,scales = "free")
 
@@ -97,22 +97,22 @@ p<-plot_richness(oral_phyloseq_filt, "IRIS", "IRIS",nrow = 1,measures=alpha_meas
 
 p$data$IRIS <- factor(p$data$IRIS, levels = c("IS", "IR"))
 
-oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ # translated comment
-  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ # translated comment
-  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ # translated comment
-  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ # translated comment
-  scale_fill_manual(values = c("# translated comment
-  scale_color_manual(values=c("black","black","black"))+ # translated comment
-  # Translated comment.
-  theme_bw()+ # translated comment
-  theme(legend.position="none", # translated comment
-        axis.text.x=element_text(colour="black",size=14), # translated comment
-        axis.text.y=element_text(size=14,face="plain"), # translated comment
-        axis.title.y=element_text(size = 14,face="plain"), # translated comment
-        axis.title.x=element_text(size = 14,face="plain"), # translated comment
-        plot.title = element_text(size=15,face="bold",hjust = 0.5), # translated comment
+oral_alpha<-ggplot(data=p$data,aes(x=IRIS,y=value,fill=IRIS))+ # "fill="Setcolors.
+  stat_boxplot(geom = "errorbar",width=0.15,aes(color="black"))+ # no no ,Use.
+  geom_boxplot(size=0.5,fill="white",outlier.fill="white",outlier.color="white")+ # SizeSetboxplot,fillSetcolors,outlier.filloutlier.colorSet.
+  geom_jitter(aes(fill=IRIS),width =0.2,shape = 21,size=2.5)+ # Setscatter plot,width,.
+  scale_fill_manual(values = c("# E69F00","0072B2"))+ Setcolors.
+  scale_color_manual(values=c("black","black","black"))+ # Setscatter plotcolors.
+  # Ggtitle("oral microbiome")+ Set.
+  theme_bw()+ # Use a white background.
+  theme(legend.position="none", # Hide the legend.
+        axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+        axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+        axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+        axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
+        plot.title = element_text(size=15,face="bold",hjust = 0.5), # Set.
         panel.grid.minor = element_blank())+
-  ylab("Alpha Diversity Index")+xlab("")+ # translated comment
+  ylab("Alpha Diversity Index")+xlab("")+ # Set x- and y-axis titles.
   stat_compare_means(comparisons=my_comparisons,label = "p.value")+facet_wrap(~variable,scales = "free")
 oral_alpha
 ggsave(
@@ -131,19 +131,19 @@ ggsave(
 
 dis_bray<- phyloseq::distance(gut_phyloseq_filt, "bray")
 
-## Translated comment.
+## PCoAfor matrix.
 dis_bray.pcoa = ordinate(gut_phyloseq_filt, method="NMDS", distance=dis_bray)
 
-## Translated comment.
+## Plot.
 bray.pcoa <- plot_ordination(gut_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
 
-## Translated comment.
+## Extractdata.
 data<-bray.pcoa$data
 
-## Translated comment.
+## column names.
 colnames(data)[1:2]<-c("NMDS1","NMDS2")
 
-## Translated comment.
+## Getcoordinates1,2explained variance.
 pc1<-""
 pc2<-""
 
@@ -151,18 +151,18 @@ data$IRIS <- factor(data$IRIS, levels = c("IS", "IR"))
 
 gut_beta<-
   ggplot(data, aes(NMDS1, NMDS2)) +
-  # Translated comment.
+  # Plotsamples,colors,size.
   geom_point(aes(fill=IRIS),size=2.5, shape = 21)+
-  # Translated comment.
+  # Match the legends for shape, border, and fill.
   scale_fill_manual(values=c("#E69F00", "#0072B2"))+
   scale_color_manual(values=c("#E69F00", "#0072B2"))+
-  # Translated comment.
+  # Set the title and axis label text.
   labs(title="NMDS - The composition of gut microbiome") +
   theme(text=element_text(size=30))+
-  # Translated comment.
+  # Add horizontal and vertical dashed lines.
   geom_vline(aes(xintercept = 0),linetype="dotted")+
   geom_hline(aes(yintercept = 0),linetype="dotted")+
-  # Translated comment.
+  # Adjust the background, axes, and legend styling.
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid=element_blank(),
         axis.title = element_text(color='black',size=14),
@@ -177,7 +177,7 @@ gut_beta<-
         legend.key=element_blank(),
         legend.background = element_rect(colour = "black"),
         legend.key.height=unit(1.6,"cm"))+
-  # Translated comment.
+  # Set the title formatting.
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = IRIS),geom = "polygon",level = 0.5,alpha = 0,size=2)
 gut_beta
 ggsave(
@@ -193,19 +193,19 @@ ggsave(
 
 dis_bray<- phyloseq::distance(oral_phyloseq_filt, "bray")
 
-## Translated comment.
+## PCoAfor matrix.
 dis_bray.pcoa = ordinate(oral_phyloseq_filt, method="NMDS", distance=dis_bray)
 
-## Translated comment.
+## Plot.
 bray.pcoa <- plot_ordination(oral_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
 
-## Translated comment.
+## Extractdata.
 data<-bray.pcoa$data
 
-## Translated comment.
+## column names.
 colnames(data)[1:2]<-c("NMDS1","NMDS2")
 
-## Translated comment.
+## Getcoordinates1,2explained variance.
 pc1<-""
 pc2<-""
 
@@ -213,18 +213,18 @@ data$IRIS <- factor(data$IRIS, levels = c("IS", "IR"))
 
 gut_beta<-
   ggplot(data, aes(NMDS1, NMDS2)) +
-  # Translated comment.
+  # Plotsamples,colors,size.
   geom_point(aes(fill=IRIS),size=2.5, shape = 21)+
-  # Translated comment.
+  # Match the legends for shape, border, and fill.
   scale_fill_manual(values=c("#E69F00", "#0072B2"))+
   scale_color_manual(values=c("#E69F00", "#0072B2"))+
-  # Translated comment.
+  # Set the title and axis label text.
   labs(title="NMDS - The composition of gut microbiome") +
   theme(text=element_text(size=30))+
-  # Translated comment.
+  # Add horizontal and vertical dashed lines.
   geom_vline(aes(xintercept = 0),linetype="dotted")+
   geom_hline(aes(yintercept = 0),linetype="dotted")+
-  # Translated comment.
+  # Adjust the background, axes, and legend styling.
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid=element_blank(),
         axis.title = element_text(color='black',size=14),
@@ -239,7 +239,7 @@ gut_beta<-
         legend.key=element_blank(),
         legend.background = element_rect(colour = "black"),
         legend.key.height=unit(1.6,"cm"))+
-  # Translated comment.
+  # Set the title formatting.
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = IRIS),geom = "polygon",level = 0.5,alpha = 0,size=2)
 gut_beta
 ggsave(
@@ -253,7 +253,7 @@ ggsave(
 )
 
 
-# Translated comment.
+# Generate the genus-level table.
 ####only remain the genus level
 library(microbiomedataset)
 
@@ -493,10 +493,10 @@ nasal_object <-
   nasal_object %>%
   transform2relative_intensity()
 
-# Translated comment.
+# Combine microbiome data from four body sites for a PCoA plot.
 
-# Translated comment.
-# Translated comment.
+# Read microbiome data from four body regions.
+# Assume the files are in the current working directory.
 gut_genus<-gut_object@expression_data
 rownames(gut_genus)<-gut_object@variable_info$Genus
 
@@ -509,35 +509,35 @@ rownames(skin_genus)<-skin_object@variable_info$Genus
 nasal_genus<-nasal_object@expression_data
 rownames(nasal_genus)<-nasal_object@variable_info$Genus
 
-# Translated comment.
-library(vegan)      # translated comment
-library(ggplot2)    # translated comment
-library(readr)      # translated comment
-library(dplyr)      # translated comment
-library(tidyr)      # translated comment
+# Load required R packages.
+library(vegan)      # CalculateNMDS.
+library(ggplot2)    # Plot.
+library(readr)      # ReadCSV.
+library(dplyr)      # dataProcess.
+library(tidyr)      # data.
 
 
-# Translated comment.
+# Add a source label for each dataset.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Combine all data.
+# Transpose the matrix so rows are samples and columns are taxa.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Rename samples to avoid duplicates while keeping the original information.
+# Assume identical sample names represent different body sites from the same person.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# Translated comment.
+# Create sample type labels.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -547,48 +547,48 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# Translated comment.
-# Translated comment.
+# Merge all taxa.
+# First ensure all tables share the same taxa columns.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# Translated comment.
+# Update the helper that fills missing taxa to avoid index errors.
 fill_missing_species <- function(df, all_species) {
-  # Translated comment.
+  # Create a new data frame containing all possible taxa.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # Translated comment.
+  # Fill in the existing data.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # Translated comment.
+  # Convert to a data frame and return it.
   return(as.data.frame(result))
 }
 
-# Translated comment.
+# Apply the updated function.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# Translated comment.
+# Merge all sample data.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# Translated comment.
+# Merge sample labels.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# Translated comment.
+# Ensure sample order matches.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
 
 
 
 
-# Translated comment.
+# Filter gut and oral samples.
 
 sample_metadata<-subset(sample_metadata,Site%in%c("Gut","Oral"))
 sample_metadata<-merge(sample_metadata,oral_object@sample_info,by.x="Subject",by.y="sample_id")
@@ -599,7 +599,7 @@ sample_metadata$IRIS[5]<-"IR"
 sample_metadata$IRIS[6]<-"IR"
 sample_metadata$IRIS[9]<-"IR"
 sample_metadata$IRIS[10]<-"IR"
-## Translated comment.
+## Filter paired oral and gut samples.
 com_samples<-intersect(gut_object@sample_info$sample_id, oral_object@sample_info$sample_id)
 
 
@@ -611,28 +611,28 @@ all_data<-all_data[sample_metadata$Sample,]
 
 
 
-# Translated comment.
+# Calculate Bray-Curtis distances.
 bray_dist <- vegdist(all_data, method = "bray")
 
-# Translated comment.
-set.seed(123)  # translated comment
+# Run NMDS analysis.
+set.seed(123)  # Set a random seed so results are reproducible.
 nmds_result <- metaMDS(bray_dist, k = 2, trymax = 100, autotransform = FALSE)
 
-# Translated comment.
+# Check whether NMDS converged and report the stress value.
 cat("NMDS Stress:", nmds_result$stress, "\n")
 if(nmds_result$stress > 0.2) {
-  warning("NMDS 应力值 > 0.2，表明排序质量较差")
+  warning("NMDS stress > 0.2, indicating poor ordination quality")
 } else if(nmds_result$stress > 0.1) {
-  cat("NMDS 应力值在0.1~0.2之间，表明排序质量一般\n")
+  cat("NMDS stress is between 0.1 and 0.2, indicating moderate ordination quality\n")
 } else {
-  cat("NMDS 应力值 < 0.1，表明排序质量良好\n")
+  cat("NMDS stress < 0.1, indicating good ordination quality\n")
 }
 
-# Translated comment.
+# Extract NMDS coordinates.
 nmds_df <- as.data.frame(nmds_result$points)
 colnames(nmds_df) <- c("NMDS1", "NMDS2")
 
-# Translated comment.
+# Add sample information to the NMDS data.
 nmds_df$Sample <- rownames(nmds_df)
 nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
@@ -641,7 +641,7 @@ nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
 
 
-# Translated comment.
+# Plot the NMDS results.
 nmds_plot<-
   ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = IRIS, shape = Site),
          color = "black") +
@@ -687,25 +687,25 @@ paired_distances <- data.frame(Subject=character(),
                                IRIS=character(),
                                stringsAsFactors=FALSE)
 
-# Translated comment.
+# 2. for ,CalculateoralgutsamplesbetweenBray-Curtis.
 for(subj in subjects) {
-  # Translated comment.
+  # Getsamples.
   subj_samples <- sample_metadata[sample_metadata$Subject == subj, ]
   
-  # Translated comment.
+  # Ensure both oral and gut samples are present.
   if(nrow(subj_samples) == 2 && all(c("Gut", "Oral") %in% subj_samples$Site)) {
-    # Translated comment.
+    # Get sample names.
     gut_sample <- subj_samples$Sample[subj_samples$Site == "Gut"]
     oral_sample <- subj_samples$Sample[subj_samples$Site == "Oral"]
     
-    # Translated comment.
+    # Extract sample data.
     gut_data <- all_data[gut_sample, , drop=FALSE]
     oral_data <- all_data[oral_sample, , drop=FALSE]
     
-    # Translated comment.
+    # Calculate Bray-Curtis distances.
     bc_dist <- vegdist(rbind(gut_data, oral_data), method="bray")[1]
     
-    # Translated comment.
+    # Save the results, including IRIS group information.
     iris_group <- unique(subj_samples$IRIS)
     paired_distances <- rbind(paired_distances, 
                               data.frame(Subject=subj, 
@@ -714,10 +714,10 @@ for(subj in subjects) {
   }
 }
 
-# Translated comment.
+# 3. PlotboxplotIRIS.
 library(ggplot2)
 
-# Translated comment.
+# Createboxplot.
 paired_distances$IRIS <- factor(paired_distances$IRIS, levels = c("IS", "IR"))
 box_plot <- 
   ggplot(paired_distances, aes(x=IRIS, y=Distance, fill=IRIS)) +

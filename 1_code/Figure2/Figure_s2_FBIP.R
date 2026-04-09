@@ -39,7 +39,7 @@ FBIP_metagenomic<-FBIP_metagenomic[rownames(FBIP_metabolome),]
 
 FBIP_metabolome_annotation<-read.table("2_data/FBIP-main/metabolites data/plasma_metabolites_name_group.txt",header = TRUE,sep = "\t")
 
-# Translated comment.
+# no HMDB IDmetabolites.
 
 FBIP_metabolome_annotation<-subset(FBIP_metabolome_annotation,HMDB!=c(""))
 
@@ -49,7 +49,7 @@ colnames(FBIP_metabolome)<-FBIP_metabolome_annotation$HMDB
 
 
 
-# Translated comment.
+# Read the iPOP dataset.
 
 
 library(tidyverse)
@@ -140,7 +140,7 @@ metabolomics_temp_object@expression_data <- expression_data
 
 
 
-## Translated comment.
+## Filtershared .
 com_tax<-intersect(gut_temp_object@variable_info$Genus,colnames(FBIP_metagenomic))
 
 
@@ -164,7 +164,7 @@ FBIP_metagenomic <-
   as.data.frame()
 
 
-### Translated comment.
+### shared metabolites.
 
 metabolome_data_ipop<-metabolomics_temp_object@expression_data
 metabolome_ann_ipop<-data.frame(metabolite_annotation)
@@ -221,18 +221,18 @@ results <- analyze_metabolite_ev(
 
 ### 
 predict_metabolites <- function(models_directory, new_data) {
-  # Translated comment.
+  # Getunder RDS.
   model_files <- list.files(models_directory, pattern = "\\.rds$", full.names = TRUE)
   
-  # Translated comment.
+  # results.
   predictions_list <- list()
   
-  # Translated comment.
+
   for (model_file in model_files) {
-    # Translated comment.
+    # Load.
     model_info <- readRDS(model_file)
     
-    # Translated comment.
+    # Ensuredatafeatures.
     required_features <- model_info$selected_features
     missing_features <- setdiff(required_features, colnames(new_data))
     
@@ -242,13 +242,13 @@ predict_metabolites <- function(models_directory, new_data) {
       next
     }
     
-    # Translated comment.
+    # featuresEnsure.
     filtered_data <- new_data[, required_features, drop = FALSE]
     
-    # Translated comment.
+
     predictions <- predict(model_info$model, filtered_data, n.trees = model_info$parameters$n.trees)
     
-    # Translated comment.
+    # Saveresults.
     predictions_list[[basename(model_file)]] <- list(
       predictions = predictions,
       model_performance = model_info$performance,
@@ -259,65 +259,65 @@ predict_metabolites <- function(models_directory, new_data) {
   return(predictions_list)
 }
 
-# Translated comment.
+# data.
 models_directory <- "metabolite_models_FBIP"
 
-# Translated comment.
+# 1. metabolites.
 predict_metabolites_pipeline <- function(models_directory, metagenomic_data) {
-  # Translated comment.
+  # Transposedata.
   new_data <- data.frame(t(metagenomic_data))
   
-  # Translated comment.
+  # metabolites.
   results <- predict_metabolites(models_directory, new_data)
   
-  # Translated comment.
+  # Processresults.
   predictions_df <- do.call(cbind, lapply(results, function(x) x$predictions))
   colnames(predictions_df) <- gsub("_model.rds", "", names(results))
   
-  # Translated comment.
+  # GetR2.
   R2_df <- do.call(cbind, lapply(results, function(x) x$model_performance$mean_r2))
   colnames(R2_df) <- names(results)
   
   list(predictions = predictions_df, r2 = R2_df)
 }
 
-# Translated comment.
+# 2. data preprocessing function.
 prepare_prediction_data <- function(predictions_df, metagenomic_data, metabolite_annotation) {
   predictions_df <- data.frame(t(predictions_df))
   colnames(predictions_df) <- colnames(metagenomic_data)
   predictions_df$variable_id <- rownames(predictions_df)
   
-  # Translated comment.
+  # Mergeannotations.
   merged_predictions <- merge(predictions_df, metabolite_annotation, by = "variable_id")
   
   merged_predictions
 }
 
-# Translated comment.
+# 3. correlation analysis.
 calculate_correlations <- function(predictions_df, metabolites_name, 
                                    MetaCardis_metabome_annotation, MetaCardis_metabolome) {
-  # Translated comment.
+  # resultsdata frame.
   results_list <- vector("list", length(metabolites_name))
   
-  # Translated comment.
+  # ParallelProcessmetabolites.
   results_list <- parallel::mclapply(metabolites_name, function(i) {
-    # Translated comment.
+    # Extractdata.
     predictions_data <- colSums(subset(predictions_df, HMDB == i)[, 2:(length(rownames(MetaCardis_metabolome))+1)])
     
-    # Translated comment.
+    # Getsample names.
     observed_sample_names <- subset(MetaCardis_metabome_annotation, HMDB == i)$HMDB
     
-    # Translated comment.
+    # Processsamples.
     do.call(rbind, lapply(observed_sample_names, function(z) {
       observed_data <- MetaCardis_metabolome[, z]
       
-      # Translated comment.
+      # MergeProcessdata.
       merge_data <- na.omit(data.frame(
         predictions = predictions_data,
         observed = observed_data
       ))
       
-      # Translated comment.
+      # datacorrelation.
       if(nrow(merge_data) > 3) {
         cor_result <- cor.test(merge_data$predictions, merge_data$observed,method="spearman")
         
@@ -333,31 +333,31 @@ calculate_correlations <- function(predictions_df, metabolites_name,
     }))
   }, mc.cores = parallel::detectCores() - 1)
   
-  # Translated comment.
+  # Mergeresults.
   results_cor_name <- do.call(rbind, results_list)
   rownames(results_cor_name) <- NULL
   
   results_cor_name
 }
 
-# Translated comment.
+# Main function.
 main_analysis <- function(models_directory, MetaCardis_metagenomic, 
                           metabolite_annotation, MetaCardis_metabome_annotation,
                           MetaCardis_metabolome) {
-  # Translated comment.
+  # 1. metabolites.
   prediction_results <- predict_metabolites_pipeline(models_directory, MetaCardis_metagenomic)
   
-  # Translated comment.
+  # 2. data.
   processed_predictions <- prepare_prediction_data(
     prediction_results$predictions, 
     MetaCardis_metagenomic, 
     metabolite_annotation
   )
   
-  # Translated comment.
+  # 3. Getmetabolites.
   metabolites_name <- unique(processed_predictions$HMDB)
   
-  # Translated comment.
+  # 4. Calculatecorrelation.
   correlation_results <- calculate_correlations(
     processed_predictions, 
     metabolites_name,
@@ -365,7 +365,7 @@ main_analysis <- function(models_directory, MetaCardis_metagenomic,
     MetaCardis_metabolome
   )
   
-  # Translated comment.
+  # Returnresults.
   list(
     predictions = processed_predictions,
     correlations = correlation_results,
@@ -373,7 +373,7 @@ main_analysis <- function(models_directory, MetaCardis_metagenomic,
   )
 }
 
-# Translated comment.
+# Usage example.
 results <- main_analysis(
   models_directory = models_directory,
   MetaCardis_metagenomic = FBIP_metagenomic,
@@ -399,7 +399,7 @@ predictions_oberserve<-predictions_oberserve%>%filter(predictions_oberserve$mode
 
 
 
-# Translated comment.
+# Summarizemetabolites.
 
 predict_TF<-predictions_oberserve[,c("p.value","HMDB_Name","model_performance")]
 
@@ -413,44 +413,44 @@ predict_TF<-predict_TF[,c("Predict","model_performance")]
 library(ggplot2)
 library(dplyr)
 
-# Translated comment.
-# Translated comment.
+# data frame df.
+# Processdata.
 library(ggplot2)
 library(dplyr)
 
-# Translated comment.
+# data frame predict_TF.
 processed_data <- predict_TF %>%
-  # Translated comment.
+  # R2sort.
   arrange(model_performance) %>%
-  # Translated comment.
+  # For R2CalculateSummarize.
   dplyr::group_by(model_performance) %>%
   dplyr::summarise(
-    # Translated comment.
+    # CalculateR2samples.
     cumulative_count = n(),
     cumulative_replication = sum(Predict == "Replicated") / n() * 100
   ) %>%
-  # Translated comment.
+  # Calculate.
   mutate(
     cumulative_count = rev(cumsum(rev(cumulative_count))),
     cumulative_replication = rev(cumsum(rev(cumulative_replication * cumulative_count)) / cumsum(rev(cumulative_count)))
   )
 
 
-# Translated comment.
+# Create.
 p<-ggplot(processed_data) +
-  # Translated comment.
+  # Add.
   geom_smooth(aes(x = model_performance, y = cumulative_replication), 
               color = "#007b7a", se = FALSE, span = 0.2) +
-  # Translated comment.
+  # Addsamples.
   geom_smooth(aes(x = model_performance, 
                   y = (cumulative_count - min(cumulative_count)) * 
                     (80/(max(cumulative_count)-min(cumulative_count))) + 20), 
               color = "#af5497", se = FALSE, span = 0.2) +
-  # Translated comment.
+  # y().
   scale_y_continuous(
     name = "Percentage replicated",
     limits = c(20, 100),
-    # Translated comment.
+    # y(samples).
     sec.axis = sec_axis(
       ~ (. - 20) * ((max(processed_data$cumulative_count)-min(processed_data$cumulative_count))/80) + 
         min(processed_data$cumulative_count),
@@ -458,13 +458,13 @@ p<-ggplot(processed_data) +
       breaks = seq(0, 250, by = 50)
     )
   ) +
-  # Translated comment.
+  # Xlabels.
   scale_x_continuous(
     name = "Measured versus predicted R²",
     limits = c(0.1, 0.5),
     breaks = seq(0.1, 0.5, by = 0.1)
   ) +
-  # Translated comment.
+  # Settheme.
   theme_bw() +
   theme(
     panel.grid = element_line(color = "gray90"),
@@ -472,10 +472,10 @@ p<-ggplot(processed_data) +
     axis.text.y.left = element_text(color = "#007b7a"),
     axis.title.y.right = element_text(color = "#af5497"),
     axis.text.y.right = element_text(color = "#af5497"),
-    axis.text.x=element_text(colour="black",size=14), # translated comment
-    axis.text.y=element_text(size=14,face="plain"), # translated comment
-    axis.title.y=element_text(size = 14,face="plain"), # translated comment
-    axis.title.x=element_text(size = 14,face="plain"), # translated comment
+    axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+    axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+    axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+    axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
     plot.title = element_text(size=15,face="bold",hjust = 0.5)
   )
 
@@ -487,16 +487,16 @@ ggsave(p,
 
 ggplot(predictions_oberserve, aes(x=predictions_oberserve$estimate, y= predictions_oberserve$model_performance)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "spearman")+theme(legend.position="none", # translated comment
-                                                                                                 axis.text.x=element_text(colour="black",size=14), # translated comment
-                                                                                                 axis.text.y=element_text(size=14,face="plain"), # translated comment
-                                                                                                 axis.title.y=element_text(size = 14,face="plain"), # translated comment
-                                                                                                 axis.title.x=element_text(size = 14,face="plain"), # translated comment
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "spearman")+theme(legend.position="none", # Hide the legend.
+                                                                                                 axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+                                                                                                 axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+                                                                                                 axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+                                                                                                 axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
                                                                                                  plot.title = element_text(size=15,face="bold",hjust = 0.5))
 
 
 
-## Translated comment.
+## Plotmetabolites.
 
 
 predictions_oberserve_dup<-predictions_oberserve[!duplicated(predictions_oberserve$HMDB_Name),]
@@ -507,15 +507,15 @@ top_10_metabolites <- predictions_oberserve_dup %>%
   arrange(desc(abs_estimate)) %>%
   slice_head(n = 15)
 
-# Translated comment.
+# metaboliteand sortafter.
 top_10_metabolites <- top_10_metabolites %>%
   mutate(HMDB.Name = factor(HMDB.Name, levels = HMDB.Name))
 
-# Translated comment.
+# Create.
 p<-ggplot(top_10_metabolites, aes(x = HMDB.Name, y = abs(estimate)+0.1)) +
   geom_segment(aes(xend = HMDB.Name, yend = 0), color = "gray50") +
   geom_point(size = 3, color = "steelblue") +
-  coord_flip() + # translated comment
+  coord_flip() +
   theme_bw() +
   labs(
     title = "Top 15 Estimate Metabolites ",
@@ -552,11 +552,11 @@ predictions_data_oberserve_data<-data.frame(cbind(oberserve_data,predictions_dat
 
 ggplot(predictions_data_oberserve_data, aes(x=predictions_data_oberserve_data$HMDB0011743, y= predictions_data_oberserve_data$HMDB0011743.1)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_bw() +stat_cor(method = "spearman")+theme(legend.position="none", # translated comment
-                                                                                                 axis.text.x=element_text(colour="black",size=14), # translated comment
-                                                                                                 axis.text.y=element_text(size=14,face="plain"), # translated comment
-                                                                                                 axis.title.y=element_text(size = 14,face="plain"), # translated comment
-                                                                                                 axis.title.x=element_text(size = 14,face="plain"), # translated comment
+  geom_smooth(method="lm",colour = "grey50") +theme_bw() +stat_cor(method = "spearman")+theme(legend.position="none", # Hide the legend.
+                                                                                                 axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+                                                                                                 axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+                                                                                                 axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+                                                                                                 axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
                                                                                                  plot.title = element_text(size=15,face="bold",hjust = 0.5))+ylim(c(-0.25,0.75))
 
 

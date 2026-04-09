@@ -46,7 +46,7 @@ library(cowplot)
 
 
 
-# Translated comment.
+# metabolitesin .
 data <- four_site_GBDT_R2 %>%
   mutate(Dominant_Factor = case_when(
     gut >= oral & gut >= skin & gut>=nasal ~ "gut",
@@ -55,18 +55,18 @@ data <- four_site_GBDT_R2 %>%
     nasal >= oral & nasal >= skin & nasal>=oral ~ "nasal"
   ))
 
-# Translated comment.
+# Calculatemetabolites R-squared ,main after R-squared descending ordersort.
 data <- data %>%
   mutate(Total_R2 = gut + oral + skin + nasal) %>%
   arrange(Dominant_Factor, desc(Total_R2))
 
-# Translated comment.
+# Convert ggplot Plot.
 data_long <- data %>%
   pivot_longer(cols = c("gut", "oral", "skin","nasal"),
                names_to = "Factor",
                values_to = "R_squared")
 
-# Translated comment.
+# Plotbar chart.
 g1 <- ggplot(data_long, aes(x = factor(metabolite, levels = data$metabolite), y = R_squared, fill = Factor)) +
   geom_bar(stat = "identity", width = 0.8) +
   scale_fill_manual(values = body_site_color, name = "Factor") +
@@ -83,7 +83,7 @@ g1 <- ggplot(data_long, aes(x = factor(metabolite, levels = data$metabolite), y 
 
 
 
-## Translated comment.
+## PlotsiteR250samples.
 gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 oral_GBDT_results<-readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
 skin_GBDT_results<-readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
@@ -114,9 +114,9 @@ colnames(four_site_GBDT_R2)<-c("metabolite","gut","oral","skin","nasal")
 library(tidyverse)
 library(ggplot2)
 
-# Translated comment.
+# Getbody site50metabolites.
 metabolite_analysis <- function(four_site_GBDT_R2) {
-  # Translated comment.
+  # Getbody site50data.
   gut_data <- four_site_GBDT_R2 %>% 
     top_n(50, gut) %>%
     select(metabolite, gut) %>%
@@ -145,7 +145,7 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
            Value = nasal) %>%
     select(metabolite, Site, Value)
   
-  # Translated comment.
+  # Mergedata.
   combined_data <- bind_rows(gut_data, oral_data, skin_data, nasal_data)
   
 
@@ -157,50 +157,50 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
     dplyr:: summarise(
       mean = mean(Value),
       sd = sd(Value),
-      count = length(Value),  # translated comment
+      count = length(Value),  # Use length()  n().
       se = sd(Value)/sqrt(length(Value))
     )
   
   
   ggplot() +
-    # Translated comment.
+    # Addbar chart.
     geom_bar(data = summary_stats, 
              aes(x = Site, y = mean, fill = Site),
              stat = "identity",
              width = 0.6,
              alpha = 1) +
-    # Translated comment.
+    # Add.
     geom_errorbar(data = summary_stats,
                   aes(x = Site, 
                       ymin = mean - se, 
                       ymax = mean + se),
                   width = 0.2) +
-    # Translated comment.
+    # Add.
     geom_quasirandom(data = combined_data,
                      aes(x = Site, y = Value),
                      alpha = 0.8,
                      width = 0.2) +
-    # Translated comment.
+    # Setcolors.
     scale_fill_manual(values = body_site_color) +
-    # Translated comment.
+    # Sety.
     scale_y_continuous(expand = c(0, 0)) +  
     theme_classic() +
     theme(
       legend.position = "none",
       axis.text = element_text(size = 14,family = "Helvetica"),
       axis.title = element_text(size = 14,family = "Helvetica"),
-      axis.text.x = element_text(angle = 30, hjust = 1,family = "Helvetica") , # translated comment
-      axis.ticks.length = unit(0.25, "cm"),  # translated comment
-      axis.ticks = element_line(linewidth = 0.8)  # translated comment
+      axis.text.x = element_text(angle = 30, hjust = 1,family = "Helvetica") , # Rotate x-axis labels if group names are long.
+      axis.ticks.length = unit(0.25, "cm"),  # Increase tick length.
+      axis.ticks = element_line(linewidth = 0.8)  # Increase tick line width.
     ) +
-    # Translated comment.
+    # Setaxis labels.
     xlab("") +
     ylab("R2")
   
   
 }
 
-# Translated comment.
+# Use.
  result <- metabolite_analysis(four_site_GBDT_R2)
  print(result)
 

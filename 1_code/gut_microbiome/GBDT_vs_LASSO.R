@@ -1,4 +1,4 @@
-# Translated comment.
+# For GBDTLASSO.
 rm(list = ls())
 setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
@@ -9,7 +9,7 @@ library(plyr)
 library(microbiomedataset)
 
 
-# Translated comment.
+# Import the data.
 
 GBDT_results<-readRDS("3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 
@@ -41,12 +41,12 @@ colnames(two_model)<-c("metabolite","GBDT_R2","lasso_R2")
 
 two_model$delt_R2<-two_model$GBDT_R2-two_model$lasso_R2
 
-# Translated comment.
+# Generate the plot.
 
 
 p1<-ggplot(two_model, aes(x=lasso_R2, y=GBDT_R2)) +
   geom_point(shape=21, size=4, fill="#edd064", color="white") +
-  geom_abline(intercept=0, slope=1, color="grey50", linetype="dashed", size=1) +  # translated comment
+  geom_abline(intercept=0, slope=1, color="grey50", linetype="dashed", size=1) +  # Add the diagonal reference line.
   scale_x_continuous(limits=c(0, 0.3)) +
   scale_y_continuous(limits=c(0, 0.3)) +
   theme_light()+
@@ -54,17 +54,17 @@ p1<-ggplot(two_model, aes(x=lasso_R2, y=GBDT_R2)) +
     legend.position = "none",
     axis.text = element_text(size = 14,family = "Helvetica"),
     axis.title = element_text(size = 14,family = "Helvetica"),
-    axis.text.x = element_text(family = "Helvetica") , # translated comment
-    axis.ticks.length = unit(0.25, "cm"),  # translated comment
-    axis.ticks = element_line(linewidth = 0.8)  # translated comment
+    axis.text.x = element_text(family = "Helvetica") , # Rotate x-axis labels if group names are long.
+    axis.ticks.length = unit(0.25, "cm"),  # Increase tick length.
+    axis.ticks = element_line(linewidth = 0.8)  # Increase tick line width.
   ) +xlab("lasso R²")+ylab("GBDT R²")
 
 
 
 
 p2<-ggplot(two_model, aes(x=delt_R2)) +
-  geom_histogram(binwidth=0.01, fill="# translated comment
-  geom_vline(aes(xintercept=median(two_model$delt_R2, na.rm=TRUE)),  # translated comment
+  geom_histogram(binwidth=0.01, fill="# Edd064",color="white") + Plothistogram.
+  geom_vline(aes(xintercept=median(two_model$delt_R2, na.rm=TRUE)),  # Add the median line.
              color="grey50", linetype="dashed", size=1) +
   labs(title="Frequency Distribution", x="Variable", y="Frequency") +
   theme_light()+
@@ -72,9 +72,9 @@ p2<-ggplot(two_model, aes(x=delt_R2)) +
     legend.position = "none",
     axis.text = element_text(size = 14,family = "Helvetica"),
     axis.title = element_text(size = 14,family = "Helvetica"),
-    axis.text.x = element_text(family = "Helvetica") , # translated comment
-    axis.ticks.length = unit(0.25, "cm"),  # translated comment
-    axis.ticks = element_line(linewidth = 0.8)  # translated comment
+    axis.text.x = element_text(family = "Helvetica") , # Rotate x-axis labels if group names are long.
+    axis.ticks.length = unit(0.25, "cm"),  # Increase tick length.
+    axis.ticks = element_line(linewidth = 0.8)  # Increase tick line width.
   ) +xlab("GBDT R²-lasso R²")
 
 

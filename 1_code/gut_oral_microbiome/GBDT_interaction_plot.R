@@ -1,10 +1,10 @@
-# Translated comment.
+# Readinteractionresults.
 
 
 # gut_oral_interaction <- readRDS("../../../../1_code/gut_oral_microbiome/combined_results_with_interactions")
 
 
-# Translated comment.
+# 2.  - microbiomemicrobiomeand metabolites.
 plot_microbe_interaction_quantile <- function(gut_data,
                                               oral_data,
                                               metabolite_data,
@@ -13,20 +13,20 @@ plot_microbe_interaction_quantile <- function(gut_data,
                                               metabolite,
                                               n_quantiles = 3,
                                               use_log = FALSE) {
-  # Translated comment.
+  # Getsamples.
   gut_samples <- colnames(gut_data)
   oral_samples <- colnames(oral_data)
   meta_samples <- colnames(metabolite_data)
   common_samples <- Reduce(intersect, list(gut_samples, oral_samples, meta_samples))
   
-  # Translated comment.
+  # Extractdata.
   gut_values <- as.numeric(gut_data[gut_feature, common_samples])
   oral_values <- as.numeric(oral_data[oral_feature, common_samples])
   metabolite_values <- as.numeric(metabolite_data[metabolite, common_samples])
   
-  # Translated comment.
+  # for Convert.
   if (use_log) {
-    # Translated comment.
+    # Process.
     gut_values[gut_values == 0] <- min(gut_values[gut_values > 0]) / 2
     oral_values[oral_values == 0] <- min(oral_values[oral_values > 0]) / 2
     
@@ -34,12 +34,12 @@ plot_microbe_interaction_quantile <- function(gut_data,
     oral_values <- log10(oral_values)
   }
   
-  # Translated comment.
+  # Createdata frame.
   plot_data <- data.frame(gut = gut_values,
                           oral = oral_values,
                           metabolite = metabolite_values)
   
-  # Translated comment.
+  # gutmicrobiome.
   quantile_breaks <- quantile(oral_values, probs = seq(0, 1, length.out = n_quantiles + 1))
   plot_data$oral_quantile <- cut(
     oral_values,
@@ -48,7 +48,7 @@ plot_microbe_interaction_quantile <- function(gut_data,
     include.lowest = TRUE
   )
   
-  # Translated comment.
+  # For Calculateoralmicrobiomeand metabolitescorrelation.
   quantile_cors <- lapply(levels(plot_data$oral_quantile), function(q) {
     subset_data <- plot_data[plot_data$oral_quantile == q, ]
     cor_value <- cor(subset_data$gut, subset_data$metabolite, method = "spearman")
@@ -56,7 +56,7 @@ plot_microbe_interaction_quantile <- function(gut_data,
   })
   quantile_cors <- do.call(rbind, quantile_cors)
   
-  # Translated comment.
+  # Createscatter plot.
   p <- ggplot(plot_data, aes(x = gut, y = metabolite, color = oral_quantile)) +
     geom_point(size = 5, alpha = 0.7) +
     geom_smooth(method = "lm", se = TRUE, aes(group = oral_quantile)) +
@@ -91,7 +91,7 @@ plot_microbe_interaction_quantile <- function(gut_data,
   return(p)
 }
 
-# Translated comment.
+# 3. heatmap - microbiome,for metabolites.
 plot_microbe_interaction_heatmap <- function(gut_data,
                                              oral_data,
                                              metabolite_data,
@@ -100,20 +100,20 @@ plot_microbe_interaction_heatmap <- function(gut_data,
                                              metabolite,
                                              n_quantiles = 4,
                                              use_log = FALSE) {
-  # Translated comment.
+  # Getsamples.
   gut_samples <- colnames(gut_data)
   oral_samples <- colnames(oral_data)
   meta_samples <- colnames(metabolite_data)
   common_samples <- Reduce(intersect, list(gut_samples, oral_samples, meta_samples))
   
-  # Translated comment.
+  # Extractdata.
   gut_values <- gut_data[gut_feature, common_samples]
   oral_values <- oral_data[oral_feature, common_samples]
   metabolite_values <- metabolite_data[metabolite, common_samples]
   
-  # Translated comment.
+  # for Convert.
   if (use_log) {
-    # Translated comment.
+    # Process.
     gut_values[gut_values == 0] <- min(gut_values[gut_values > 0]) / 2
     oral_values[oral_values == 0] <- min(oral_values[oral_values > 0]) / 2
     
@@ -121,12 +121,12 @@ plot_microbe_interaction_heatmap <- function(gut_data,
     oral_values <- log10(oral_values)
   }
   
-  # Translated comment.
+  # Createdata frame.
   plot_data <- data.frame(gut = gut_values,
                           oral = oral_values,
                           metabolite = metabolite_values)
   
-  # Translated comment.
+
   gut_breaks <- quantile(gut_values, probs = seq(0, 1, length.out = n_quantiles + 1))
   oral_breaks <- quantile(oral_values, probs = seq(0, 1, length.out = n_quantiles + 1))
   
@@ -144,21 +144,21 @@ plot_microbe_interaction_heatmap <- function(gut_data,
     include.lowest = TRUE
   )
   
-  # Translated comment.
+  # Calculatemetabolites.
   heatmap_data <- aggregate(metabolite ~ gut_quantile + oral_quantile,
                             data = plot_data,
                             FUN = mean)
   
-  # Translated comment.
+  # Calculatesamples.
   count_data <- as.data.frame(table(plot_data$gut_quantile, plot_data$oral_quantile))
   names(count_data) <- c("gut_quantile", "oral_quantile", "count")
   
-  # Translated comment.
+  # Mergedata.
   heatmap_data <- merge(heatmap_data,
                         count_data,
                         by = c("gut_quantile", "oral_quantile"))
   
-  # Translated comment.
+  # Createheatmap.
   p <- ggplot(heatmap_data,
               aes(x = oral_quantile, y = gut_quantile, fill = metabolite)) +
     geom_tile(color = "white") +

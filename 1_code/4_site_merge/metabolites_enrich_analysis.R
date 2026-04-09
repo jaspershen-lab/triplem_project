@@ -39,15 +39,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -107,15 +107,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -173,15 +173,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -243,15 +243,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list
@@ -280,7 +280,7 @@ enrich_results_nasal<-enrich_results
 
 
 
-######### Translated comment.
+######### Mergesitemetabolitesresultsnetwork plot.
 
 
 enrich_results_gut$site<-"gut"
@@ -317,7 +317,7 @@ ggraph_data <- igraph::graph_from_data_frame(d = edges,
 
 
 
-# Translated comment.
+# Load packages.
 library(ggplot2)
 library(RColorBrewer)
 library(tidyverse)

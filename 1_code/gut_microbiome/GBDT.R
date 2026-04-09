@@ -1,30 +1,30 @@
-# Translated comment.
-library(gbm)         # translated comment
-library(caret)       # translated comment
-library(dplyr)       # translated comment
-library(foreach)     # translated comment
-library(doParallel)  # translated comment
-library(progress)    # translated comment
-library(ggplot2)     # translated comment
-library(tidyr)       # translated comment
-library(patchwork)   # translated comment
+# Load packages.
+library(gbm)         # GBDT.
+library(caret)
+library(dplyr)       # Process the data.
+library(foreach)     # ParallelCalculate.
+library(doParallel)  # Parallelafter.
+library(progress)
+library(ggplot2)
+library(tidyr)       # Data.
+library(patchwork)
 
-# Translated comment.
+# Data preprocessing function.
 preprocess_data <- function(microbiome_data, metabolite_data) {
-  # Translated comment.
+  # Getsample IDs.
   micro_samples <- colnames(microbiome_data)
   meta_samples <- colnames(metabolite_data)
   
-  # Translated comment.
+  # Checksample IDs.
   message("Initial sample counts:")
   message(sprintf("Microbiome samples: %d", length(micro_samples)))
   message(sprintf("Metabolite samples: %d", length(meta_samples)))
   
-  # Translated comment.
+  # samples.
   common_samples <- intersect(micro_samples, meta_samples)
   message(sprintf("Common samples: %d", length(common_samples)))
   
-  # Translated comment.
+  # Extractsamplesdata.
   microbiome_matched <- microbiome_data[, common_samples]
   metabolite_matched <- metabolite_data[, common_samples]
   
@@ -35,39 +35,39 @@ preprocess_data <- function(microbiome_data, metabolite_data) {
   ))
 }
 
-# Translated comment.
+# R-squared helper function.
 calculate_r2 <- function(actual, predicted) {
   1 - sum((actual - predicted)^2) / sum((actual - mean(actual))^2)
 }
 
-# Translated comment.
+# Feature selection function.
 select_relevant_features <- function(X, y, correlation_method = "spearman", 
                                      p_threshold = 0.05,
                                      p_adjust_method = "none",
-                                     rho_threshold = 0.1) {  # translated comment
-  # Translated comment.
+                                     rho_threshold = 0.1) {  # Addcorrelation coefficientthreshold.
+  # Calculatefeaturesand variablescorrelation.
   correlations <- sapply(1:ncol(X), function(i) {
     result <- cor.test(X[,i], y, method = correlation_method)
     c(correlation = result$estimate,
       p_value = result$p.value)
   })
   
-  # Translated comment.
+  # ConvertmatrixProcess.
   correlations<-as.data.frame(t(correlations))
   colnames(correlations) <- c("correlation", "p_value")
   rownames(correlations) <- colnames(X)
   
-  # Translated comment.
+
   adjusted_p_values <- p.adjust(correlations[,"p_value"], method = p_adjust_method)
   
-  # Translated comment.
+  # Addadjusted p-valuesresultsin.
   correlations <- cbind(correlations, adjusted_p_value = adjusted_p_values)
   
-  # Translated comment.
+  # adjusted p-valuescorrelation coefficientfor Filter.
   significant_features <- which(adjusted_p_values < p_threshold & 
                                   abs(correlations[,"correlation"]) >= rho_threshold)
   
-  # Translated comment.
+  # correlationfor sort.
   if(length(significant_features) > 0) {
     abs_cors <- abs(correlations[significant_features, "correlation"])
     significant_features <- significant_features[order(abs_cors, decreasing = TRUE)]
@@ -80,28 +80,28 @@ select_relevant_features <- function(X, y, correlation_method = "spearman",
   ))
 }
 
-# Translated comment.
+# Cross-validation function.
 single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
-  # Translated comment.
+  # Setrandom seed.
   if(!is.null(seed)) {
     set.seed(seed)
   }
   
-  # Translated comment.
+  # Createfold.
   fold_ids <- sample(rep(1:n_folds, length.out = length(y)))
   all_predictions <- numeric(length(y))
   
   for(fold in 1:n_folds) {
-    # Translated comment.
+
     test_idx <- which(fold_ids == fold)
     train_idx <- which(fold_ids != fold)
     
-    # Translated comment.
+    # data.
     train_data <- data.frame(X[train_idx, , drop = FALSE])
     test_data <- data.frame(X[test_idx, , drop = FALSE])
     train_data$target <- y[train_idx]
     
-    # Translated comment.
+
     model <- gbm(
       target ~ .,
       data = train_data,
@@ -113,7 +113,7 @@ single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
       verbose = FALSE
     )
     
-    # Translated comment.
+
     test_data <- data.frame(X[test_idx, , drop = FALSE])
     all_predictions[test_idx] <- predict(model, test_data, n.trees = gbdt_params$n.trees)
   }
@@ -121,9 +121,8 @@ single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
   return(calculate_r2(y, all_predictions))
 }
 
-# Translated comment.
 plot_feature_selection_results <- function(results) {
-  # Translated comment.
+  # 1. feature selectiondata.
   feature_summary <- do.call(rbind, lapply(results$detailed_results, function(x) {
     if(!is.null(x$feature_selection)) {
       data.frame(
@@ -134,7 +133,7 @@ plot_feature_selection_results <- function(results) {
     }
   }))
   
-  # Translated comment.
+  # 2. Extractcorrelationdata.
   all_correlations <- do.call(rbind, lapply(results$detailed_results, function(x) {
     if(!is.null(x$feature_selection)) {
       correlations <- x$feature_selection$correlations
@@ -149,15 +148,15 @@ plot_feature_selection_results <- function(results) {
     }
   }))
   
-  # Translated comment.
+  # 3. Summarizefeaturesin .
   feature_frequency <- all_correlations %>%
     filter(significant) %>%
     count(feature) %>%
     arrange(desc(n))
   
-  # Translated comment.
+  # Create.
   
-  # Translated comment.
+  # 1. featuresand R-squared.
   p1 <- ggplot(feature_summary, aes(x = n_features, y = r2)) +
     geom_point(alpha = 0.6) +
     geom_smooth(method = "loess", se = TRUE) +
@@ -166,7 +165,7 @@ plot_feature_selection_results <- function(results) {
          x = "Number of Selected Features",
          y = "R² Score")
   
-  # Translated comment.
+  # 2. in features.
   p2 <- ggplot(feature_summary, aes(x = n_features)) +
     geom_histogram(bins = 30, fill = "steelblue", color = "white") +
     theme_minimal() +
@@ -174,7 +173,7 @@ plot_feature_selection_results <- function(results) {
          x = "Number of Selected Features",
          y = "Count")
   
-  # Translated comment.
+  # 3. Top 20in features.
   p3 <- feature_frequency %>%
     head(20) %>%
     ggplot(aes(x = reorder(feature, n), y = n)) +
@@ -185,7 +184,7 @@ plot_feature_selection_results <- function(results) {
          x = "Feature",
          y = "Number of Metabolites")
   
-  # Translated comment.
+  # 4. correlation.
   p4 <- ggplot(all_correlations %>% filter(significant), 
                aes(x = correlation)) +
     geom_histogram(bins = 50, fill = "steelblue", color = "white") +
@@ -194,7 +193,7 @@ plot_feature_selection_results <- function(results) {
          x = "Correlation Coefficient",
          y = "Count")
   
-  # Translated comment.
+  # 5. heatmaptopfeaturesand topmetabolites.
   top_metabolites <- results$summary %>%
     arrange(desc(r2_mean)) %>%
     head(15) %>%
@@ -218,7 +217,7 @@ plot_feature_selection_results <- function(results) {
     labs(title = "Correlation Heatmap: Top Features vs Top Metabolites",
          x = "Features", y = "Metabolites")
   
-  # Translated comment.
+  # Usepatchwork.
   combined_plots <- (p1 + p2) / (p3 + p4) / p5 +
     plot_layout(heights = c(1, 1, 1.2))
   
@@ -232,35 +231,35 @@ plot_feature_selection_results <- function(results) {
   ))
 }
 
-# Translated comment.
+# Main analysis function.
 analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NULL, seed = 42,
                                   do_feature_selection = TRUE,
                                   correlation_method = "spearman",
                                   p_threshold = 0.05,
                                   p_adjust_method = "BH",
                                   rho_threshold = 0.3) {
-  # Translated comment.
+  # Set.
   set.seed(seed)
   
-  # Translated comment.
+  # Set.
   n_boots <- 100
   n_folds <- 10
   
-  # Translated comment.
+  # Setparallel.
   if(is.null(n_cores)) {
     n_cores <- detectCores() - 1
   }
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
   
-  # Translated comment.
+  # Data preprocessing.
   processed_data <- preprocess_data(microbiome_data, metabolite_data)
   
-  # Translated comment.
+  # Transposedata.
   X <- t(processed_data$microbiome)
   Y <- t(processed_data$metabolite)
   
-  # Translated comment.
+
   message("\nAnalysis settings:")
   message(sprintf("Feature selection: %s", if(do_feature_selection) "Yes" else "No"))
   if(do_feature_selection) {
@@ -274,7 +273,7 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
   message(sprintf("Metabolites: %d", ncol(Y)))
   message(sprintf("Using %d cores", n_cores))
   
-  # Translated comment.
+  # GBDT.
   gbdt_params <- list(
     n.trees = 50,
     interaction.depth = 10,
@@ -284,24 +283,24 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
     train.fraction = 0.8
   )
   
-  # Translated comment.
+  # parallel.
   clusterExport(cl, c("single_cv", "calculate_r2"), envir = environment())
   
-  # Translated comment.
+  # results.
   results <- list()
   
-  # Translated comment.
+  # Set.
   pb <- progress_bar$new(
     format = "[:bar] :percent | Metabolite :current/:total | Elapsed: :elapsed | ETA: :eta",
     total = ncol(Y)
   )
   
-  # Translated comment.
+  # Analyzemetabolites.
   for(i in 1:ncol(Y)) {
     start_time <- Sys.time()
     current_y <- Y[, i]
     
-    # Translated comment.
+    # samplesfeature selection.
     if(do_feature_selection) {
       feature_selection <- select_relevant_features(
         X, current_y,
@@ -316,9 +315,9 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
       X_selected <- X
     }
     
-    # Translated comment.
+    # featuresAnalyze.
     if(ncol(X_selected) > 0) {
-      # Translated comment.
+      # ParallelBootstrap.
       boot_results <- foreach(b = 1:n_boots,
                               .combine = 'c',
                               .packages = c("gbm", "caret")) %dopar% {
@@ -331,20 +330,20 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
                                 single_cv(boot_X, boot_y, n_folds, gbdt_params, seed = local_seed)
                               }
       
-      # Translated comment.
+      # CalculateSummarize.
       mean_r2 <- mean(boot_results)
       ci <- quantile(boot_results, probs = c(0.025, 0.975))
       t_stat <- mean_r2 / (sd(boot_results) / sqrt(n_boots))
       p_value <- 2 * pt(-abs(t_stat), df = n_boots - 1)
     } else {
-      # Translated comment.
+      # If no features,Set.
       boot_results <- rep(0, n_boots)
       mean_r2 <- 0
       ci <- c(0, 0)
       p_value <- 1
     }
     
-    # Translated comment.
+    # results.
     results[[i]] <- list(
       metabolite = colnames(Y)[i],
       mean_r2 = mean_r2,
@@ -356,7 +355,7 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
       n_selected_features = if(do_feature_selection) length(selected_features) else ncol(X)
     )
     
-    # Translated comment.
+    # results.
     pb$tick()
     end_time <- Sys.time()
     time_taken <- difftime(end_time, start_time, units = "mins")
@@ -367,10 +366,10 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
     message(sprintf("Time: %.2f mins", time_taken))
   }
   
-  # Translated comment.
+  # Stop the parallel cluster.
   stopCluster(cl)
   
-  # Translated comment.
+  # Organize the results into a data frame.
   summary_df <- do.call(rbind, lapply(results, function(x) {
     data.frame(
       metabolite = x$metabolite,
@@ -382,7 +381,7 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
     )
   }))
   
-  # Translated comment.
+  # Add visualization results.
   if(do_feature_selection) {
     viz_results <- plot_feature_selection_results(list(
       detailed_results = results,

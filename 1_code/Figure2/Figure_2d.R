@@ -53,7 +53,7 @@ FBIP_metabolome_annotation <- read.table(
   sep = "\t"
 )
 
-# Translated comment.
+# no HMDB IDmetabolites.
 
 FBIP_metabolome_annotation <- subset(FBIP_metabolome_annotation, HMDB !=
                                        c(""))
@@ -63,7 +63,7 @@ FBIP_metabolome <- FBIP_metabolome[, FBIP_metabolome_annotation$ID]
 colnames(FBIP_metabolome) <- FBIP_metabolome_annotation$HMDB
 
 
-# Translated comment.
+# Read the iPOP dataset.
 
 
 library(tidyverse)
@@ -158,7 +158,7 @@ metabolomics_temp_object@expression_data <- expression_data
 
 
 
-## Translated comment.
+## Filtershared .
 com_tax <- intersect(gut_temp_object@variable_info$Genus,
                      colnames(FBIP_metagenomic))
 
@@ -183,7 +183,7 @@ FBIP_metagenomic <-
   as.data.frame()
 
 
-### Translated comment.
+### shared metabolites.
 
 metabolome_data_ipop <- metabolomics_temp_object@expression_data
 metabolome_ann_ipop <- data.frame(metabolite_annotation)
@@ -205,14 +205,14 @@ common_samples <- intersect(colnames(metabolome_data_ipop),
 metabolome_data <- metabolome_data_ipop[, common_samples]
 microbiome_data <- microbiome_data_ipop[, common_samples]
 
-# Translated comment.
+# TransposedatamatrixcorrelationCalculate.
 metabolome_t <- t(metabolome_data)
 microbiome_t <- t(microbiome_data)
 
-# Translated comment.
+# data framecorrelationresults.
 correlation_results <- data.frame()
 
-# Translated comment.
+# Calculatemetabolitesand betweencorrelation.
 for (i in 1:ncol(metabolome_t)) {
   metabolite_name <- colnames(metabolome_t)[i]
   metabolite_data <- metabolome_t[, i]
@@ -221,15 +221,15 @@ for (i in 1:ncol(metabolome_t)) {
     microbe_name <- colnames(microbiome_t)[j]
     microbe_data <- microbiome_t[, j]
     
-    # Translated comment.
+    # Usecomplete.casesNAsamples.
     valid_indices <- complete.cases(metabolite_data, microbe_data)
     
     if (sum(valid_indices) > 5) {
-      # Translated comment.
-      # Translated comment.
+      # Ensureat least samples.
+      # CalculateSpearmancorrelation coefficientp-values.
       cor_test <- cor.test(metabolite_data[valid_indices], microbe_data[valid_indices], method = "spearman")
       
-      # Translated comment.
+      # results.
       result <- data.frame(
         Metabolite = metabolite_name,
         Microbe = microbe_name,
@@ -242,16 +242,16 @@ for (i in 1:ncol(metabolome_t)) {
   }
 }
 
-# Translated comment.
+# Calculateadjusted p-values(FDR).
 correlation_results$FDR <- p.adjust(correlation_results$P_value, method = "BH")
 
-# Translated comment.
+# Calculatecorrelationfor ,sort.
 correlation_results$Abs_Correlation <- abs(correlation_results$Correlation)
 
-# Translated comment.
+# correlationfor descending ordersort.
 correlation_results <- correlation_results[order(correlation_results$Abs_Correlation, decreasing = TRUE), ]
 
-# Translated comment.
+# correlation100.
 top_100_correlations <- head(correlation_results, 500)
 
 
@@ -274,52 +274,52 @@ top_100_correlations <- top_100_correlations %>%
 
 
 
-library(tidyverse)  # translated comment
+library(tidyverse)  # Process the data.
 library(Hmisc)
 
 #######FBIP
-# Translated comment.
-# Translated comment.
+# Read the data.
+# dataCSVin,.
 metagenomic_data <- FBIP_metagenomic
 metabolome_data <- data.frame(t(FBIP_metabolome))
 
-# Translated comment.
-cat("代谢物数据维度:", dim(metagenomic_data), "\n")
-cat("细菌数据维度:", dim(metabolome_data), "\n")
+# Checkdata.
+cat("Metabolite data dimensions:", dim(metagenomic_data), "\n")
+cat("Bacterial data dimensions:", dim(metabolome_data), "\n")
 
-# Translated comment.
-# Translated comment.
+# Ensure the sample column names match.
+# Extractsamples.
 common_samples <- intersect(colnames(metagenomic_data), colnames(metabolome_data))
 
-# Translated comment.
+# If no samples,.
 if (length(common_samples) == 0) {
-  stop("没有共同的样本名在两个数据集中")
+  stop("No shared sample names were found across the two datasets")
 }
 
-# Translated comment.
+# Use shared samples to filter the dataset.
 metagenomic_filtered <- metagenomic_data[, common_samples]
 metabolome_filtered <- metabolome_data[, common_samples]
 
-# Translated comment.
-# Translated comment.
+# Correlation analysis.
+# Transposesamples,features.
 metagenomic_t <- t(metagenomic_filtered)
 metabolome_t <- t(metabolome_filtered)
 
-# Translated comment.
+# Calculatecorrelationmatrix(Spearmancorrelation coefficient).
 correlation_result <- rcorr(as.matrix(metagenomic_t), as.matrix(metabolome_t), type = "spearman")
 
-# Translated comment.
+# Extractcorrelation coefficientp-values.
 cor_coef <- correlation_result$r
 cor_pval <- correlation_result$P
 
-# Translated comment.
-# Translated comment.
+# Extractmetabolitesbetweencorrelation coefficient.
+# metagenomic_tmetabolites,metabolome_t.
 cor_subset <- cor_coef[1:ncol(metagenomic_t), (ncol(metagenomic_t) + 1):(ncol(metagenomic_t) +
                                                                            ncol(metabolome_t))]
 pval_subset <- cor_pval[1:ncol(metagenomic_t), (ncol(metagenomic_t) + 1):(ncol(metagenomic_t) +
                                                                             ncol(metabolome_t))]
 
-# Translated comment.
+# matrixConvert.
 correlation_table <- data.frame()
 
 for (i in 1:nrow(cor_subset)) {
@@ -341,13 +341,13 @@ for (i in 1:nrow(cor_subset)) {
   }
 }
 
-# Translated comment.
+# p-valuessort.
 correlation_table <- correlation_table[order(correlation_table$Pvalue), ]
 
-# Translated comment.
+# AddFDRp-values.
 correlation_table$AdjustedPvalue <- p.adjust(correlation_table$Pvalue, method = "BH")
 
-# Translated comment.
+# Addsignificance.
 correlation_table$Significance <- ""
 correlation_table$Significance[correlation_table$Pvalue < 0.05] <- "*"
 correlation_table$Significance[correlation_table$Pvalue < 0.01] <- "**"
@@ -389,19 +389,19 @@ plot <-
   geom_smooth(method = "lm", colour = "grey50") + theme_light() + stat_cor(method = "spearman") +
   theme(
     legend.position = "none",
-    # Translated comment.
+    # Hide the legend.
     axis.text.x =
       element_text(colour = "black", size = 14),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.text.y =
       element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.title.y =
       element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set y-axis title text properties.
     axis.title.x =
       element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set x-axis title text properties.
     plot.title = element_text(size =
                                 15, face = "bold", hjust = 0.5)
   ) + xlab("iPOP_Rho") + ylab("FBIP_Rho")

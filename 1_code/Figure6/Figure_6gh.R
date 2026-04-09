@@ -172,7 +172,7 @@ common_samples <- Reduce(intersect, list(
   colnames(metabolome_data)
 ))
 
-# Translated comment.
+# Function: calculate Spearman correlations and apply FDR correction.
 calculate_correlations <- function(data1, data2) {
   result <- matrix(NA, nrow = ncol(data1), ncol = ncol(data2))
   rownames(result) <- colnames(data1)
@@ -187,67 +187,67 @@ calculate_correlations <- function(data1, data2) {
     }
   }
   
-  # Translated comment.
+  # FDR correction.
   fdr_values <- matrix(p.adjust(p_values, method = "BH"), nrow = nrow(p_values))
   rownames(fdr_values) <- rownames(p_values)
   colnames(fdr_values) <- colnames(p_values)
   
   return(list(cor = result, p = p_values, fdr = fdr_values))
 }
-# Translated comment.
-# Translated comment.
+# AddIRISAnalyze.
+# sample informationin IRIS.
 rownames(gut_sample_info)<-gut_sample_info$sample_id
 rownames(oral_sample_info)<-oral_sample_info$sample_id
-# Translated comment.
-# Translated comment.
-ir_samples <- row.names(gut_sample_info)[gut_sample_info$IRIS == "IR"]  # translated comment
-is_samples <- row.names(gut_sample_info)[gut_sample_info$IRIS == "IS"]  # translated comment
+# GetIRIS(gut_sample_infoin IRIS).
+# : if IRIScolumn names"IRIS",column names.
+ir_samples <- row.names(gut_sample_info)[gut_sample_info$IRIS == "IR"]
+is_samples <- row.names(gut_sample_info)[gut_sample_info$IRIS == "IS"]
 
-# Translated comment.
+# samplesdatasetin .
 ir_common_samples <- intersect(ir_samples, common_samples)
 is_common_samples <- intersect(is_samples, common_samples)
 
-# Translated comment.
+# IRExtractdata.
 gut_data_ir <- gut_data[, ir_common_samples]
 oral_data_ir <- oral_data[, ir_common_samples]
 metabolome_data_ir <- metabolome_data[, ir_common_samples]
 
-# Translated comment.
+# ISExtractdata.
 gut_data_is <- gut_data[, is_common_samples]
 oral_data_is <- oral_data[, is_common_samples]
 metabolome_data_is <- metabolome_data[, is_common_samples]
 
-# Translated comment.
+# TransposeIRdataAnalyze.
 gut_data_ir_t <- t(gut_data_ir)
 oral_data_ir_t <- t(oral_data_ir)
 metabolome_data_ir_t <- t(metabolome_data_ir)
 
-# Translated comment.
+# TransposeISdataAnalyze.
 gut_data_is_t <- t(gut_data_is)
 oral_data_is_t <- t(oral_data_is)
 metabolome_data_is_t <- t(metabolome_data_is)
 
-# Translated comment.
+# IRcorrelation analysis.
 gut_metabolome_cor_ir <- calculate_correlations(gut_data_ir_t, metabolome_data_ir_t)
 oral_metabolome_cor_ir <- calculate_correlations(oral_data_ir_t, metabolome_data_ir_t)
 oral_gut_cor_ir <- calculate_correlations(oral_data_ir_t, gut_data_ir_t)
 
-# Translated comment.
+# IScorrelation analysis.
 gut_metabolome_cor_is <- calculate_correlations(gut_data_is_t, metabolome_data_is_t)
 oral_metabolome_cor_is <- calculate_correlations(oral_data_is_t, metabolome_data_is_t)
 oral_gut_cor_is <- calculate_correlations(oral_data_is_t, gut_data_is_t)
 
-# Translated comment.
+# IR.
 gut_metabolome_associations_ir <- which(gut_metabolome_cor_ir$p < 0.05, arr.ind = TRUE)
 oral_metabolome_associations_ir <- which(oral_metabolome_cor_ir$p < 0.05, arr.ind = TRUE)
 oral_gut_associations_ir <- which(oral_gut_cor_ir$p < 0.05, arr.ind = TRUE)
 
-# Translated comment.
+# IS.
 gut_metabolome_associations_is <- which(gut_metabolome_cor_is$p < 0.05, arr.ind = TRUE)
 oral_metabolome_associations_is <- which(oral_metabolome_cor_is$p < 0.05, arr.ind = TRUE)
 oral_gut_associations_is <- which(oral_gut_cor_is$p < 0.05, arr.ind = TRUE)
 
-# Translated comment.
+# CreateIRresultsdata frame - Setgroup.
 bidirectional_mediation_results_ir <- data.frame(
   direction = character(),
   oral_feature = character(),
@@ -259,7 +259,7 @@ bidirectional_mediation_results_ir <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Translated comment.
+# CreateISresultsdata frame - Setgroup.
 bidirectional_mediation_results_is <- data.frame(
   direction = character(),
   oral_feature = character(),
@@ -272,7 +272,7 @@ bidirectional_mediation_results_is <- data.frame(
 )
 
 
-# Translated comment.
+# AnalyzeafterAdd.
 if(nrow(bidirectional_mediation_results_ir) > 0) {
   bidirectional_mediation_results_ir$group <- "IR"
 }
@@ -280,7 +280,7 @@ if(nrow(bidirectional_mediation_results_ir) > 0) {
 if(nrow(bidirectional_mediation_results_is) > 0) {
   bidirectional_mediation_results_is$group <- "IS"
 }
-# Translated comment.
+# IR: oralmicrobiome -> gutmicrobiome -> metabolites.
 for (i in 1:nrow(oral_gut_associations_ir)) {
   oral_idx <- oral_gut_associations_ir[i, "row"]
   gut_idx <- oral_gut_associations_ir[i, "col"]
@@ -288,7 +288,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
   oral_feature <- rownames(oral_gut_cor_ir$cor)[oral_idx]
   gut_feature <- colnames(oral_gut_cor_ir$cor)[gut_idx]
   
-  # Translated comment.
+  # Checkgutmicrobiomewhether and metabolites.
   gut_metabolite_associations <- which(gut_metabolome_cor_ir$p[gut_idx, ] <  0.0001, arr.ind = TRUE)
   
   if (length(gut_metabolite_associations) > 0) {
@@ -296,16 +296,16 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
       met_idx <- gut_metabolite_associations[j]
       metabolite <- colnames(gut_metabolome_cor_ir$cor)[met_idx]
       
-      # Translated comment.
+      # data framein Analyze.
       med_data <- data.frame(oral = oral_data_ir_t[, oral_feature],
                              gut = gut_data_ir_t[, gut_feature],
                              metabolite = metabolome_data_ir_t[, metabolite])
       
-      # Translated comment.
+      # Oralmicrobiome -> gutmicrobiome -> metabolites.
       med_model <- lm(gut ~ oral, data = med_data)
       out_model <- lm(metabolite ~ oral + gut + oral:gut, data = med_data)
       
-      # Translated comment.
+      # in Analyze.
       library(mediation)
       med_result <- mediate(
         med_model,
@@ -316,7 +316,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
         sims = 10
       )
       
-      # Translated comment.
+      # Saveresults.
       result_row <- data.frame(
         direction = "oral->gut->metabolite",
         oral_feature = oral_feature,
@@ -333,7 +333,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
   }
 }
 
-# Translated comment.
+# IS: oralmicrobiome -> gutmicrobiome -> metabolites.
 for (i in 1:nrow(oral_gut_associations_is)) {
   oral_idx <- oral_gut_associations_is[i, "row"]
   gut_idx <- oral_gut_associations_is[i, "col"]
@@ -341,7 +341,7 @@ for (i in 1:nrow(oral_gut_associations_is)) {
   oral_feature <- rownames(oral_gut_cor_is$cor)[oral_idx]
   gut_feature <- colnames(oral_gut_cor_is$cor)[gut_idx]
   
-  # Translated comment.
+  # Checkgutmicrobiomewhether and metabolites.
   gut_metabolite_associations <- which(gut_metabolome_cor_is$p[gut_idx, ] <  0.0001, arr.ind = TRUE)
   
   if (length(gut_metabolite_associations) > 0) {
@@ -349,16 +349,16 @@ for (i in 1:nrow(oral_gut_associations_is)) {
       met_idx <- gut_metabolite_associations[j]
       metabolite <- colnames(gut_metabolome_cor_is$cor)[met_idx]
       
-      # Translated comment.
+      # data framein Analyze.
       med_data <- data.frame(oral = oral_data_is_t[, oral_feature],
                              gut = gut_data_is_t[, gut_feature],
                              metabolite = metabolome_data_is_t[, metabolite])
       
-      # Translated comment.
+      # Oralmicrobiome -> gutmicrobiome -> metabolites.
       med_model <- lm(gut ~ oral, data = med_data)
       out_model <- lm(metabolite ~ oral + gut + oral:gut, data = med_data)
       
-      # Translated comment.
+      # in Analyze.
       med_result <- mediate(
         med_model,
         out_model,
@@ -368,7 +368,7 @@ for (i in 1:nrow(oral_gut_associations_is)) {
         sims = 10
       )
       
-      # Translated comment.
+      # Saveresults.
       result_row <- data.frame(
         direction = "oral->gut->metabolite",
         oral_feature = oral_feature,
@@ -385,7 +385,7 @@ for (i in 1:nrow(oral_gut_associations_is)) {
   }
 }
 
-# Translated comment.
+# IR: gutmicrobiome -> oralmicrobiome -> metabolites.
 for (i in 1:nrow(oral_gut_associations_ir)) {
   oral_idx <- oral_gut_associations_ir[i, "row"]
   gut_idx <- oral_gut_associations_ir[i, "col"]
@@ -393,7 +393,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
   oral_feature <- rownames(oral_gut_cor_ir$cor)[oral_idx]
   gut_feature <- colnames(oral_gut_cor_ir$cor)[gut_idx]
   
-  # Translated comment.
+  # Checkoralmicrobiomewhether and metabolites.
   oral_metabolite_associations <- which(oral_metabolome_cor_ir$p[oral_idx, ] <  0.0001, arr.ind = TRUE)
   
   if (length(oral_metabolite_associations) > 0) {
@@ -401,16 +401,16 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
       met_idx <- oral_metabolite_associations[j]
       metabolite <- colnames(oral_metabolome_cor_ir$cor)[met_idx]
       
-      # Translated comment.
+      # data framein Analyze.
       med_data <- data.frame(gut = gut_data_ir_t[, gut_feature],
                              oral = oral_data_ir_t[, oral_feature],
                              metabolite = metabolome_data_ir_t[, metabolite])
       
-      # Translated comment.
+      # Gutmicrobiome -> oralmicrobiome -> metabolites.
       med_model <- lm(oral ~ gut, data = med_data)
       out_model <- lm(metabolite ~ gut + oral + gut:oral, data = med_data)
       
-      # Translated comment.
+      # in Analyze.
       med_result <- mediate(
         med_model,
         out_model,
@@ -420,7 +420,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
         sims = 10
       )
       
-      # Translated comment.
+      # Saveresults.
       result_row <- data.frame(
         direction = "gut->oral->metabolite",
         oral_feature = oral_feature,
@@ -437,7 +437,7 @@ for (i in 1:nrow(oral_gut_associations_ir)) {
   }
 }
 
-# Translated comment.
+# IS: gutmicrobiome -> oralmicrobiome -> metabolites.
 for (i in 1:nrow(oral_gut_associations_is)) {
   oral_idx <- oral_gut_associations_is[i, "row"]
   gut_idx <- oral_gut_associations_is[i, "col"]
@@ -445,7 +445,7 @@ for (i in 1:nrow(oral_gut_associations_is)) {
   oral_feature <- rownames(oral_gut_cor_is$cor)[oral_idx]
   gut_feature <- colnames(oral_gut_cor_is$cor)[gut_idx]
   
-  # Translated comment.
+  # Checkoralmicrobiomewhether and metabolites.
   oral_metabolite_associations <- which(oral_metabolome_cor_is$p[oral_idx, ] <  0.0001, arr.ind = TRUE)
   
   if (length(oral_metabolite_associations) > 0) {
@@ -453,16 +453,16 @@ for (i in 1:nrow(oral_gut_associations_is)) {
       met_idx <- oral_metabolite_associations[j]
       metabolite <- colnames(oral_metabolome_cor_is$cor)[met_idx]
       
-      # Translated comment.
+      # data framein Analyze.
       med_data <- data.frame(gut = gut_data_is_t[, gut_feature],
                              oral = oral_data_is_t[, oral_feature],
                              metabolite = metabolome_data_is_t[, metabolite])
       
-      # Translated comment.
+      # Gutmicrobiome -> oralmicrobiome -> metabolites.
       med_model <- lm(oral ~ gut, data = med_data)
       out_model <- lm(metabolite ~ gut + oral + gut:oral, data = med_data)
       
-      # Translated comment.
+      # in Analyze.
       med_result <- mediate(
         med_model,
         out_model,
@@ -472,7 +472,7 @@ for (i in 1:nrow(oral_gut_associations_is)) {
         sims = 10
       )
       
-      # Translated comment.
+      # Saveresults.
       result_row <- data.frame(
         direction = "gut->oral->metabolite",
         oral_feature = oral_feature,
@@ -489,25 +489,25 @@ for (i in 1:nrow(oral_gut_associations_is)) {
   }
 }
 
-# Translated comment.
+# FDR - IR.
 if (nrow(bidirectional_mediation_results_ir) > 0) {
   bidirectional_mediation_results_ir$ACME_fdr <-
     p.adjust(bidirectional_mediation_results_ir$ACME_p, method = "BH")
 }
 
-# Translated comment.
+# FDR - IS.
 if (nrow(bidirectional_mediation_results_is) > 0) {
   bidirectional_mediation_results_is$ACME_fdr <-
     p.adjust(bidirectional_mediation_results_is$ACME_p, method = "BH")
 }
 
-# Translated comment.
+# Filtersignificantresults - IR.
 bidirectional_mediation_results_ir_sig <- subset(bidirectional_mediation_results_ir, ACME_p < 0.05)
 
-# Translated comment.
+# Filtersignificantresults - IS.
 bidirectional_mediation_results_is_sig <- subset(bidirectional_mediation_results_is, ACME_p < 0.05)
 
-# Translated comment.
+# Addannotations - IR.
 oral_tax <- oral_temp_object@variable_info
 gut_tax <- gut_temp_object@variable_info
 
@@ -532,7 +532,7 @@ bidirectional_mediation_results_ir_sig <- merge(
   by.y = "variable_id"
 )
 
-# Translated comment.
+# Addannotations - IS.
 bidirectional_mediation_results_is_sig <- merge(bidirectional_mediation_results_is_sig,
                                                 oral_tax[, c("Genus", "variable_id")],
                                                 by.x = "oral_feature",
@@ -550,11 +550,11 @@ bidirectional_mediation_results_is_sig <- merge(
   by.y = "variable_id"
 )
 
-# Translated comment.
+# Summarize.
 ir_direction_counts <- table(bidirectional_mediation_results_ir_sig$direction)
 is_direction_counts <- table(bidirectional_mediation_results_is_sig$direction)
 
-# Translated comment.
+# Createdata framefor .
 ir_counts_df <- data.frame(
   Direction = names(ir_direction_counts),
   Count = as.numeric(ir_direction_counts),
@@ -567,10 +567,10 @@ is_counts_df <- data.frame(
   Group = "IS"
 )
 
-# Translated comment.
+# Mergedata.
 comparison_df <- rbind(ir_counts_df, is_counts_df)
 
-# Translated comment.
+# Createbar chart.
 plot <-
 comparison_df %>% 
   dplyr::filter(Direction == "oral->gut->metabolite") %>% 
@@ -587,11 +587,11 @@ ggsave(plot,
        filename = "4_manuscript/Figures/Figure_6/number of significant mediation paths.pdf",
        width = 4, height = 5)
 
-# Translated comment.
+# Extractoral->gut->metabolites.
 ir_og_path <- subset(bidirectional_mediation_results_ir_sig, direction == "oral->gut->metabolite")
 is_og_path <- subset(bidirectional_mediation_results_is_sig, direction == "oral->gut->metabolite")
 
-# Translated comment.
+# Createoral->gut->metabolitesSankey diagram - IR.
 if(nrow(ir_og_path) > 0) {
   ir_sankey_data <- ir_og_path[, c("Genus.x", "Genus.y", "HMDB.Name")]
   colnames(ir_sankey_data) <- c("Oral", "Gut", "Metabolite")
@@ -622,7 +622,7 @@ if(nrow(ir_og_path) > 0) {
     labs(title = "IR Group: Oral -> Gut -> Metabolite Pathway")
 }
 
-# Translated comment.
+# Createoral->gut->metabolitesSankey diagram - IS.
 if(nrow(is_og_path) > 0) {
   is_sankey_data <- is_og_path[, c("Genus.x", "Genus.y", "HMDB.Name")]
   colnames(is_sankey_data) <- c("Oral", "Gut", "Metabolite")

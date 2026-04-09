@@ -115,7 +115,7 @@ gut_data <- gut_temp_object@expression_data
 metabolome_data <- metabolomics_temp_object@expression_data
 sample_info <- metabolomics_temp_object@sample_info
 rownames(sample_info)<-sample_info$sample_id
-# Translated comment.
+# 1. Filtersignificantmetabolites.
 selection_results <- select_significant_metabolites(
   gut_microbiome = gut_data,
   metabolome = metabolome_data,
@@ -123,16 +123,16 @@ selection_results <- select_significant_metabolites(
   p_threshold = 0.05
 )
 
-# Translated comment.
+# 2. metabolitesFilterresults.
 metabolite_plot <- plot_metabolite_selection(selection_results)
 
-# Translated comment.
+# 3. Analyze.
 results <- analyze_associations(
   gut_microbiome = gut_data, 
   metabolome = metabolome_data,
   selected_metabolites = selection_results$significant_metabolites,
-  metadata =  sample_info  # translated comment
+  metadata =  sample_info  # IRISdata.
 )
 
-# Translated comment.
+# 4. Plotresults.
 plots <- plot_associations(results)

@@ -116,7 +116,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## Translated comment.
+## Compute correlations between all genera and metabolomics PC1.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -129,25 +129,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# Translated comment.
-# Translated comment.
+# Assume 'metabolomics_pc' and 'gut_pc' are your data frames and have been set correctly.
+# Ensure the two data frames use the same samples (row names) in the same order.
 
-# Translated comment.
+# Convert the data frames to matrices for correlation analysis.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# Translated comment.
+# Convert the results to a data frame.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -161,7 +161,7 @@ rownames(cor_values_filtered)<-rownames(gut_expression_data)
 
 
 
-## Translated comment.
+## PlotSankey diagram.
 library(reshape2)
 sangkey_data<-melt(cor_values_filtered)
 
@@ -230,7 +230,7 @@ plot_data$site_genus <- paste(plot_data$Var1, plot_data$Var2, sep = "_")
 
 plot_data_sorted <- plot_data[order(plot_data$Freq), ]
 
-# Translated comment.
+# sort.
 plot_data_sorted$site_genus <- factor(plot_data_sorted$site_genus , levels = unique(plot_data_sorted$site_genus ))
 
 

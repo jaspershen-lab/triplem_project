@@ -1,4 +1,4 @@
-# Translated comment.
+# Calculate.
 
 library(microbiome)
 library(DirichletMultinomial)
@@ -37,7 +37,7 @@ gut_object <-
 
 
 
-## Translated comment.
+## Importphyloseqfor .
 
 
 
@@ -100,7 +100,7 @@ for (k in seq(ncol(fitted(best)))) {
 
 
 
-# Translated comment.
+# PlotPCoA.
 
 gut_phyloseq <- microbiome::transform(gut_phyloseq, "compositional")
 taxa <- core_members(gut_phyloseq, prevalence = 5/100,detection = 1/100)
@@ -112,36 +112,36 @@ sample_data(gut_phyloseq_filt)$CT <- as.character(ass)
 
 dis_bray<- phyloseq::distance(gut_phyloseq_filt, "bray")
 
-## Translated comment.
+## PCoAfor matrix.
 dis_bray.pcoa = ordinate(gut_phyloseq_filt, method="NMDS", distance=dis_bray)
 
-## Translated comment.
+## Plot.
 bray.pcoa <- plot_ordination(gut_phyloseq_filt, dis_bray.pcoa, color="IRIS" ) + geom_point(size=3)
 
-## Translated comment.
+## Extractdata.
 data<-bray.pcoa$data
 
-## Translated comment.
+## column names.
 colnames(data)[1:2]<-c("NMDS1","NMDS2")
 
-## Translated comment.
+## Getcoordinates1,2explained variance.
 pc1<-""
 pc2<-""
 
 
 
 ggplot(data, aes(NMDS1, NMDS2)) +
-  # Translated comment.
+  # Plotsamples,colors,size.
   geom_point(aes(colour=CT,fill=CT),size=2.5)+
-  # Translated comment.
+  # Match the legends for shape, border, and fill.
   scale_color_manual(values=c ("#2442B2","#E12441"))+
-  # Translated comment.
+  # Set the title and axis label text.
   labs(title="NMDS - The composition of gut microbiome") +
   theme(text=element_text(size=30))+
-  # Translated comment.
+  # Add horizontal and vertical dashed lines.
   geom_vline(aes(xintercept = 0),linetype="dotted")+
   geom_hline(aes(yintercept = 0),linetype="dotted")+
-  # Translated comment.
+  # Adjust the background, axes, and legend styling.
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid=element_blank(),
         axis.title = element_text(color='black',size=14),
@@ -156,6 +156,6 @@ ggplot(data, aes(NMDS1, NMDS2)) +
         legend.key=element_blank(),
         legend.background = element_rect(colour = "black"),
         legend.key.height=unit(1.6,"cm"))+
-  # Translated comment.
+  # Set the title formatting.
   theme(plot.title = element_text(size=14,colour = "black",hjust = 0.5,face = "bold"))+stat_ellipse(aes(color = CT),geom = "polygon",level = 0.8,alpha = 0,size=2)
 

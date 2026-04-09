@@ -3,7 +3,7 @@ setwd(r4projects::get_project_wd())
 source("1_code/100_tools.R")
 library(ggbeeswarm)
 setwd("1_code/4_site_merge/")
-##### Translated comment.
+##### Merge gut  oral GBDTdata.
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
 metabolite_annotation <- read_excel(
@@ -36,7 +36,7 @@ gut_oral_results_summary <- gut_oral_results_summary %>%
       gut_R2 > 0.05 & oral_R2 < 0.05 ~ "gut",
       oral_R2 > 0.05 & gut_R2 < 0.05 ~ "oral",
       gut_R2 > 0.05 & oral_R2 > 0.05 ~ "co-influence",
-      TRUE ~ "none"  # translated comment
+      TRUE ~ "none"  # Process,0.
     )
   )
 # Create a subset for labeled points
@@ -130,15 +130,15 @@ hmdb_pathway =
 
 compound_list <- hmdb_pathway@compound_list
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list <- filtered_compound_list
@@ -193,15 +193,15 @@ hmdb_pathway =
 
 compound_list <- hmdb_pathway@compound_list
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list <- filtered_compound_list
@@ -257,15 +257,15 @@ hmdb_pathway =
 
 compound_list <- hmdb_pathway@compound_list
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list <- filtered_compound_list
@@ -320,15 +320,15 @@ hmdb_pathway =
 
 compound_list <- hmdb_pathway@compound_list
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list <- filtered_compound_list
@@ -353,7 +353,7 @@ enrich_results <- subset(enrich_results, mapped_number >= 3 &
 enrich_results_nasal <- enrich_results
 
 
-######### Translated comment.
+######### Mergesitemetabolitesresultsnetwork plot.
 
 
 enrich_results_gut$site <- "gut"
@@ -398,7 +398,7 @@ enrich_results_merge <- rbind(
 #                                              vertices = vertices,
 #                                              directed = T)
 #
-# Translated comment.
+# Load.
 # library(ggplot2)
 # library(RColorBrewer)
 # library(tidyverse)

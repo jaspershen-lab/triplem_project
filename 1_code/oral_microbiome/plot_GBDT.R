@@ -19,13 +19,12 @@ GBDT_R2[,]
 
 
 
-# Translated comment.
 library(ggplot2)
 library(dplyr)
 library(scales)
 library(ggrepel)
 
-# Translated comment.
+# CreateDefineConvert0-0.1.
 compress_trans <- function(from = 0, to = 0.1, factor = 0.2) {
   trans_new(
     name = "compress",
@@ -43,27 +42,27 @@ compress_trans <- function(from = 0, to = 0.1, factor = 0.2) {
   )
 }
 
-# Translated comment.
+# Data preprocessing.
 plot_data <- GBDT_R2 %>%
-  # Translated comment.
+  # Calculatemetabolites.
   group_by(HMDB.Class) %>%
   mutate(
     class_size = n(),
-    # Translated comment.
+    # Indoles and derivativesin significantmetabolitesAddlabels.
     label = ifelse(HMDB.Class == "Indoles and derivatives" & r2_mean >= 0.05, 
                    HMDB.Name, "")
   ) %>%
   ungroup() %>%
   filter(class_size >= 20) %>%
-  # Translated comment.
+  # HMDB.Classsort.
   arrange(HMDB.Class) %>%
-  # Translated comment.
+  # Addsignificance.
   mutate(significant = ifelse(r2_mean >= 0.05, "significant", "not_significant"))
 
-# Translated comment.
+# metabolites.
 plot_data$metabolite_sort <- 1:nrow(plot_data)
 
-# Translated comment.
+# Calculatelabels.
 class_num <- table(plot_data$HMDB.Class)
 class_range <- c(0)
 class_name <- numeric(length(class_num))
@@ -73,9 +72,9 @@ for (i in 1:length(class_num)) {
   class_name[i] <- class_range[i] + class_num[i] / 2
 }
 
-# Translated comment.
+# Create.
 p <- ggplot(plot_data, aes(x = metabolite_sort, y = r2_mean)) +
-  # Translated comment.
+  # Settheme.
   theme_bw() +
   theme(
     panel.grid = element_blank(),
@@ -84,25 +83,25 @@ p <- ggplot(plot_data, aes(x = metabolite_sort, y = r2_mean)) +
     legend.key = element_rect(fill = 'transparent'),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)
   ) +
-  # Translated comment.
+  # Setx.
   scale_x_continuous(
     breaks = class_name,
     labels = names(class_num),
     expand = c(0, 0)
   ) +
-  # Translated comment.
+  # Sety,UseDefineConvert.
   scale_y_continuous(
     trans = compress_trans(),
     breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
   ) +
-  # Translated comment.
+  # Setlabels.
   labs(
     x = NULL,
     y = "R² Value",
     size = "R² value"
   )
 
-# Translated comment.
+# Add.
 for (i in 1:(length(class_range) - 1)) {
   p <- p + annotate('rect',
                     xmin = class_range[i],
@@ -114,23 +113,23 @@ for (i in 1:(length(class_range) - 1)) {
   )
 }
 
-# Translated comment.
+# Addlabels.
 p <- p +
-  # Translated comment.
+  # PlotR-squared<0.1().
   geom_point(
     data = subset(plot_data, significant == "not_significant"),
     aes(size = 2),
     color = "grey70",
     alpha = 0.6
   ) +
-  # Translated comment.
+  # PlotR-squared>=0.1(),microbesSet.
   geom_point(
     data = subset(plot_data, significant == "significant"),
     aes(size = 2, color = HMDB.Class, 
         shape = HMDB.Source.Microbial),
     alpha = 0.8
   ) +
-  # Translated comment.
+  # Addlabels(Indoles and derivativessignificantmetabolites).
   geom_text_repel(
     data = subset(plot_data, label != ""),
     aes(label = label),
@@ -142,7 +141,7 @@ p <- p +
   ) +
   scale_shape_manual(values = c("FALSE" = 16, "TRUE" = 17,"NA"=16)) +
   scale_size(range = c(2, 2)) +
-  # Translated comment.
+  # Add.
   geom_hline(
     yintercept = 0.05,
     color = 'gray',
@@ -150,13 +149,12 @@ p <- p +
     size = 1
   )
 
-# Translated comment.
 print(p)
 
-# Translated comment.
+# metabolites.
 labeled_metabolites <- plot_data %>%
   filter(label != "") %>%
   select(HMDB.Name, r2_mean, HMDB.Source.Microbial)
 
-print("标记的代谢物信息：")
+print("Annotated metabolite information:")
 print(labeled_metabolites)

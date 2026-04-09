@@ -152,10 +152,10 @@ nasal_object <-
 
 
 
-# Translated comment.
+# Combine microbiome data from four body sites for a PCoA plot.
 
-# Translated comment.
-# Translated comment.
+# Read microbiome data from four body regions.
+# Assume the files are in the current working directory.
 gut_genus<-gut_object@expression_data
 rownames(gut_genus)<-gut_object@variable_info$Genus
 
@@ -168,35 +168,35 @@ rownames(skin_genus)<-skin_object@variable_info$Genus
 nasal_genus<-nasal_object@expression_data
 rownames(nasal_genus)<-nasal_object@variable_info$Genus
 
-# Translated comment.
-library(vegan)      # translated comment
-library(ggplot2)    # translated comment
-library(readr)      # translated comment
-library(dplyr)      # translated comment
-library(tidyr)      # translated comment
+# Load required R packages.
+library(vegan)      # CalculateNMDS.
+library(ggplot2)    # Plot.
+library(readr)      # ReadCSV.
+library(dplyr)      # dataProcess.
+library(tidyr)      # data.
 
 
-# Translated comment.
+# Add a source label for each dataset.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Combine all data.
+# Transpose the matrix so rows are samples and columns are taxa.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Rename samples to avoid duplicates while keeping the original information.
+# Assume identical sample names represent different body sites from the same person.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# Translated comment.
+# Create sample type labels.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -206,69 +206,69 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# Translated comment.
-# Translated comment.
+# Merge all taxa.
+# First ensure all tables share the same taxa columns.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# Translated comment.
+# Update the helper that fills missing taxa to avoid index errors.
 fill_missing_species <- function(df, all_species) {
-  # Translated comment.
+  # Create a new data frame containing all possible taxa.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # Translated comment.
+  # Fill in the existing data.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # Translated comment.
+  # Convert to a data frame and return it.
   return(as.data.frame(result))
 }
 
-# Translated comment.
+# Apply the updated function.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# Translated comment.
+# Merge all sample data.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# Translated comment.
+# Merge sample labels.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# Translated comment.
+# Ensure sample order matches.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
-# Translated comment.
+# Calculate Bray-Curtis distances.
 bray_dist <- vegdist(all_data, method = "bray")
 
-# Translated comment.
-set.seed(123)  # translated comment
+# Run NMDS analysis.
+set.seed(123)  # Set a random seed so results are reproducible.
 nmds_result <- metaMDS(bray_dist, k = 2, trymax = 100, autotransform = FALSE)
 
-# Translated comment.
+# Check whether NMDS converged and report the stress value.
 cat("NMDS Stress:", nmds_result$stress, "\n")
 if(nmds_result$stress > 0.2) {
-  warning("NMDS 应力值 > 0.2，表明排序质量较差")
+  warning("NMDS stress > 0.2, indicating poor ordination quality")
 } else if(nmds_result$stress > 0.1) {
-  cat("NMDS 应力值在0.1~0.2之间，表明排序质量一般\n")
+  cat("NMDS stress is between 0.1 and 0.2, indicating moderate ordination quality\n")
 } else {
-  cat("NMDS 应力值 < 0.1，表明排序质量良好\n")
+  cat("NMDS stress < 0.1, indicating good ordination quality\n")
 }
 
-# Translated comment.
+# Extract NMDS coordinates.
 nmds_df <- as.data.frame(nmds_result$points)
 colnames(nmds_df) <- c("NMDS1", "NMDS2")
 
-# Translated comment.
+# Add sample information to the NMDS data.
 nmds_df$Sample <- rownames(nmds_df)
 nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
-# Translated comment.
+# Plot the NMDS results.
 nmds_plot <- ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Site, shape = Site)) +
   geom_point(size = 3, alpha = 0.8) +
   stat_ellipse(aes(group = Site), level = 0.95, linetype = 2) +
@@ -289,27 +289,27 @@ nmds_plot <- ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Site, shape = Sit
     panel.grid.minor = element_blank()
   )
 
-# Translated comment.
+# Add a source label for each dataset.
 gut_samples <- colnames(gut_genus)
 oral_samples <- colnames(oral_genus)
 skin_samples <- colnames(skin_genus)
 nasal_samples <- colnames(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Combine all data.
+# Transpose the matrix so rows are samples and columns are taxa.
 gut_t <- t(gut_genus)
 oral_t <- t(oral_genus)
 skin_t <- t(skin_genus)
 nasal_t <- t(nasal_genus)
 
-# Translated comment.
-# Translated comment.
+# Rename samples to avoid duplicates while keeping the original information.
+# Assume identical sample names represent different body sites from the same person.
 rownames(gut_t) <- paste0(rownames(gut_t), "_gut")
 rownames(oral_t) <- paste0(rownames(oral_t), "_oral")
 rownames(skin_t) <- paste0(rownames(skin_t), "_skin")
 rownames(nasal_t) <- paste0(rownames(nasal_t), "_nasal")
 
-# Translated comment.
+# Create sample type labels.
 gut_labels <- data.frame(Sample = rownames(gut_t), Site = "Gut", 
                          Subject = sub("_gut$", "", rownames(gut_t)))
 oral_labels <- data.frame(Sample = rownames(oral_t), Site = "Oral", 
@@ -319,69 +319,69 @@ skin_labels <- data.frame(Sample = rownames(skin_t), Site = "Skin",
 nasal_labels <- data.frame(Sample = rownames(nasal_t), Site = "Nasal", 
                            Subject = sub("_nasal$", "", rownames(nasal_t)))
 
-# Translated comment.
-# Translated comment.
+# Merge all taxa.
+# First ensure all tables share the same taxa columns.
 all_species <- unique(c(colnames(gut_t), colnames(oral_t), colnames(skin_t), colnames(nasal_t)))
 
-# Translated comment.
+# Update the helper that fills missing taxa to avoid index errors.
 fill_missing_species <- function(df, all_species) {
-  # Translated comment.
+  # Create a new data frame containing all possible taxa.
   result <- matrix(0, nrow = nrow(df), ncol = length(all_species))
   rownames(result) <- rownames(df)
   colnames(result) <- all_species
   
-  # Translated comment.
+  # Fill in the existing data.
   common_species <- intersect(colnames(df), all_species)
   for (sp in common_species) {
     result[, sp] <- df[, sp]
   }
   
-  # Translated comment.
+  # Convert to a data frame and return it.
   return(as.data.frame(result))
 }
 
-# Translated comment.
+# Apply the updated function.
 gut_complete <- fill_missing_species(gut_t, all_species)
 oral_complete <- fill_missing_species(oral_t, all_species)
 skin_complete <- fill_missing_species(skin_t, all_species)
 nasal_complete <- fill_missing_species(nasal_t, all_species)
 
-# Translated comment.
+# Merge all sample data.
 all_data <- rbind(gut_complete, oral_complete, skin_complete, nasal_complete)
 
-# Translated comment.
+# Merge sample labels.
 sample_metadata <- rbind(gut_labels, oral_labels, skin_labels, nasal_labels)
 rownames(sample_metadata) <- sample_metadata$Sample
 
-# Translated comment.
+# Ensure sample order matches.
 sample_metadata <- sample_metadata[rownames(all_data), ]
 
-# Translated comment.
+# Calculate Bray-Curtis distances.
 bray_dist <- vegdist(all_data, method = "bray")
 
-# Translated comment.
-set.seed(123)  # translated comment
+# Run NMDS analysis.
+set.seed(123)  # Set a random seed so results are reproducible.
 nmds_result <- metaMDS(bray_dist, k = 2, trymax = 100, autotransform = FALSE)
 
-# Translated comment.
+# Check whether NMDS converged and report the stress value.
 cat("NMDS Stress:", nmds_result$stress, "\n")
 if(nmds_result$stress > 0.2) {
-  warning("NMDS 应力值 > 0.2，表明排序质量较差")
+  warning("NMDS stress > 0.2, indicating poor ordination quality")
 } else if(nmds_result$stress > 0.1) {
-  cat("NMDS 应力值在0.1~0.2之间，表明排序质量一般\n")
+  cat("NMDS stress is between 0.1 and 0.2, indicating moderate ordination quality\n")
 } else {
-  cat("NMDS 应力值 < 0.1，表明排序质量良好\n")
+  cat("NMDS stress < 0.1, indicating good ordination quality\n")
 }
 
-# Translated comment.
+# Extract NMDS coordinates.
 nmds_df <- as.data.frame(nmds_result$points)
 colnames(nmds_df) <- c("NMDS1", "NMDS2")
 
-# Translated comment.
+# Add sample information to the NMDS data.
 nmds_df$Sample <- rownames(nmds_df)
 nmds_df <- merge(nmds_df, sample_metadata, by = "Sample")
 
-# Translated comment.
+# Plot the NMDS results.
 nmds_plot<-ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = Site,color=Site)) +
   geom_point(size = 4, alpha = 0.8,colour = "white",shape = 21) +
   stat_ellipse(aes(group = Site), level = 0.95, linetype = 2) +
@@ -405,10 +405,10 @@ nmds_plot<-ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, fill = Site,color=Site)) +
   )
 ggsave("../../4_manuscript/Figures/Figure_1/figure_1c.pdf", plot=nmds_plot, width=7, height=6, units="in")
 
-## Translated comment.
+## Summarize detected metabolite categories.
 
 
-# Translated comment.
+# Load required packages.
 library(ggplot2)
 library(dplyr)
 
@@ -421,12 +421,12 @@ class_counts<-subset(class_counts,!(HMDB.Source.Microbial=="NA"))
 class_counts<-subset(class_counts,Count>=5)
 
 total_by_class <- aggregate(Count ~ HMDB.Class, data = class_counts, sum)
-# Translated comment.
+# Sort by total count in ascending order.
 class_order <- total_by_class$HMDB.Class[order(total_by_class$Count)]
-# Translated comment.
+# Convert HMDB.Class to an ordered factor.
 class_counts$HMDB.Class <- factor(class_counts$HMDB.Class, levels = class_order)
 
-# Translated comment.
+# Then generate the plot.
 p<-ggplot(class_counts, aes(x = HMDB.Class, y = Count, fill=HMDB.Source.Microbial)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(values = c("#3d95d2", "#f16147"))+
@@ -440,7 +440,7 @@ p<-ggplot(class_counts, aes(x = HMDB.Class, y = Count, fill=HMDB.Source.Microbia
   )
 
 ggsave("../../4_manuscript/Figures/Figure_1/figure_1b.pdf", plot=p, width=7, height=6, units="in")
-### Translated comment.
+### Source Venn diagram.
 
 
 metabolite_annotation_Source<-metabolite_annotation[,29:31]

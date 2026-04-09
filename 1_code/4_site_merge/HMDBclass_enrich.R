@@ -5,7 +5,7 @@ library(readxl)
 
 metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx")
 setwd("1_code/4_site_merge/")
-## Translated comment.
+## 814metabolitesheatmap.
 
 
 gut_GBDT_results<-readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
@@ -51,25 +51,25 @@ four_site_GBDT_R2<-four_site_GBDT_R2[rowSums(four_site_GBDT_R2)>0,]
 
 
 
-# Translated comment.
+# Load the required packages.
 library(dplyr)
 library(ggplot2)
 library(stats)
 
 metabolite_class_enrichment <- function(
-    significant_metabolites,  # translated comment
-    all_metabolites_df,      # translated comment
-    class_column,            # translated comment
-    metabolite_column,       # translated comment
-    alpha = 0.05            # translated comment
+    significant_metabolites,  # Significantmetabolites.
+    all_metabolites_df,      # metabolitesclassdata frame.
+    class_column,            # Classcolumn names.
+    metabolite_column,       # MetabolitesID/column names.
+    alpha = 0.05            # Significance.
 ) {
-  # Translated comment.
+  # Getmetabolites.
   N <- nrow(all_metabolites_df)
   
-  # Translated comment.
+  # Getsignificantmetabolites.
   n <- length(significant_metabolites)
   
-  # Translated comment.
+  # For classAnalyze.
   results <- all_metabolites_df %>%
     dplyr::group_by(!!sym(class_column)) %>%
     dplyr::summarise(
@@ -79,7 +79,7 @@ metabolite_class_enrichment <- function(
     mutate(
       Expected_by_chance = (Total_in_class * n) / N,
       Fold_enrichment = (Significant_in_class/n)/(Total_in_class/N),
-      # Translated comment.
+      # Calculatep-values.
       P_value = phyper(
         Significant_in_class - 1,
         Total_in_class,
@@ -89,10 +89,10 @@ metabolite_class_enrichment <- function(
       )
     )
   
-  # Translated comment.
+  # FDR correction.
   results$FDR <- p.adjust(results$P_value, method = "BH")
   
-  # Translated comment.
+  # p-valuessort.
   results <- results %>% arrange(P_value)
   
   return(results)
@@ -188,7 +188,7 @@ ggplot(results_all, aes(x = HMDB.Class, y = Significant_in_class)) +
     legend.position = "none",
     axis.text = element_text(size = 14,family = "Helvetica"),
     axis.title = element_text(size = 14,family = "Helvetica"),
-    axis.text.x = element_text(family = "Helvetica") , # translated comment
-    axis.ticks.length = unit(0.25, "cm"),  # translated comment
-    axis.ticks = element_line(linewidth = 0.8)  # translated comment
+    axis.text.x = element_text(family = "Helvetica") , # Rotate x-axis labels if group names are long.
+    axis.ticks.length = unit(0.25, "cm"),  # Increase tick length.
+    axis.ticks = element_line(linewidth = 0.8)  # Increase tick line width.
   )+scale_fill_manual(values = body_site_color)

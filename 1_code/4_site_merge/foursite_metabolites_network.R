@@ -47,30 +47,30 @@ library(ggraph)
 library(dplyr)
 library(tidyr)
 
-# Translated comment.
+# metabolites-body sitematrixConvertnetwork plot.
 metabolite_to_network <- function(metabolite_matrix, annotation_df) {
-  # Translated comment.
+  # Ensurematrixdata frame.
   if (!is.matrix(metabolite_matrix) && !is.data.frame(metabolite_matrix)) {
-    stop("输入必须是矩阵或数据框")
+    stop("Input must be a matrix or data frame")
   }
   
-  # Translated comment.
+  # Convertdata frame.
   metabolite_df <- as.data.frame(metabolite_matrix)
   
-  # Translated comment.
+  # Addmetabolites.
   metabolite_df$metabolite <- rownames(metabolite_matrix)
   
-  # Translated comment.
+  # Convert.
   edges_df <- metabolite_df %>%
     pivot_longer(
       cols = c("gut", "oral", "skin", "nasal"),
       names_to = "body_site",
       values_to = "value"
     ) %>%
-    mutate(value = as.numeric(value)) %>%  # translated comment
-    filter(value > 0)  # translated comment
+    mutate(value = as.numeric(value)) %>%  # Ensure.
+    filter(value > 0)
   
-  # Translated comment.
+  # Createdata frame,annotations.
   metabolite_nodes <- data.frame(
     name = unique(edges_df$metabolite),
     type = "metabolite"
@@ -88,14 +88,14 @@ metabolite_to_network <- function(metabolite_matrix, annotation_df) {
     HMDB.Name = NA
   )
   
-  # Translated comment.
+  # Merge.
   nodes <- bind_rows(metabolite_nodes, body_site_nodes)
   
-  # Translated comment.
+  # Createdata frame.
   edges <- edges_df %>%
     select(from = metabolite, to = body_site, weight = value)
   
-  # Translated comment.
+  # Createtidygraphfor .
   graph <- tbl_graph(
     nodes = nodes,
     edges = edges,
@@ -105,12 +105,12 @@ metabolite_to_network <- function(metabolite_matrix, annotation_df) {
   return(graph)
 }
 
-# Translated comment.
+# Create.
 plot_metabolite_network <- function(graph) {
-  # Translated comment.
+  # Getdata frame.
   node_data <- as_tibble(graph)
   
-  # Translated comment.
+  # CalculateHMDB.ClassfrequencyGet8.
   top_classes <- node_data %>%
     filter(!is.na(HMDB.Class)) %>%
     count(HMDB.Class) %>%
@@ -118,7 +118,7 @@ plot_metabolite_network <- function(graph) {
     slice_head(n = 8) %>%
     pull(HMDB.Class)
   
-  # Translated comment.
+  # 8"Others".
   V(graph)$HMDB.Class_grouped <- ifelse(
     V(graph)$type == "body_site",
     "body_site",
@@ -127,23 +127,23 @@ plot_metabolite_network <- function(graph) {
            "Others")
   )
   
-  # Translated comment.
+
   class_colors <- setNames(
     colorRampPalette(c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999"))(8),
     top_classes
   )
-  # Translated comment.
+  # AddOthersbody_sitecolors.
   class_colors <- c(class_colors,
                     "Others" = "#CCCCCC",
                     "body_site" = "red")
   
   ggraph(graph, layout = "fr") +
-    # Translated comment.
+    # Add.
     geom_edge_link(aes(width = weight, alpha = weight),
                    color = "grey50") +
     scale_edge_width_continuous(range = c(0.2, 2)) +
     scale_edge_alpha_continuous(range = c(0.2, 0.8)) +
-    # Translated comment.
+    # Add.
     geom_node_point(aes(color = HMDB.Class_grouped, 
                         size = type)) +
     scale_color_manual(values = class_colors,
@@ -152,28 +152,28 @@ plot_metabolite_network <- function(graph) {
       metabolite = 3,
       body_site = 8
     )) +
-    # Translated comment.
+    # Addlabels.
     geom_node_text(aes(label = ifelse(type == "body_site", name,
                                       ifelse(HMDB.Class == "Indoles and derivatives", 
                                              HMDB.Name, ""))),
                    repel = TRUE,
                    size = 3) +
-    # Translated comment.
+    # Theme settings.
     theme_graph() +
     theme(
       legend.position = "bottom",
       plot.margin = margin(1, 1, 1, 1, "cm")
     ) +
     labs(
-      edge_width = "关联强度",
-      edge_alpha = "关联强度",
-      color = "节点类型",
-      size = "节点类型"
+      edge_width = "Association strength",
+      edge_alpha = "Association strength",
+      color = "Node type",
+      size = "Node type"
     )
 }
 
-# Translated comment.
-# Translated comment.
+# Usage example.
+# under data(data):.
 example_data <- matrix(
   c(1, 0, 1, 0,
     0, 1, 1, 1,
@@ -186,8 +186,8 @@ example_data <- matrix(
   )
 )
 
-# Translated comment.
+# Createnetwork plotfor .
 graph <- metabolite_to_network(four_site_R2,metabolite_annotation)
 
-# Translated comment.
+# Plotnetwork plot.
 plot_metabolite_network(graph)

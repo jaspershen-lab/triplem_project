@@ -286,21 +286,21 @@ expression_data <-
 metabolomics_temp_object <- metabolomics_object
 metabolomics_temp_object@expression_data <- expression_data
 
-# Translated comment.
-library(Hmisc)      # translated comment
-library(igraph)     # translated comment
-library(ggplot2)    # translated comment
-library(reshape2)   # translated comment
-library(tidyverse)  # translated comment
+# Load required packages.
+library(Hmisc)      # Calculatecorrelation.
+library(igraph)
+library(ggplot2)    # Plot.
+library(reshape2)   # data.
+library(tidyverse)  # Process the data.
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# dataunder data framein:.
+# Gut_data: gutmicrobiome data.
+# Oral_data: oralmicrobiome data.
+# Skin_data: skinmicrobiome data.
+# Nasal_data: nasalmicrobiome data.
+# Metabolites: metabolite data.
 
-# Translated comment.
+# : CalculatecorrelationFiltersignificantresults.
 calculate_correlations <- function(microbiome_data,
                                    taxdata,
                                    metabolite_data,
@@ -308,10 +308,10 @@ calculate_correlations <- function(microbiome_data,
                                    site,
                                    threshold = 0.3,
                                    p_value = 0.05) {
-  # Translated comment.
+  # Ensure sample order matches.
   common_samples <- intersect(rownames(microbiome_data), rownames(metabolite_data))
   
-  # Translated comment.
+  # data.
   microbiome_subset <- microbiome_data[common_samples, ]
   
   colnames(microbiome_subset) <-  paste(site, taxdata$Genus, sep = "_")
@@ -320,7 +320,7 @@ calculate_correlations <- function(microbiome_data,
   
   
   colnames(metabolite_subset) <-  metabolite_anno$HMDB.Name
-  # Translated comment.
+  # Calculatecorrelationmatrixp-values.
   cors <- matrix(NA,
                  nrow = ncol(microbiome_subset),
                  ncol = ncol(metabolite_subset))
@@ -328,7 +328,7 @@ calculate_correlations <- function(microbiome_data,
                   nrow = ncol(microbiome_subset),
                   ncol = ncol(metabolite_subset))
   
-  # Translated comment.
+  # Calculatecorrelation.
   for (i in 1:ncol(microbiome_subset)) {
     for (j in 1:ncol(metabolite_subset)) {
       test_result <- cor.test(microbiome_subset[, i],
@@ -340,17 +340,17 @@ calculate_correlations <- function(microbiome_data,
     }
   }
   
-  # Translated comment.
+  # Setcolumn names.
   rownames(cors) <- colnames(microbiome_subset)
   colnames(cors) <- colnames(metabolite_subset)
   rownames(pvals) <- colnames(microbiome_subset)
   colnames(pvals) <- colnames(metabolite_subset)
   
-  # Translated comment.
+  # Convertdata.
   cors_df <- melt(cors)
   pvals_df <- melt(pvals)
   
-  # Translated comment.
+  # Mergecorrelation coefficientp-values.
   result_df <- data.frame(
     Microbiome = cors_df$Var1,
     Metabolite = cors_df$Var2,
@@ -359,14 +359,14 @@ calculate_correlations <- function(microbiome_data,
     Site = site
   )
   
-  # Translated comment.
+  # Filtersignificantresults.
   significant_cors <- result_df %>%
     filter(abs(Correlation) >= threshold & P_value <= p_value)
   
   return(significant_cors)
 }
 
-# Translated comment.
+# For body siteCalculatecorrelation.
 gut_cors <- calculate_correlations(
   t(gut_temp_object@expression_data),
   gut_temp_object@variable_info,
@@ -396,17 +396,17 @@ nasal_cors <- calculate_correlations(
   "Nasal"
 )
 
-# Translated comment.
+# Mergecorrelationresults.
 all_cors <- rbind(gut_cors, oral_cors, skin_cors, nasal_cors)
 
 correlation_data <- all_cors
 
 
-# Translated comment.
+# UseggraphCreatenetwork plot.
 edges <- correlation_data %>%
   select(Microbiome, Metabolite, Correlation, Site)
 
-# Translated comment.
+# Create.
 nodes <- data.frame(
   name = unique(c(
     correlation_data$Microbiome, correlation_data$Metabolite
@@ -429,75 +429,75 @@ nodes <- data.frame(
   )
 )
 
-# Translated comment.
+# Createigraphfor .
 graph <- graph_from_data_frame(d = edges,
                                vertices = nodes,
                                directed = FALSE)
-# Translated comment.
-# Translated comment.
+# Calculatedegree.
+# Calculatedegree.
 node_degrees <- degree(graph)
 nodes$degree <- node_degrees[match(nodes$name, names(node_degrees))]
 
-# Translated comment.
+# Filtertop 20.
 top_nodes <- nodes %>%
   group_by(site) %>%
   top_n(10, degree) %>%
   ungroup()
 
-# Translated comment.
+# Filtertop.
 filtered_edges <- edges %>%
   filter(Microbiome %in% top_nodes$name |
            Metabolite %in% top_nodes$name)
 
-# Translated comment.
+# Create(Filterafterin ).
 filtered_nodes <- nodes %>%
   filter(name %in% unique(c(
     filtered_edges$Microbiome, filtered_edges$Metabolite
   )))
 
 
-# Translated comment.
+# Getsitetop 10.
 top_10_nodes <- filtered_nodes %>%
   group_by(site) %>%
   top_n(10, degree) %>%
   ungroup() %>%
   pull(name)
 
-# Translated comment.
+# Addwhether labels.
 filtered_nodes$show_label <- filtered_nodes$name %in% top_10_nodes
 
-# Translated comment.
+# CreateFilterafterigraphfor .
 filtered_graph <- graph_from_data_frame(d = filtered_edges,
                                         vertices = filtered_nodes,
                                         directed = FALSE)
 
-# Translated comment.
+# Calculatedegree.
 filtered_degrees <- degree(filtered_graph)
 V(filtered_graph)$degree <- filtered_degrees
 V(filtered_graph)$show_label <- filtered_nodes$show_label
-# Translated comment.
+# Createggraph.
 
 library(ggraph)
 plot <-
   ggraph(filtered_graph, layout = "stress") +
-  # Translated comment.
+  # Add.
   geom_edge_link(aes(
     edge_alpha = abs(Correlation),
     edge_width = abs(Correlation),
     color = Correlation > 0
   ),
   show.legend = TRUE) +
-  # Translated comment.
+  # Add.
   geom_node_point(aes(fill = site, size = degree, shape = type), color =
                     "white") +
-  # Translated comment.
+  # Addlabels.
   geom_node_text(
     aes(label = ifelse(show_label, name, "")),
     repel = TRUE,
     size = 2,
     max.overlaps = 20
   ) +
-  # Translated comment.
+  # Set.
   scale_edge_color_manual(
     values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
     name = "Correlation",
@@ -512,14 +512,14 @@ plot <-
       "Metabolite" = "#FF9999"
     )
   ) +
-  # Translated comment.
+  # Set.
   scale_size_continuous(range = c(2, 10), name = "Degree") +
-  # Translated comment.
+  # Set.
   scale_shape_manual(values = c("Microbiome" = 21, "Metabolite" = 22)) +
-  # Translated comment.
+  # Set.
   scale_edge_alpha(range = c(0.2, 0.8)) +
   scale_edge_width(range = c(0.3, 2)) +
-  # Translated comment.
+  # Theme settings.
   theme_graph() +
   theme(legend.position = "none") +
   guides(
@@ -533,11 +533,11 @@ plot <-
 
 plot
 
-# Translated comment.
+# Filterdata.
 correlation_data <- subset(all_cors,
                            Microbiome %in% c("Gut_Oscillibacter", "Gut_Phocaeicola"))
 
-# Translated comment.
+# afterUse.
 edges <- correlation_data %>%
   select(Microbiome, Metabolite, Correlation, Site, P_value)
 
@@ -563,20 +563,20 @@ nodes <- data.frame(
   )
 )
 
-# Translated comment.
+# labels.
 nodes$show_label <- TRUE
 
-# Translated comment.
+# Createigraphfor .
 graph <- graph_from_data_frame(d = edges,
                                vertices = nodes,
                                directed = FALSE)
 
-# Translated comment.
+# Calculatedegree.
 node_degrees <- degree(graph)
 V(graph)$degree <- node_degrees
 V(graph)$show_label <- TRUE
 
-# Translated comment.
+# Createggraph.
 plot <-
   ggraph(graph, layout = "stress") +
   geom_edge_bend(

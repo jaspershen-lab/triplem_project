@@ -16,11 +16,11 @@ demographic_data<-data.frame(metabolomics_object@sample_info)
 
 
 
-# Translated comment.
+# Calculatebody sitealpha.
 demographic_data_Continuous<-demographic_data[,c("adjusted_age","BMI")]
 rownames(demographic_data_Continuous)<-demographic_data$sample_id
 
-# Translated comment.
+# variables.
 demographic_data_Discrete<-demographic_data[,c("IRIS","Gender","Ethnicity")]
 
 
@@ -37,40 +37,40 @@ library(ComplexHeatmap)
 library(circlize)
 library(grid)
 
-# Translated comment.
+# Set0.7(30%).
 alpha_value = 0.7
 
-# Translated comment.
+# Createannotationsfor .
 ha = columnAnnotation(
-  # Translated comment.
+  # variablesUsecolors,Add.
   Age = anno_barplot(demographic_data$adjusted_age, 
                      gp = gpar(fill = scales::alpha("#E69F00", alpha_value)),
                      border = TRUE,
-                     width = unit(2, "cm")),  # translated comment
+                     width = unit(2, "cm")),  # Use.
   BMI = anno_barplot(demographic_data$BMI,
                      gp = gpar(fill = scales::alpha("#56B4E9", alpha_value)),
                      border = TRUE,
-                     width = unit(2, "cm")),  # translated comment
+                     width = unit(2, "cm")),  # Use.
   
   border = TRUE,
-  # Translated comment.
+  # variables.
   IRIS = demographic_data$IRIS,
   Gender = demographic_data$Gender,
   Ethnicity = demographic_data$Ethnicity,
   
-  # Translated comment.
+  # Setvariablescolors,Add.
   col = list(
     IRIS = mapply(function(x) scales::alpha(x, alpha_value), iris_color, USE.NAMES = TRUE),
     Gender = mapply(function(x) scales::alpha(x, alpha_value), sex_color, USE.NAMES = TRUE),
     Ethnicity = mapply(function(x) scales::alpha(x, alpha_value), ethnicity_color, USE.NAMES = TRUE)
   ),
   
-  # Translated comment.
+  # Setannotations.
   annotation_name_gp = gpar(fontsize = 10),
   annotation_name_side = "left",
   simple_anno_size = unit(0.5, "cm"),
   
-  # Translated comment.
+  # Addlegend.
   show_legend = TRUE,
   annotation_legend_param = list(
     IRIS = list(title = "IRIS"),
@@ -78,29 +78,29 @@ ha = columnAnnotation(
     Ethnicity = list(title = "Ethnicity")
   ),
   
-  # Translated comment.
-  gap = unit(c(2, 2, 1, 1, 1), "mm")  # translated comment
+  # Set.
+  gap = unit(c(2, 2, 1, 1, 1), "mm")  # betweenAdd.
 )
 
-# Translated comment.
+# CreatematrixPlotheatmap.
 mat = matrix(0, nrow = 1, ncol = nrow(demographic_data))
 
-# Translated comment.
+# CreatePlotheatmap,.
 ht = Heatmap(mat,
              top_annotation = ha,
              show_row_names = FALSE,
              show_column_names = FALSE,
              show_heatmap_legend = FALSE,
-             cluster_rows = FALSE,    # translated comment
-             cluster_columns = FALSE, # translated comment
-             height = unit(0.2, "cm"))   # translated comment
+             cluster_rows = FALSE,
+             cluster_columns = FALSE,
+             height = unit(0.2, "cm"))   # Set.
 
-# Translated comment.
+# PlotSetlegend.
 draw(ht, annotation_legend_side = "bottom")
 
 
 
-### Translated comment.
+### Calculatebody sitemicrobiomealpha.
 
 
 
@@ -143,7 +143,7 @@ gut_object <-
 
 shannon_div <- diversity(t(gut_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_gut <- data.frame(
   Sample = names(shannon_div),
   Shannon = shannon_div
@@ -189,7 +189,7 @@ oral_object <-
 
 shannon_div <- diversity(t(oral_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_oral <- data.frame(
   Sample = names(shannon_div),
   Shannon = shannon_div
@@ -235,7 +235,7 @@ skin_object <-
 
 shannon_div <- diversity(t(skin_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_skin <- data.frame(
   Sample = names(shannon_div),
   Shannon = shannon_div
@@ -281,14 +281,14 @@ nasal_object <-
 
 shannon_div <- diversity(t(nasal_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_nasal <- data.frame(
   Sample = names(shannon_div),
   Shannon = shannon_div
 )
 
 
-# Translated comment.
+# Mergealpha diversity.
 Sample_ID<-demographic_data[,1:2]
 colnames(Sample_ID)[1]<-"Sample"
 
@@ -305,16 +305,16 @@ alpha_diversity<-alpha_diversity[,-1:-2]
 colnames(alpha_diversity)<-c("gut","oral","skin","nasal")
 
 
-# Translated comment.
+# Set0.7(30%).
 alpha_value = 0.7
 
-# Translated comment.
+# Definebody sitecolors.
 microbiome_colors <- body_site_color
 
 
-# Translated comment.
+# Createannotationsfor .
 ha = columnAnnotation(
-  # Translated comment.
+  # SummarizevariablesUsebarplot.
   Age = anno_barplot(demographic_data$adjusted_age, 
                      gp = gpar(fill = scales::alpha("#E69F00", alpha_value)),
                      border = TRUE,
@@ -324,13 +324,13 @@ ha = columnAnnotation(
                      border = TRUE,
                      width = unit(2, "cm")),
   
-  # Translated comment.
+  # Use(anno_points)body sitealpha.
   `Gut` = anno_points(
     alpha_diversity$gut,
     gp = gpar(col = scales::alpha(microbiome_colors["gut"], alpha_value), 
               fill = scales::alpha(microbiome_colors["gut"], alpha_value)),
-    pch = 16,  # translated comment
-    size = unit(2, "mm"),  # translated comment
+    pch = 16,
+    size = unit(2, "mm"),
     border = TRUE,
     width = unit(2, "cm")
   ),
@@ -366,24 +366,24 @@ ha = columnAnnotation(
   ),
   
   border = TRUE,
-  # Translated comment.
+  # variables.
   IRIS = demographic_data$IRIS,
   Gender = demographic_data$Gender,
   Ethnicity = demographic_data$Ethnicity,
   
-  # Translated comment.
+  # Setvariablescolors,Add.
   col = list(
     IRIS = mapply(function(x) scales::alpha(x, alpha_value), iris_color, USE.NAMES = TRUE),
     Gender = mapply(function(x) scales::alpha(x, alpha_value), sex_color, USE.NAMES = TRUE),
     Ethnicity = mapply(function(x) scales::alpha(x, alpha_value), ethnicity_color, USE.NAMES = TRUE)
   ),
   
-  # Translated comment.
+  # Setannotations.
   annotation_name_gp = gpar(fontsize = 10),
   annotation_name_side = "left",
   simple_anno_size = unit(0.5, "cm"),
   
-  # Translated comment.
+  # Addlegend.
   show_legend = TRUE,
   annotation_legend_param = list(
     IRIS = list(title = "IRIS"),
@@ -391,26 +391,26 @@ ha = columnAnnotation(
     Ethnicity = list(title = "Ethnicity")
   ),
   
-  # Translated comment.
-  gap = unit(c(2, 2, 2, 2, 2, 2, 1, 1, 1), "mm")  # translated comment
+  # Set.
+  gap = unit(c(2, 2, 2, 2, 2, 2, 1, 1, 1), "mm")  # betweenAdd.
 )
 
-# Translated comment.
+# CreatematrixPlotheatmap.
 mat = matrix(0, nrow = 1, ncol = nrow(demographic_data))
 
-# Translated comment.
+# CreatePlotheatmap,.
 ht = Heatmap(mat,
              top_annotation = ha,
              show_row_names = FALSE,
              show_column_names = FALSE,
              show_heatmap_legend = FALSE,
-             cluster_rows = FALSE,    # translated comment
-             cluster_columns = FALSE, # translated comment
-             height = unit(0.2, "cm"))   # translated comment
+             cluster_rows = FALSE,
+             cluster_columns = FALSE,
+             height = unit(0.2, "cm"))   # Set.
 
 
 
-# Translated comment.
+# Save.
 pdf("4_manuscript/Figures/Figure_1/figure_s1_demographic.pdf", width = 12, height = 6)
 draw(ht, annotation_legend_side = "bottom")
 dev.off()

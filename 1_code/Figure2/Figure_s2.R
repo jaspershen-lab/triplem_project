@@ -284,26 +284,26 @@ expression_data <-
 metabolomics_temp_object <- metabolomics_object
 metabolomics_temp_object@expression_data <- expression_data
 
-# Translated comment.
-library(Hmisc)      # translated comment
-library(igraph)     # translated comment
-library(ggplot2)    # translated comment
-library(reshape2)   # translated comment
-library(tidyverse)  # translated comment
+# Load required packages.
+library(Hmisc)      # Calculatecorrelation.
+library(igraph)     # Remove incomplete cases.
+library(ggplot2)    # Plot.
+library(reshape2)   # data.
+library(tidyverse)  # Process the data.
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# dataunder data framein:.
+# Gut_data: gutmicrobiome data.
+# Oral_data: oralmicrobiome data.
+# Skin_data: skinmicrobiome data.
+# Nasal_data: nasalmicrobiome data.
+# Metabolites: metabolite data.
 
-# Translated comment.
+# : CalculatecorrelationFiltersignificantresults.
 calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,metabolite_anno, site, threshold = 0.3, p_value = 0.05) {
-  # Translated comment.
+  # Ensure sample order matches.
   common_samples <- intersect(rownames(microbiome_data), rownames(metabolite_data))
   
-  # Translated comment.
+  # data.
   microbiome_subset <- microbiome_data[common_samples,]
   
   colnames(microbiome_subset)<-  paste(site,taxdata$Genus,sep = "_")
@@ -312,11 +312,11 @@ calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,meta
   
   
   colnames(metabolite_subset)<-  metabolite_anno$HMDB.Name
-  # Translated comment.
+  # Calculatecorrelationmatrixp-values.
   cors <- matrix(NA, nrow = ncol(microbiome_subset), ncol = ncol(metabolite_subset))
   pvals <- matrix(NA, nrow = ncol(microbiome_subset), ncol = ncol(metabolite_subset))
   
-  # Translated comment.
+  # Calculatecorrelation.
   for(i in 1:ncol(microbiome_subset)) {
     for(j in 1:ncol(metabolite_subset)) {
       test_result <- cor.test(microbiome_subset[,i], metabolite_subset[,j], 
@@ -326,17 +326,17 @@ calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,meta
     }
   }
   
-  # Translated comment.
+  # Setcolumn names.
   rownames(cors) <- colnames(microbiome_subset)
   colnames(cors) <- colnames(metabolite_subset)
   rownames(pvals) <- colnames(microbiome_subset)
   colnames(pvals) <- colnames(metabolite_subset)
   
-  # Translated comment.
+  # Convertdata.
   cors_df <- melt(cors)
   pvals_df <- melt(pvals)
   
-  # Translated comment.
+  # Mergecorrelation coefficientp-values.
   result_df <- data.frame(
     Microbiome = cors_df$Var1,
     Metabolite = cors_df$Var2,
@@ -345,20 +345,20 @@ calculate_correlations <- function(microbiome_data,taxdata, metabolite_data,meta
     Site = site
   )
   
-  # Translated comment.
+  # Filtersignificantresults.
   significant_cors <- result_df %>%
     filter(abs(Correlation) >= threshold & P_value <= p_value)
   
   return(significant_cors)
 }
 
-# Translated comment.
+# For body siteCalculatecorrelation.
 gut_cors <- calculate_correlations(t(gut_temp_object@expression_data),gut_temp_object@variable_info,t(metabolomics_temp_object@expression_data),metabolite_annotation, "Gut")
 oral_cors <- calculate_correlations(t(oral_temp_object@expression_data),oral_temp_object@variable_info, t(metabolomics_temp_object@expression_data),metabolite_annotation ,"Oral")
 skin_cors <- calculate_correlations(t(skin_temp_object@expression_data),skin_temp_object@variable_info ,t(metabolomics_temp_object@expression_data),metabolite_annotation, "Skin")
 nasal_cors <- calculate_correlations(t(nasal_temp_object@expression_data),nasal_temp_object@variable_info, t(metabolomics_temp_object@expression_data),metabolite_annotation, "Nasal")
 
-# Translated comment.
+# Mergecorrelationresults.
 all_cors <- rbind(gut_cors, oral_cors, skin_cors, nasal_cors)
 
 
@@ -366,11 +366,11 @@ all_cors <- rbind(gut_cors, oral_cors, skin_cors, nasal_cors)
 correlation_data<-all_cors
 
 
-# Translated comment.
+# UseggraphCreatenetwork plot.
 edges <- correlation_data %>%
   select(Microbiome, Metabolite, Correlation, Site)
 
-# Translated comment.
+# Create.
 nodes <- data.frame(
   name = unique(c(correlation_data$Microbiome, correlation_data$Metabolite)),
   type = ifelse(unique(c(correlation_data$Microbiome, correlation_data$Metabolite)) %in% correlation_data$Microbiome, "Microbiome", "Metabolite"),
@@ -379,64 +379,64 @@ nodes <- data.frame(
                 "Metabolite")
 )
 
-# Translated comment.
+# Createigraphfor .
 graph <- graph_from_data_frame(d = edges, vertices = nodes, directed = FALSE)
-# Translated comment.
-# Translated comment.
+# Calculatedegree.
+# Calculatedegree.
 node_degrees <- degree(graph)
 nodes$degree <- node_degrees[match(nodes$name, names(node_degrees))]
 
-# Translated comment.
+# Filtertop 20.
 top_nodes <- nodes %>%
   group_by(site) %>%
   top_n(10, degree) %>%
   ungroup()
 
-# Translated comment.
+# Filtertop.
 filtered_edges <- edges %>%
   filter(Microbiome %in% top_nodes$name | Metabolite %in% top_nodes$name)
 
-# Translated comment.
+# Create(Filterafterin ).
 filtered_nodes <- nodes %>%
   filter(name %in% unique(c(filtered_edges$Microbiome, filtered_edges$Metabolite)))
 
 
-# Translated comment.
+# Getsitetop 10.
 top_10_nodes <- filtered_nodes %>%
   group_by(site) %>%
   top_n(10, degree) %>%
   ungroup() %>%
   pull(name)
 
-# Translated comment.
+# Addwhether labels.
 filtered_nodes$show_label <- filtered_nodes$name %in% top_10_nodes
 
-# Translated comment.
+# CreateFilterafterigraphfor .
 filtered_graph <- graph_from_data_frame(d = filtered_edges, vertices = filtered_nodes, directed = FALSE)
 
-# Translated comment.
+# Calculatedegree.
 filtered_degrees <- degree(filtered_graph)
 V(filtered_graph)$degree <- filtered_degrees
 V(filtered_graph)$show_label <- filtered_nodes$show_label
-# Translated comment.
+# Createggraph.
 
 library(ggraph)
 p<-ggraph(filtered_graph, layout = "stress") +
-  # Translated comment.
+  # Add.
   geom_edge_link(aes(edge_alpha = abs(Correlation),
                      edge_width = abs(Correlation),
                      color = Correlation > 0),
                  show.legend = TRUE) +
-  # Translated comment.
+  # Add.
   geom_node_point(aes(fill = site, 
                       size = degree,
                       shape = type),color="white") +
-  # Translated comment.
+  # Addlabels.
   geom_node_text(aes(label = ifelse(show_label, name, "")), 
                  repel = TRUE, 
                  size = 2,
                  max.overlaps = 20)+
-  # Translated comment.
+  # Set.
   scale_edge_color_manual(values = c("TRUE" = "#FF9999", "FALSE" = "#9999FF"),
                           name = "Correlation",
                           labels = c("Negative", "Positive")) +
@@ -445,14 +445,14 @@ p<-ggraph(filtered_graph, layout = "stress") +
                                "Skin" = "#f2ccac",
                                "Nasal" = "#a17db4",
                                "Metabolite" = "#FF9999")) +
-  # Translated comment.
+  # Set.
   scale_size_continuous(range = c(2, 10), name = "Degree")+
-  # Translated comment.
+  # Set.
   scale_shape_manual(values = c("Microbiome" = 21, "Metabolite" = 22)) +
-  # Translated comment.
+  # Set.
   scale_edge_alpha(range = c(0.2, 0.8)) +
   scale_edge_width(range = c(0.3, 2)) +
-  # Translated comment.
+  # Theme settings.
   theme_graph() +
   theme(legend.position = "none") +
   guides(
@@ -477,14 +477,14 @@ ggsave(p,
 ##########
 
 
-# Translated comment.
+# Import.
 library(igraph)
 library(dplyr)
 
-# Translated comment.
-# Translated comment.
+# Analyze.
+# filtered_graphfiltered_nodes.
 
-# Translated comment.
+# 1. Extractimportance.
 node_importance <- data.frame(
   name = V(filtered_graph)$name,
   site = V(filtered_graph)$site,
@@ -495,8 +495,8 @@ node_importance <- data.frame(
   eigen_centrality = eigen_centrality(filtered_graph)$vector
 )
 
-# Translated comment.
-# Translated comment.
+# 2. Summarizemicrobesmetabolites.
+# Microbes(body sitesort).
 important_microbes <- node_importance %>%
   filter(type == "Microbiome") %>%
   group_by(site) %>%
@@ -504,7 +504,7 @@ important_microbes <- node_importance %>%
   slice_head(n = 10) %>%
   ungroup()
 
-# Translated comment.
+# Metabolites(sort).
 important_metabolites <- node_importance %>%
   filter(type == "Metabolite") %>%
   arrange(desc(degree)) %>%
@@ -512,10 +512,10 @@ important_metabolites <- node_importance %>%
 
 
 
-# Translated comment.
-# Translated comment.
+# 4. Summarizebody sitefor metabolitesmicrobes.
+# and metabolites.
 
-# Translated comment.
+# ,Calculatemicrobesand metabolitescorrelation.
 microbe_influence <- all_cors %>%
   dplyr::group_by(Microbiome, Site) %>%
   dplyr::summarize(
@@ -525,16 +525,16 @@ microbe_influence <- all_cors %>%
   ) %>%
   dplyr::arrange(Site, desc(avg_correlation))
 
-# Translated comment.
+# Getbody sitemicrobes(5).
 top_influential_microbes <- microbe_influence %>%
   dplyr::group_by(Site) %>%
   dplyr::slice_head(n = 5) %>%
   dplyr::ungroup()
 
-cat("\n每个部位对代谢物影响最强的微生物(前5名):\n")
+cat("\nTop 5 microbes with the strongest effect on metabolites for each body site:\n")
 print(top_influential_microbes, n = nrow(top_influential_microbes))
 
-# Translated comment.
+# 5. body sitemetabolites.
 metabolites_by_site <- all_cors %>%
   dplyr::group_by(Metabolite) %>%
   dplyr::summarize(
@@ -546,19 +546,19 @@ metabolites_by_site <- all_cors %>%
   ) %>%
   dplyr:: arrange(desc(site_count), desc(avg_correlation))
 
-# Translated comment.
+# Getbody sitemetabolites(2or morebody site).
 shared_metabolites <- metabolites_by_site %>%
   dplyr::filter(site_count > 1) %>%
   dplyr::slice_head(n = 15)
 
-cat("\n被多个部位微生物共同影响的代谢物(前15名):\n")
+cat("\nTop 15 metabolites influenced by microbes from multiple body sites:\n")
 print(shared_metabolites, n = nrow(shared_metabolites))
 
-# Translated comment.
+# 6. Create.
 library(ggplot2)
 library(forcats)
 
-# Translated comment.
+# body sitemicrobes.
 p1 <- important_microbes %>%
   group_by(site) %>%
   slice_head(n = 5) %>%
@@ -576,11 +576,11 @@ p1 <- important_microbes %>%
        y = "") +
   theme_bw()
 
-# Translated comment.
+# Saveresults.
 ggsave("4_manuscript/Figures/Figure_2/Figure_s2_important_microbes.pdf", 
        p1, width = 15, height = 4)
 
-# Translated comment.
+# metabolites.
 p2 <- important_metabolites %>%
   slice_head(n = 10) %>%
   mutate(name = fct_reorder(name, degree)) %>%

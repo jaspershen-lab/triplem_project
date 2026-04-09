@@ -28,7 +28,7 @@ metabolite_annotation<-read_excel("3_data_analysis/plasma_metabolomics/data_prep
 
 MetaCardis_metabome_annotation_microbial<-subset(MetaCardis_metabome_annotation,HMDB%in%metabolite_annotation$HMDB)
 
-# Translated comment.
+# Remove duplicate participants.
 
 MetaCardis_metadata<-subset(MetaCardis_metadata,Status%in%c("MMC372","HC275","UMCC222","IHD372"))
 
@@ -37,7 +37,7 @@ MetaCardis_metagenomic<-MetaCardis_metagenomic[MetaCardis_metadata$ID,]
 MetaCardis_metabolome<-MetaCardis_metabolome[MetaCardis_metadata$ID,]
 
 
-# Translated comment.
+# Keep participants with both metabolomics and microbiome data.
 MetaCardis_metagenomic <- MetaCardis_metagenomic[!apply(MetaCardis_metagenomic == "NA", 1, all), ]
 MetaCardis_metabolome <- MetaCardis_metabolome[!apply(MetaCardis_metabolome == "NA", 1, all), ]
 
@@ -49,7 +49,7 @@ MetaCardis_metadata<-subset(MetaCardis_metadata,ID%in%com_sample)
 MetaCardis_metabolome <- type.convert(MetaCardis_metabolome, as.is = TRUE)
 
 MetaCardis_metabolome<-na.omit(MetaCardis_metabolome)
-# Translated comment.
+# Aggregate MetaCardis_metagenomic to the genus level.
 
 
 
@@ -80,46 +80,46 @@ library(ade4)
 
 
 
-# Translated comment.
+# Read the data.
 metabolome <-MetaCardis_metagenomic
 metadata <- MetaCardis_metadata
 
-# Translated comment.
+# Ensuremetabolite data.
 metabolome <- as.data.frame(apply(metabolome, 2, as.numeric))
 
-# Translated comment.
+# Extractdata.
 age <- metadata$Age..years.
 
-# Translated comment.
+# Createdata framecorrelationresults.
 correlation_results <- data.frame(
   Metabolite = colnames(metabolome),
   Correlation = NA,
   P_value = NA
 )
 
-# Translated comment.
+# Calculatemetabolitesand correlation.
 for(i in 1:ncol(metabolome)) {
-  # Translated comment.
+  # Usecomplete.casesEnsureUsedatafor.
   complete_data <- complete.cases(metabolome[,i], age)
   
-  # Translated comment.
+  # Calculatecorrelation.
   cor_test <- cor.test(metabolome[complete_data,i], 
                        age[complete_data], 
-                       method = "pearson",  # translated comment
-                       exact = FALSE)        # translated comment
+                       method = "pearson",  # UseSpearmancorrelation coefficient.
+                       exact = FALSE)        # For samplesUseCalculate.
   
-  # Translated comment.
+  # results.
   correlation_results$Correlation[i] <- cor_test$estimate
   correlation_results$P_value[i] <- cor_test$p.value
 }
 
-# Translated comment.
+# AddFDRp-values.
 correlation_results$FDR <- p.adjust(correlation_results$P_value, method = "BH")
 
-# Translated comment.
+# correlation coefficientfor sort.
 correlation_results <- correlation_results[order(abs(correlation_results$Correlation), decreasing = TRUE),]
 
-# Translated comment.
+# Addsignificance.
 correlation_results$Significance <- ifelse(correlation_results$FDR < 0.05, 
                                            "Significant", 
                                            "Not Significant")
@@ -132,42 +132,42 @@ correlation_results_MGS<-subset(correlation_results,Correlation>0&Significance==
 metabolome <-MetaCardis_metabolome
 metadata <- MetaCardis_metadata
 
-# Translated comment.
+# Ensuremetabolite data.
 metabolome <- as.data.frame(apply(metabolome, 2, as.numeric))
 
-# Translated comment.
+# Extractdata.
 age <- metadata$Age..years.
 
-# Translated comment.
+# Createdata framecorrelationresults.
 correlation_results <- data.frame(
   Metabolite = colnames(metabolome),
   Correlation = NA,
   P_value = NA
 )
 
-# Translated comment.
+# Calculatemetabolitesand correlation.
 for(i in 1:ncol(metabolome)) {
-  # Translated comment.
+  # Usecomplete.casesEnsureUsedatafor.
   complete_data <- complete.cases(metabolome[,i], age)
   
-  # Translated comment.
+  # Calculatecorrelation.
   cor_test <- cor.test(metabolome[complete_data,i], 
                        age[complete_data], 
-                       method = "pearson",  # translated comment
-                       exact = FALSE)        # translated comment
+                       method = "pearson",  # UseSpearmancorrelation coefficient.
+                       exact = FALSE)        # For samplesUseCalculate.
   
-  # Translated comment.
+  # results.
   correlation_results$Correlation[i] <- cor_test$estimate
   correlation_results$P_value[i] <- cor_test$p.value
 }
 
-# Translated comment.
+# AddFDRp-values.
 correlation_results$FDR <- p.adjust(correlation_results$P_value, method = "BH")
 
-# Translated comment.
+# correlation coefficientfor sort.
 correlation_results <- correlation_results[order(abs(correlation_results$Correlation), decreasing = TRUE),]
 
-# Translated comment.
+# Addsignificance.
 correlation_results$Significance <- ifelse(correlation_results$FDR < 0.05, 
                                            "Significant", 
                                            "Not Significant")
@@ -177,44 +177,44 @@ correlation_results_Met<-subset(correlation_results,Correlation>0.1&Significance
 
 
 
-# Translated comment.
+# 2. for datasetPCA.
 pca_microbiome <- dudi.pca(data.frame(MetaCardis_metagenomic), scannf = FALSE, nf = 5)
 pca_metabolome <- dudi.pca(data.frame(MetaCardis_metabolome[,correlation_results_Met$Metabolite]), scannf = FALSE, nf = 5)
 
-# Translated comment.
+# 3. CoinertiaAnalyze.
 coia <- coinertia(pca_microbiome, pca_metabolome, scannf = FALSE, nf = 2)
 
-# Translated comment.
-# Translated comment.
+# 4. Viewresults.
+# RV(correlation).
 coia$RV
 
-# Translated comment.
+# Calculatesamples.
 distances <- sqrt(rowSums((coia$mX - coia$mY)^2))
 
-# Translated comment.
-# Translated comment.
+# resultsCreatedata frame.
+# Viewcoinertiafor .
 str(coia)
 
-# Translated comment.
+# Viewfeatures(eigenvalues).
 coia$eig
 
-# Translated comment.
+# View.
 percent_var <- (coia$eig/sum(coia$eig))*100
 print(percent_var)
 
-# Translated comment.
-# Translated comment.
-micro_scores <- coia$li  # translated comment
-micro_loadings <- coia$c1 # translated comment
+# Getdatacoordinates.
+# Microbiome datacoordinates.
+micro_scores <- coia$li  # Samplesmicrobiomecoordinates.
+micro_loadings <- coia$c1 # Microbiomevariablescontribution.
 
-# Translated comment.
-metab_scores <- coia$li # translated comment
-metab_loadings <- coia$l1 # translated comment
+# Metabolite datacoordinates.
+metab_scores <- coia$li # Samplesmetabolitescoordinates.
+metab_loadings <- coia$l1 # Metabolitesvariablescontribution.
 
-# Translated comment.
-# Translated comment.
+# Viewvariablescontribution.
+# Microbiomevariablescontribution.
 head(micro_loadings)
-# Translated comment.
+# Metabolitesvariablescontribution.
 head(metab_loadings)
 
 
@@ -227,11 +227,11 @@ a<- type.convert(a, as.is = TRUE)
 a<-subset(a,a$Status=="UMCC222")
 ggplot(a, aes(x=Age..years., y= distances)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # translated comment
-                                                                                                axis.text.x=element_text(colour="black",size=14), # translated comment
-                                                                                                axis.text.y=element_text(size=14,face="plain"), # translated comment
-                                                                                                axis.title.y=element_text(size = 14,face="plain"), # translated comment
-                                                                                                axis.title.x=element_text(size = 14,face="plain"), # translated comment
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # Hide the legend.
+                                                                                                axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+                                                                                                axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+                                                                                                axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+                                                                                                axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+xlab("Age")+xlim(c(27,70))
 
 

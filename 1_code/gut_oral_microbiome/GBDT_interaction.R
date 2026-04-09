@@ -173,28 +173,28 @@ oral_expression_data <-
 
 oral_temp_object <- oral_object
 oral_temp_object@expression_data <- oral_expression_data
-# Translated comment.
+# Cross-validation function.
 single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
-  # Translated comment.
+  # Setrandom seed.
   if(!is.null(seed)) {
     set.seed(seed)
   }
   
-  # Translated comment.
+  # Createfold.
   fold_ids <- sample(rep(1:n_folds, length.out = length(y)))
   all_predictions <- numeric(length(y))
   
   for(fold in 1:n_folds) {
-    # Translated comment.
+
     test_idx <- which(fold_ids == fold)
     train_idx <- which(fold_ids != fold)
     
-    # Translated comment.
+    # data.
     train_data <- data.frame(X[train_idx, , drop = FALSE])
     test_data <- data.frame(X[test_idx, , drop = FALSE])
     train_data$target <- y[train_idx]
     
-    # Translated comment.
+
     model <- gbm(
       target ~ .,
       data = train_data,
@@ -206,7 +206,7 @@ single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
       verbose = FALSE
     )
     
-    # Translated comment.
+
     test_data <- data.frame(X[test_idx, , drop = FALSE])
     all_predictions[test_idx] <- predict(model, test_data, n.trees = gbdt_params$n.trees)
   }
@@ -216,38 +216,38 @@ single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
 
 
 
-# Translated comment.
+# R-squared helper function.
 calculate_r2 <- function(actual, predicted) {
   1 - sum((actual - predicted)^2) / sum((actual - mean(actual))^2)
 }
-# Translated comment.
+# Feature selection function.
 select_relevant_features <- function(X, y, correlation_method = "spearman", 
                                      p_threshold = 0.05,
                                      p_adjust_method = "none",
-                                     rho_threshold = 0.1) {  # translated comment
-  # Translated comment.
+                                     rho_threshold = 0.1) {  # Addcorrelation coefficientthreshold.
+  # Calculatefeaturesand variablescorrelation.
   correlations <- sapply(1:ncol(X), function(i) {
     result <- cor.test(X[,i], y, method = correlation_method)
     c(correlation = result$estimate,
       p_value = result$p.value)
   })
   
-  # Translated comment.
+  # ConvertmatrixProcess.
   correlations<-as.data.frame(t(correlations))
   colnames(correlations) <- c("correlation", "p_value")
   rownames(correlations) <- colnames(X)
   
-  # Translated comment.
+
   adjusted_p_values <- p.adjust(correlations[,"p_value"], method = p_adjust_method)
   
-  # Translated comment.
+  # Addadjusted p-valuesresultsin.
   correlations <- cbind(correlations, adjusted_p_value = adjusted_p_values)
   
-  # Translated comment.
+  # adjusted p-valuescorrelation coefficientfor Filter.
   significant_features <- which(adjusted_p_values < p_threshold & 
                                   abs(correlations[,"correlation"]) >= rho_threshold)
   
-  # Translated comment.
+  # correlationfor sort.
   if(length(significant_features) > 0) {
     abs_cors <- abs(correlations[significant_features, "correlation"])
     significant_features <- significant_features[order(abs_cors, decreasing = TRUE)]
@@ -260,42 +260,42 @@ select_relevant_features <- function(X, y, correlation_method = "spearman",
   ))
 }
 
-# Translated comment.
+# : Creategutmicrobiomeoralmicrobiomeinteraction features.
 create_microbiome_interactions <- function(gut_data, oral_data, 
                                            method = "multiplication",
                                            feature_selection = TRUE,
                                            max_features = 50,
                                            correlation_threshold = 0.2) {
-  # Translated comment.
+  # Getsample IDsEnsuredata.
   gut_samples <- colnames(gut_data)
   oral_samples <- colnames(oral_data)
   
-  # Translated comment.
+  # Ensuredatasetsamples.
   common_samples <- intersect(gut_samples, oral_samples)
   message(sprintf("Common samples for interaction analysis: %d", length(common_samples)))
   
-  # Translated comment.
+  # Extractsamplesdata.
   gut_matched <- gut_data[, common_samples]
   oral_matched <- oral_data[, common_samples]
   
-  # Translated comment.
+  # Transposedata,samples,columns are features.
   gut_df <- as.data.frame(t(gut_matched))
   oral_df <- as.data.frame(t(oral_matched))
   
-  # Translated comment.
+  # Add.
   colnames(gut_df) <- paste0("gut_", colnames(gut_df))
   colnames(oral_df) <- paste0("oral_", colnames(oral_df))
   
-  # Translated comment.
+  # If feature selection,features.
   if (feature_selection) {
-    # Translated comment.
+    # For gutfeatures,.
     gut_variances <- apply(gut_df, 2, var)
     gut_means <- apply(gut_df, 2, mean)
-    gut_importance <- gut_variances * gut_means  # translated comment
+    gut_importance <- gut_variances * gut_means
     top_gut_indices <- order(gut_importance, decreasing = TRUE)[1:min(max_features, ncol(gut_df))]
     selected_gut_features <- colnames(gut_df)[top_gut_indices]
     
-    # Translated comment.
+    # For oralfeatures,.
     oral_variances <- apply(oral_df, 2, var)
     oral_means <- apply(oral_df, 2, mean)
     oral_importance <- oral_variances * oral_means
@@ -305,7 +305,7 @@ create_microbiome_interactions <- function(gut_data, oral_data,
     message(sprintf("Selected %d gut features and %d oral features for interaction analysis", 
                     length(selected_gut_features), length(selected_oral_features)))
     
-    # Translated comment.
+    # Filterdata frame.
     gut_df_selected <- gut_df[, selected_gut_features, drop = FALSE]
     oral_df_selected <- oral_df[, selected_oral_features, drop = FALSE]
   } else {
@@ -315,36 +315,36 @@ create_microbiome_interactions <- function(gut_data, oral_data,
     selected_oral_features <- colnames(oral_df)
   }
   
-  # Translated comment.
+  # Createinteraction features.
   message("Creating interaction features...")
   interaction_list <- list()
   interaction_names <- character()
   
-  # Translated comment.
+  # Calculatefeaturesbetweencorrelation,featuresfor Create.
   if (correlation_threshold > 0) {
-    # Translated comment.
+    # MergedataCalculatecorrelation.
     combined_df <- cbind(gut_df_selected, oral_df_selected)
     correlation_matrix <- cor(combined_df, method = "spearman")
     
-    # Translated comment.
+    # gut-oralfeaturesfor betweencorrelation.
     gut_indices <- which(grepl("^gut_", colnames(combined_df)))
     oral_indices <- which(grepl("^oral_", colnames(combined_df)))
     
-    # Translated comment.
+    # CreateAddinteraction features.
     interaction_count <- 0
     
-    # Translated comment.
+    # gutoralfeaturesfor.
     for (i in gut_indices) {
       gut_feature <- colnames(combined_df)[i]
       for (j in oral_indices) {
         oral_feature <- colnames(combined_df)[j]
-        # Translated comment.
+        # Checkcorrelationwhether threshold.
         if (abs(correlation_matrix[i, j]) >= correlation_threshold) {
-          # Translated comment.
+          # Create.
           if (method == "multiplication") {
             interaction_feature <- gut_df_selected[, gut_feature] * oral_df_selected[, oral_feature]
           } else if (method == "ratio") {
-            # Translated comment.
+
             denominator <- oral_df_selected[, oral_feature]
             denominator[denominator == 0] <- min(denominator[denominator > 0]) / 10
             interaction_feature <- gut_df_selected[, gut_feature] / denominator
@@ -354,7 +354,7 @@ create_microbiome_interactions <- function(gut_data, oral_data,
             stop("Unsupported interaction method. Use 'multiplication', 'ratio', or 'difference'.")
           }
           
-          # Translated comment.
+          # interaction featuresAdd.
           interaction_name <- paste0("int_", gsub("gut_", "", gut_feature), "_", 
                                      gsub("oral_", "", oral_feature))
           interaction_list[[interaction_name]] <- interaction_feature
@@ -367,14 +367,14 @@ create_microbiome_interactions <- function(gut_data, oral_data,
     message(sprintf("Created %d interaction features based on correlation threshold %.2f", 
                     interaction_count, correlation_threshold))
   } else {
-    # Translated comment.
+    # UsecorrelationFilter,Create.
     for (gut_feature in selected_gut_features) {
       for (oral_feature in selected_oral_features) {
-        # Translated comment.
+        # Create.
         if (method == "multiplication") {
           interaction_feature <- gut_df_selected[, gut_feature] * oral_df_selected[, oral_feature]
         } else if (method == "ratio") {
-          # Translated comment.
+
           denominator <- oral_df_selected[, oral_feature]
           denominator[denominator == 0] <- min(denominator[denominator > 0]) / 10
           interaction_feature <- gut_df_selected[, gut_feature] / denominator
@@ -384,7 +384,7 @@ create_microbiome_interactions <- function(gut_data, oral_data,
           stop("Unsupported interaction method. Use 'multiplication', 'ratio', or 'difference'.")
         }
         
-        # Translated comment.
+        # interaction featuresAdd.
         interaction_name <- paste0("int_", gsub("gut_", "", gut_feature), "_", 
                                    gsub("oral_", "", oral_feature))
         interaction_list[[interaction_name]] <- interaction_feature
@@ -397,13 +397,13 @@ create_microbiome_interactions <- function(gut_data, oral_data,
                     length(selected_oral_features)))
   }
   
-  # Translated comment.
+  # interaction featuresConvertdata frame.
   interaction_df <- as.data.frame(interaction_list)
   
-  # Translated comment.
+  # Ensurerow names.
   rownames(interaction_df) <- rownames(gut_df)
   
-  # Translated comment.
+  # Returninteraction featuresdata frameandFilterafterdata.
   return(list(
     interaction_features = interaction_df,
     gut_features = gut_df_selected,
@@ -417,48 +417,48 @@ create_microbiome_interactions <- function(gut_data, oral_data,
   ))
 }
 
-# Translated comment.
+# preprocess_combined_data,Addinteraction features.
 preprocess_combined_data_with_interactions <- function(gut_data, oral_data, metabolite_data,
                                                        include_interactions = TRUE,
                                                        interaction_method = "multiplication",
                                                        max_features = 30,
                                                        correlation_threshold = 0.3) {
-  # Translated comment.
+  # Getsample IDs.
   gut_samples <- colnames(gut_data)
   oral_samples <- colnames(oral_data)
   meta_samples <- colnames(metabolite_data)
   
-  # Translated comment.
+  # Checksample IDs.
   message("Initial sample counts:")
   message(sprintf("Gut microbiome samples: %d", length(gut_samples)))
   message(sprintf("Oral microbiome samples: %d", length(oral_samples)))
   message(sprintf("Metabolite samples: %d", length(meta_samples)))
   
-  # Translated comment.
+  # samples.
   common_samples <- Reduce(intersect, list(gut_samples, oral_samples, meta_samples))
   message(sprintf("Common samples across all datasets: %d", length(common_samples)))
   
-  # Translated comment.
+  # Extractsamplesdata.
   gut_matched <- gut_data[, common_samples]
   oral_matched <- oral_data[, common_samples]
   metabolite_matched <- metabolite_data[, common_samples]
   
-  # Translated comment.
+  # ConvertCheckdata.
   gut_df <- as.data.frame(t(gut_matched))
   oral_df <- as.data.frame(t(oral_matched))
   
-  # Translated comment.
+  # Add.
   colnames(gut_df) <- paste0("gut_", colnames(gut_df))
   colnames(oral_df) <- paste0("oral_", colnames(oral_df))
   
-  # Translated comment.
+  # Check.
   message(sprintf("Gut features: %d", ncol(gut_df)))
   message(sprintf("Oral features: %d", ncol(oral_df)))
   
-  # Translated comment.
+  # microbiomeMerge.
   combined_microbiome <- cbind(gut_df, oral_df)
   
-  # Translated comment.
+  # Addinteraction features(if ).
   if (include_interactions) {
     interactions_result <- create_microbiome_interactions(
       gut_data = gut_matched,
@@ -469,20 +469,20 @@ preprocess_combined_data_with_interactions <- function(gut_data, oral_data, meta
       correlation_threshold = correlation_threshold
     )
     
-    # Translated comment.
+    # Mergeinteraction features.
     interaction_df <- interactions_result$interaction_features
     message(sprintf("Adding %d interaction features", ncol(interaction_df)))
     
-    # Translated comment.
+    # Ensure row names match.
     if (!identical(rownames(combined_microbiome), rownames(interaction_df))) {
       warning("Row names (samples) do not match between microbiome data and interaction features!")
     }
     
-    # Translated comment.
+    # Mergefeatures.
     combined_microbiome <- cbind(combined_microbiome, interaction_df)
   }
   
-  # Translated comment.
+  # Ensure sample order matches.
   rownames(combined_microbiome) <- common_samples
   
   return(list(
@@ -493,7 +493,7 @@ preprocess_combined_data_with_interactions <- function(gut_data, oral_data, meta
   ))
 }
 
-# Translated comment.
+# analyze_combined_metabolite_ev,interaction features.
 analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data, metabolite_data, 
                                                              n_cores = NULL, seed = 42,
                                                              do_feature_selection = TRUE,
@@ -505,21 +505,21 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
                                                              interaction_method = "multiplication",
                                                              max_interaction_features = 30,
                                                              interaction_correlation_threshold = 0.3) {
-  # Translated comment.
+  # Set.
   set.seed(seed)
   
-  # Translated comment.
+  # Set.
   n_boots <- 100
   n_folds <- 10
   
-  # Translated comment.
+  # Setparallel.
   if(is.null(n_cores)) {
     n_cores <- detectCores() - 1
   }
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
   
-  # Translated comment.
+  # Data preprocessing(interaction features).
   processed_data <- preprocess_combined_data_with_interactions(
     gut_data, oral_data, metabolite_data,
     include_interactions = include_interactions,
@@ -528,11 +528,11 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
     correlation_threshold = interaction_correlation_threshold
   )
   
-  # Translated comment.
+  # data.
   X <- as.matrix(processed_data$combined_microbiome)
   Y <- processed_data$metabolite
   
-  # Translated comment.
+
   message("\nAnalysis settings:")
   message(sprintf("Feature selection: %s", if(do_feature_selection) "Yes" else "No"))
   if(do_feature_selection) {
@@ -549,7 +549,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
   message(sprintf("Metabolites: %d", ncol(Y)))
   message(sprintf("Using %d cores", n_cores))
   
-  # Translated comment.
+  # GBDT.
   gbdt_params <- list(
     n.trees = 100,
     interaction.depth = 15,
@@ -559,24 +559,24 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
     train.fraction = 0.8
   )
   
-  # Translated comment.
+  # parallel.
   clusterExport(cl, c("single_cv", "calculate_r2"), envir = environment())
   
-  # Translated comment.
+  # results.
   results <- list()
   
-  # Translated comment.
+  # Set.
   pb <- progress_bar$new(
     format = "[:bar] :percent | Metabolite :current/:total | Elapsed: :elapsed | ETA: :eta",
     total = ncol(Y)
   )
   
-  # Translated comment.
+  # Analyzemetabolites.
   for(i in 1:ncol(Y)) {
     start_time <- Sys.time()
     current_y <- Y[, i]
     
-    # Translated comment.
+    # Feature selection.
     if(do_feature_selection) {
       feature_selection <- select_relevant_features(
         X, current_y,
@@ -592,7 +592,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
         X_selected <- X
       }
       
-      # Translated comment.
+      # Summarizein featuresin proportion.
       n_gut <- sum(grepl("^gut_", selected_features))
       n_oral <- sum(grepl("^oral_", selected_features))
       n_interaction <- sum(grepl("^int_", selected_features))
@@ -603,9 +603,9 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
       n_interaction <- sum(grepl("^int_", colnames(X)))
     }
     
-    # Translated comment.
+    # featuresAnalyze.
     if(ncol(X_selected) > 0) {
-      # Translated comment.
+      # ParallelBootstrap.
       boot_results <- foreach(b = 1:n_boots,
                               .combine = 'c',
                               .packages = c("gbm", "caret")) %dopar% {
@@ -618,13 +618,13 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
                                 single_cv(boot_X, boot_y, n_folds, gbdt_params, seed = local_seed)
                               }
       
-      # Translated comment.
+      # CalculateSummarize.
       mean_r2 <- mean(boot_results)
       ci <- quantile(boot_results, probs = c(0.025, 0.975))
       t_stat <- mean_r2 / (sd(boot_results) / sqrt(n_boots))
       p_value <- 2 * pt(-abs(t_stat), df = n_boots - 1)
       
-      # Translated comment.
+      # UsefeaturesGBDT,Calculatefeaturesimportance.
       final_data <- data.frame(current_y, X_selected)
       final_model <- gbm(
         current_y ~ ., data = final_data,
@@ -646,7 +646,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
       feature_importance <- NULL
     }
     
-    # Translated comment.
+    # results.
     results[[i]] <- list(
       metabolite = colnames(Y)[i],
       mean_r2 = mean_r2,
@@ -662,7 +662,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
       feature_importance = feature_importance
     )
     
-    # Translated comment.
+    # results.
     pb$tick()
     end_time <- Sys.time()
     time_taken <- difftime(end_time, start_time, units = "mins")
@@ -675,10 +675,10 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
     message(sprintf("Time: %.2f mins", time_taken))
   }
   
-  # Translated comment.
+  # Stop the parallel cluster.
   stopCluster(cl)
   
-  # Translated comment.
+  # Organize the results into a data frame.
   summary_df <- do.call(rbind, lapply(results, function(x) {
     data.frame(
       metabolite = x$metabolite,
@@ -693,9 +693,9 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
     )
   }))
   
-  # Translated comment.
+  # Addinteraction featuresAnalyze.
   analyze_interaction_importance <- function(results) {
-    # Translated comment.
+    # Extractmetabolitesfeaturesimportance.
     all_importance <- do.call(rbind, lapply(1:length(results), function(i) {
       imp <- results[[i]]$feature_importance
       if(!is.null(imp)) {
@@ -707,22 +707,22 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
       }
     }))
     
-    # Translated comment.
+    # Add feature types.
     all_importance$feature_type <- "other"
     all_importance$feature_type[grepl("^gut_", all_importance$feature)] <- "gut"
     all_importance$feature_type[grepl("^oral_", all_importance$feature)] <- "oral"
     all_importance$feature_type[grepl("^int_", all_importance$feature)] <- "interaction"
     
-    # Translated comment.
+    # metabolitesfeaturesimportance.
     importance_by_type <- aggregate(importance ~ metabolite + feature_type, 
                                     data = all_importance, sum)
     
-    # Translated comment.
+    # Extractinteraction features.
     interaction_details <- all_importance[all_importance$feature_type == "interaction", ]
     
-    # Translated comment.
+    # Extractinteraction features.
     if(nrow(interaction_details) > 0) {
-      # Translated comment.
+      # interaction featuresin Extractgutoralfeatures.
       pattern <- "int_(.+)_(.+)"
       interaction_parts <- do.call(rbind, lapply(interaction_details$feature, function(feat) {
         if(grepl(pattern, feat)) {
@@ -741,7 +741,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
         }
       }))
       
-      # Translated comment.
+      # Mergeimportance.
       interaction_analysis <- merge(interaction_details, interaction_parts, by = "feature")
     } else {
       interaction_analysis <- data.frame()
@@ -753,9 +753,9 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
     ))
   }
   
-  # Translated comment.
+
   plot_combined_feature_selection_results_with_interactions <- function(results) {
-    # Translated comment.
+    # data.
     feature_summary <- do.call(rbind, lapply(results$detailed_results, function(x) {
       data.frame(
         metabolite = x$metabolite,
@@ -767,10 +767,10 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
       )
     }))
     
-    # Translated comment.
+    # Analyzeinteraction featuresimportance.
     interaction_importance <- analyze_interaction_importance(results$detailed_results)
     
-    # Translated comment.
+    # 1. featuresand R-squared.
     p1 <- ggplot(feature_summary, aes(x = n_features, y = r2)) +
       geom_point(alpha = 0.6) +
       geom_smooth(method = "loess", se = TRUE) +
@@ -779,7 +779,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
            x = "Number of Selected Features",
            y = "R² Score")
     
-    # Translated comment.
+    # 2. featuresproportion.
     feature_types <- reshape2::melt(feature_summary[, c("metabolite", "n_gut", "n_oral", "n_interaction", "r2")],
                                     id.vars = c("metabolite", "r2"),
                                     variable.name = "feature_type",
@@ -795,7 +795,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
            y = "Number of Features",
            fill = "Feature Type")
     
-    # Translated comment.
+    # 3. interaction featuresfor .
     p3 <- ggplot(feature_summary, aes(x = n_interaction / n_features, y = r2)) +
       geom_point(alpha = 0.6) +
       geom_smooth(method = "loess", se = TRUE) +
@@ -804,7 +804,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
            x = "Proportion of Interaction Features",
            y = "R² Score")
     
-    # Translated comment.
+    # 4. featuresimportance.
     if(nrow(interaction_importance$importance_by_type) > 0) {
       p4 <- ggplot(interaction_importance$importance_by_type, 
                    aes(x = feature_type, y = importance, fill = feature_type)) +
@@ -822,7 +822,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
         labs(title = "Feature Importance by Type")
     }
     
-    # Translated comment.
+
     combined_plots <- (p1 + p2) / (p3 + p4) +
       plot_layout(heights = c(1, 1))
     
@@ -836,7 +836,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
     ))
   }
   
-  # Translated comment.
+  # AddAnalyze.
   viz_results <- plot_combined_feature_selection_results_with_interactions(list(
     detailed_results = results,
     summary = summary_df
@@ -851,7 +851,7 @@ analyze_combined_metabolite_ev_with_interactions <- function(gut_data, oral_data
   ))
 }
 
-# Translated comment.
+# Usage example.
  combined_results_with_interactions <- analyze_combined_metabolite_ev_with_interactions(
    gut_data = gut_temp_object@expression_data,
    oral_data = oral_temp_object@expression_data,

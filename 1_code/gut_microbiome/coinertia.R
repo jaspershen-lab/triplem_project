@@ -118,53 +118,53 @@ metabolomics_data<-metabolomics_data[metabolomics_Microbial$variable_id,]
 
 library(ade4)
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# data:.
+# Microbiome_data: samples,microbiome.
+# Metabolome_data: samples,metabolites.
 
-# Translated comment.
-# Translated comment.
+# 1. data preprocessing.
+# data,Ensurerow names.
 microbiome_scaled <- t(microbiome_data)
 metabolome_scaled <- t(metabolomics_data)
 
-# Translated comment.
+# 2. for datasetPCA.
 pca_microbiome <- dudi.pca(data.frame(microbiome_scaled), scannf = FALSE, nf = 5)
 pca_metabolome <- dudi.pca(data.frame(metabolome_scaled), scannf = FALSE, nf = 5)
 
-# Translated comment.
+# 3. CoinertiaAnalyze.
 coia <- coinertia(pca_microbiome, pca_metabolome, scannf = FALSE, nf = 2)
 
-# Translated comment.
-# Translated comment.
+# 4. Viewresults.
+# RV(correlation).
 coia$RV
 
-# Translated comment.
+# Calculatesamples.
 distances <- sqrt(rowSums((coia$mX - coia$mY)^2))
 
-# Translated comment.
-# Translated comment.
+# resultsCreatedata frame.
+# Viewcoinertiafor .
 str(coia)
 
-# Translated comment.
+# Viewfeatures(eigenvalues).
 coia$eig
 
-# Translated comment.
+# View.
 percent_var <- (coia$eig/sum(coia$eig))*100
 print(percent_var)
 
-# Translated comment.
-# Translated comment.
-micro_scores <- coia$li  # translated comment
-micro_loadings <- coia$c1 # translated comment
+# Getdatacoordinates.
+# Microbiome datacoordinates.
+micro_scores <- coia$li  # Samplesmicrobiomecoordinates.
+micro_loadings <- coia$c1 # Microbiomevariablescontribution.
 
-# Translated comment.
-metab_scores <- coia$li # translated comment
-metab_loadings <- coia$l1 # translated comment
+# Metabolite datacoordinates.
+metab_scores <- coia$li # Samplesmetabolitescoordinates.
+metab_loadings <- coia$l1 # Metabolitesvariablescontribution.
 
-# Translated comment.
-# Translated comment.
+# Viewvariablescontribution.
+# Microbiomevariablescontribution.
 head(micro_loadings)
-# Translated comment.
+# Metabolitesvariablescontribution.
 head(metab_loadings)
 
 
@@ -174,16 +174,16 @@ a<-cbind(gut_temp_object@sample_info,distances)
 
 ggplot(a, aes(x=adjusted_age, y= distances)) +
   geom_point(shape=21,size=4,fill="#A1D0C7",color="white") +
-  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # translated comment
-                                                                                                axis.text.x=element_text(colour="black",size=14), # translated comment
-                                                                                                axis.text.y=element_text(size=14,face="plain"), # translated comment
-                                                                                                axis.title.y=element_text(size = 14,face="plain"), # translated comment
-                                                                                                axis.title.x=element_text(size = 14,face="plain"), # translated comment
+  geom_smooth(method="lm",colour = "grey50") +theme_light() +stat_cor(method = "pearson")+theme(legend.position="none", # Hide the legend.
+                                                                                                axis.text.x=element_text(colour="black",size=14), # Set x-axis tick label text properties.
+                                                                                                axis.text.y=element_text(size=14,face="plain"), # Set x-axis tick label text properties.
+                                                                                                axis.title.y=element_text(size = 14,face="plain"), # Set y-axis title text properties.
+                                                                                                axis.title.x=element_text(size = 14,face="plain"), # Set x-axis title text properties.
                                                                                                 plot.title = element_text(size=15,face="bold",hjust = 0.5))+ylab("MMC")+xlab("Age")+xlim(c(33,70))
 
 
 
-### Translated comment.
+### Plot,metabolites.
 
 
 micro_loadings<-subset(micro_loadings,CS1<(-0.1))
@@ -203,7 +203,7 @@ metab_loadings$HMDB.Name<-factor(metab_loadings$HMDB.Name,levels = unique(metab_
 p1<-ggplot(metab_loadings, aes(x = HMDB.Name, y = abs(RS1))) +
   geom_segment(aes(xend = HMDB.Name, yend = 0), color = "gray50") +
   geom_point(size = 3, color = "steelblue") +
-  coord_flip() + # translated comment
+  coord_flip() +
   theme_bw() +
   labs(
     title = "Top Estimate Metabolites ",
@@ -222,7 +222,7 @@ micro_loadings$Genus<-factor(micro_loadings$Genus,levels = unique(micro_loadings
 p2<-ggplot(micro_loadings, aes(x = Genus, y = abs(CS1))) +
   geom_segment(aes(xend = Genus, yend = 0), color = "gray50") +
   geom_point(size = 3, color = "steelblue") +
-  coord_flip() + # translated comment
+  coord_flip() +
   theme_bw() +
   labs(
     title = "Top Estimate Microbiome ",

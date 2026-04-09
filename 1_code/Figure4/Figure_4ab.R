@@ -6,7 +6,7 @@ setwd("1_code/4_site_merge/")
 library(tidyverse)
 library(readxl)
 
-##### Translated comment.
+##### Merge gut  oral GBDTdata.
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_nest_results")
 oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_nest_results")
 metabolite_annotation <- read_excel(
@@ -133,54 +133,54 @@ ggsave(
 )
 
 
-# Translated comment.
+# Read the data.
 data <- gut_oral_results_summary_co_influence
 
-# Translated comment.
+# Process the data.
 library(tidyr)
 library(dplyr)
 library(ggplot2)
-# Translated comment.
+# Handle duplicated HMDB.Name entries.
 data$HMDB.Name <- make.unique(data$HMDB.Name, sep = "_")
-# Translated comment.
+# Sort the data and select the top 30 metabolites.
 data_sorted <- data %>%
   arrange(desc(r2_mean)) %>%
   slice(1:30)
 
-# Translated comment.
+# Create long-format data for the stacked plot.
 data_long <- data_sorted %>%
   dplyr::select(HMDB.Name, gut_R2, oral_R2, r2_mean) %>%
   gather(key = "source", value = "value", c(gut_R2, oral_R2))
 
-# Translated comment.
+# Create a separate long-format table for r2_mean.
 r2_mean_long <- data_sorted %>%
   dplyr::select(HMDB.Name, r2_mean) %>%
   dplyr::mutate(source = "r2_mean") %>%
   dplyr::rename(value = r2_mean)
 
-# Translated comment.
+# Create the factor level order.
 level_order <- data_sorted$HMDB.Name
 
-# Translated comment.
+# Convert HMDB.Name to a factor and set the level order.
 data_long$HMDB.Name <- factor(data_long$HMDB.Name, levels = level_order)
 r2_mean_long$HMDB.Name <- factor(r2_mean_long$HMDB.Name, levels = level_order)
 
-# Translated comment.
+# Create the stacked bar chart and r2_mean comparison plot.
 a <- ggplot() +
-  # Translated comment.
+  # Stacked gut_R2 and oral_R2.
   geom_col(
     data = data_long,
     aes(x = HMDB.Name, y = value, fill = source),
     position = "stack",
     width = 0.4
   ) +
-  # Translated comment.
+  # Bars for r2_mean.
   geom_col(
     data = r2_mean_long,
     aes(x = HMDB.Name, y = value, fill = source),
     width = 0.4,
     position = position_nudge(x = 0.4)
-  ) +  # translated comment
+  ) +  # Shift the r2_mean bars to the right.
   scale_fill_manual(
     values = c(
       "gut_R2" = "#edd064",
@@ -202,43 +202,43 @@ a <- ggplot() +
 
 a
 
-# Translated comment.
+# Calculatemetabolitesin featuresimportance.
 calculate_feature_importance_proportions <- function(results) {
-  # Translated comment.
+  # Create a data frame to store the results.
   importance_summary <- data.frame()
   
-  # Translated comment.
+  # Iterate over each metabolite result.
   for (i in 1:length(results$detailed_results)) {
     metabolite <- results$detailed_results[[i]]$metabolite
     feature_importance <- results$detailed_results[[i]]$feature_importance
     
-    # Translated comment.
+    # Check whether feature importance data are available.
     if (!is.null(feature_importance) &&
         nrow(feature_importance) > 0) {
-      # Translated comment.
+      # Add feature types.
       feature_importance$feature_type <- "other"
       feature_importance$feature_type[grepl("^gut_", feature_importance$var)] <- "gut"
       feature_importance$feature_type[grepl("^oral_", feature_importance$var)] <- "oral"
       feature_importance$feature_type[grepl("^int_", feature_importance$var)] <- "interaction"
       
-      # Translated comment.
+      # Summarize importance by feature type.
       importance_by_type <- aggregate(rel.inf ~ feature_type, data = feature_importance, sum)
       
-      # Translated comment.
+      # Calculate total importance.
       total_importance <- sum(importance_by_type$rel.inf)
       
-      # Translated comment.
+      # Calculate the proportion of each type.
       importance_by_type$proportion <- importance_by_type$rel.inf / total_importance * 100
       
-      # Translated comment.
+      # Add metabolite information.
       importance_by_type$metabolite <- metabolite
       
-      # Translated comment.
+      # Merge into the overall results.
       importance_summary <- rbind(importance_summary, importance_by_type)
     }
   }
   
-  # Translated comment.
+  # Convert to wide format so each metabolite has one row and each feature type has one column.
   importance_wide <- reshape(
     importance_summary,
     idvar = "metabolite",
@@ -246,11 +246,11 @@ calculate_feature_importance_proportions <- function(results) {
     direction = "wide"
   )
   
-  # Translated comment.
+  # Rename columns.
   names(importance_wide) <- gsub("rel.inf\\.", "", names(importance_wide))
   names(importance_wide) <- gsub("proportion\\.", "proportion_", names(importance_wide))
   
-  # Translated comment.
+  # Ensure all feature-type columns exist, filling missing ones with 0.
   for (type in c("gut", "oral", "interaction", "other")) {
     if (!type %in% names(importance_wide)) {
       importance_wide[, type] <- 0
@@ -264,7 +264,7 @@ calculate_feature_importance_proportions <- function(results) {
 }
 
 
-# Translated comment.
+# Calculate and display importance proportions.
 feature_importance_proportions <- calculate_feature_importance_proportions(gut_oral_interaction)
 
 
@@ -273,7 +273,7 @@ viz_data <- merge(data_sorted, feature_importance_proportions, by = "metabolite"
 
 
 library(reshape2)
-# Translated comment.
+# Prepare data for visualization.
 viz_data <- melt(
   viz_data[, c("HMDB.Name", grep("proportion_", names(feature_importance_proportions), value = TRUE))],
   id.vars = "HMDB.Name",
@@ -281,7 +281,7 @@ viz_data <- melt(
   value.name = "proportion"
 )
 
-# Translated comment.
+# Clean feature-type names.
 viz_data$feature_type <- gsub("proportion_", "", viz_data$feature_type)
 
 viz_data <- subset(viz_data, !(feature_type == "other"))

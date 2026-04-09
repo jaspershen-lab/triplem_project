@@ -107,49 +107,49 @@ metabolomics_temp_object@expression_data <- expression_data
 microbiome_data<-gut_temp_object@expression_data
 metabolite_data<-metabolomics_temp_object@expression_data
 
-# Translated comment.
+# Load required packages.
 library(glmnet)
 library(caret)
 library(dplyr)
 library(parallel)
 
-# Translated comment.
+# CalculateR-squared.
 calculate_r2 <- function(pred, actual) {
-  # Translated comment.
+  # Ensure.
   pred <- as.numeric(pred)
   actual <- as.numeric(actual)
   
-  # Translated comment.
+  # Checkwhether NA.
   if(any(is.na(pred)) || any(is.na(actual))) {
     return(NA)
   }
   
-  # Translated comment.
+  # Checkwhether .
   if(sd(actual) == 0 || sd(pred) == 0) {
     return(0)
   }
   
-  # Translated comment.
+  # CalculateR-squared.
   cor_val <- cor(pred, actual)
   return(cor_val^2)
 }
 
-# Translated comment.
+# Calculatep-values.
 calculate_pvalue <- function(observed_r2, null_r2s) {
-  # Translated comment.
+  # Check.
   if(is.na(observed_r2)) return(NA)
   if(all(is.na(null_r2s))) return(NA)
   
-  # Translated comment.
+  # NA.
   null_r2s <- null_r2s[!is.na(null_r2s)]
   
-  # Translated comment.
+  # If no null,ReturnNA.
   if(length(null_r2s) == 0) return(NA)
   
-  # Translated comment.
+  # Calculatep-values.
   p_value <- mean(null_r2s >= observed_r2, na.rm = TRUE)
   
-  # Translated comment.
+  # If p-values0,Use1(+1).
   if(p_value == 0) {
     p_value <- 1 / (length(null_r2s) + 1)
   }
@@ -157,19 +157,19 @@ calculate_pvalue <- function(observed_r2, null_r2s) {
   return(p_value)
 }
 
-# Translated comment.
+# cross-validation function.
 nested_cv_lasso <- function(X, y, outer_folds = 5, inner_folds = 5, 
                             lambda_factor = 5, n_permutations = 1000) {
   
-  # Translated comment.
+  # Create.
   set.seed(123)
   outer_fold_indices <- createFolds(1:length(y), k = outer_folds)
   
-  # Translated comment.
+  # results.
   outer_results <- list()
   
   for(i in 1:outer_folds) {
-    # Translated comment.
+
     test_indices <- outer_fold_indices[[i]]
     train_indices <- setdiff(1:length(y), test_indices)
     
@@ -178,24 +178,24 @@ nested_cv_lasso <- function(X, y, outer_folds = 5, inner_folds = 5,
     X_test <- X[test_indices, ]
     y_test <- y[test_indices]
     
-    # Translated comment.
+    # lambda.
     cv_fit <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = inner_folds)
     
-    # Translated comment.
+    # Uselambda.
     selected_lambda <- cv_fit$lambda.min * lambda_factor
     
-    # Translated comment.
+
     final_model <- glmnet(X_train, y_train, alpha = 1, lambda = selected_lambda)
     
-    # Translated comment.
+
     test_pred <- predict(final_model, newx = X_test)
     test_r2 <- calculate_r2(test_pred, y_test)
     test_rmse <- sqrt(mean((as.numeric(test_pred) - y_test)^2))
     
-    # Translated comment.
+    # : y,CalculateR-squared.
     perm_r2 <- numeric(n_permutations)
     for(p in 1:n_permutations) {
-      # Translated comment.
+      # y.
       y_perm <- y_train[sample(length(y_train))]
       
       tryCatch({
@@ -207,30 +207,30 @@ nested_cv_lasso <- function(X, y, outer_folds = 5, inner_folds = 5,
       })
     }
     
-    # Translated comment.
+    # Calculatep-values.
     p_value <- calculate_pvalue(test_r2, perm_r2)
     
-    # Translated comment.
+    # Getfeatures.
     coef_matrix <- coef(final_model)
     selected_features <- rownames(coef_matrix)[which(coef_matrix != 0)]
     
-    # Translated comment.
+    # results.
     outer_results[[i]] <- list(
       test_r2 = test_r2,
       test_rmse = test_rmse,
-      n_features = length(selected_features) - 1,  # translated comment
-      selected_features = selected_features[-1],   # translated comment
+      n_features = length(selected_features) - 1,
+      selected_features = selected_features[-1],
       lambda = selected_lambda,
       p_value = p_value,
       perm_r2_dist = perm_r2,
-      n_valid_perms = sum(!is.na(perm_r2))  # translated comment
+      n_valid_perms = sum(!is.na(perm_r2))
     )
   }
   
   return(outer_results)
 }
 
-# Translated comment.
+# Main analysis function.
 analyze_all_metabolites <- function(metabolite_data, microbiome_data, 
                                     lambda_factor = 5,
                                     outer_folds = 5, 
@@ -238,7 +238,7 @@ analyze_all_metabolites <- function(metabolite_data, microbiome_data,
                                     n_permutations = 1000,
                                     ncores = 1) {
   
-  # Translated comment.
+  # Data preprocessing.
   common_samples <- intersect(colnames(metabolite_data), colnames(microbiome_data))
   metabolite_subset <- metabolite_data[, common_samples]
   microbiome_subset <- microbiome_data[, common_samples]
@@ -246,43 +246,43 @@ analyze_all_metabolites <- function(metabolite_data, microbiome_data,
   X <- t(microbiome_subset)
   y <- t(metabolite_subset)
   
-  # Translated comment.
+  # results.
   results_list <- list()
   
-  # Translated comment.
+  # ParallelProcessSet.
   if(ncores > 1) {
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
   }
   
-  # Translated comment.
+  # For metabolitesAnalyze.
   for(i in 1:nrow(metabolite_data)) {
     tryCatch({
-      cat(sprintf("\n分析代谢物 %d/%d: %s\n", 
+      cat(sprintf("\nAnalyzing metabolite %d/%d: %s\n", 
                   i, nrow(metabolite_data), 
                   rownames(metabolite_data)[i]))
       
-      # Translated comment.
+      # Run.
       cv_results <- nested_cv_lasso(X, y[,i], 
                                     outer_folds = outer_folds,
                                     inner_folds = inner_folds,
                                     lambda_factor = lambda_factor,
                                     n_permutations = n_permutations)
       
-      # Translated comment.
+      # Calculate.
       mean_r2 <- mean(sapply(cv_results, function(x) x$test_r2), na.rm = TRUE)
       mean_rmse <- mean(sapply(cv_results, function(x) x$test_rmse), na.rm = TRUE)
       mean_features <- mean(sapply(cv_results, function(x) x$n_features), na.rm = TRUE)
       valid_p_values <- sapply(cv_results, function(x) x$p_value)
       valid_p_values <- valid_p_values[!is.na(valid_p_values)]
       
-      # Translated comment.
+      # If p-values,; NA.
       min_p_value <- if(length(valid_p_values) > 0) min(valid_p_values) else NA
       
-      # Translated comment.
+      # Calculate.
       mean_valid_perms <- mean(sapply(cv_results, function(x) x$n_valid_perms))
       
-      # Translated comment.
+      # results.
       results_list[[i]] <- list(
         metabolite = rownames(metabolite_data)[i],
         mean_test_r2 = mean_r2,
@@ -294,19 +294,19 @@ analyze_all_metabolites <- function(metabolite_data, microbiome_data,
         cv_results = cv_results
       )
       
-      # Translated comment.
-      cat(sprintf("平均测试 R² = %.3f\n", mean_r2))
-      cat(sprintf("平均特征数 = %.1f\n", mean_features))
-      cat(sprintf("最小 p-value = %s\n", 
+      # results.
+      cat(sprintf("Mean test R-squared = %.3f\n", mean_r2))
+      cat(sprintf("Mean feature count = %.1f\n", mean_features))
+      cat(sprintf("Minimum p-value = %s\n", 
                   if(is.na(min_p_value)) "NA" else sprintf("%.3f", min_p_value)))
-      cat(sprintf("平均有效排列次数 = %.1f\n", mean_valid_perms))
+      cat(sprintf("Mean valid permutation count = %.1f\n", mean_valid_perms))
       
     }, error = function(e) {
-      cat(sprintf("处理代谢物 %s 时出错: %s\n", 
+      cat(sprintf("Error while processing metabolite %s: %s\n", 
                   rownames(metabolite_data)[i], 
                   conditionMessage(e)))
       
-      # Translated comment.
+
       results_list[[i]] <- list(
         metabolite = rownames(metabolite_data)[i],
         error = conditionMessage(e)
@@ -318,7 +318,7 @@ analyze_all_metabolites <- function(metabolite_data, microbiome_data,
     stopCluster(cl)
   }
   
-  # Translated comment.
+  # Organize the results into a data frame.
   valid_results <- !sapply(results_list, function(x) exists("error", where = x))
   results_df <- data.frame(
     metabolite = sapply(results_list[valid_results], function(x) x$metabolite),
@@ -330,7 +330,7 @@ analyze_all_metabolites <- function(metabolite_data, microbiome_data,
     significant = sapply(results_list[valid_results], function(x) x$significant)
   )
   
-  # Translated comment.
+  # FDR(for p-values).
   valid_p <- !is.na(results_df$p_value)
   results_df$p_adj <- NA
   results_df$p_adj[valid_p] <- p.adjust(results_df$p_value[valid_p], method = "BH")

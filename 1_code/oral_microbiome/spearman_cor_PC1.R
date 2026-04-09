@@ -114,7 +114,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## Translated comment.
+## Compute correlations between all genera and metabolomics PC1.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -127,25 +127,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# Translated comment.
-# Translated comment.
+# Assume 'metabolomics_pc' and 'gut_pc' are your data frames and have been set correctly.
+# Ensure the two data frames use the same samples (row names) in the same order.
 
-# Translated comment.
+# Convert the data frames to matrices for correlation analysis.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# Translated comment.
+# Convert the results to a data frame.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -156,7 +156,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# Translated comment.
+# Select the top 100 metabolites.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -177,14 +177,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -202,9 +202,9 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # translated comment
-  arrange(desc(abs_rho)) %>%       # translated comment
-  slice_head(n = 20)           # translated comment
+  mutate(abs_rho = abs(rho)) %>% # Create an absolute-value column.
+  arrange(desc(abs_rho)) %>%       # Sort by absolute value in descending order.
+  slice_head(n = 20)           # Keep the top 20 rows.
 
 variable_info<-gut_temp_object@variable_info
 
@@ -216,11 +216,11 @@ genus_top30_mete <- genus_top30_mete %>%
 
 
 ggplot(genus_top30_mete, aes(x = reorder(Genus, rho), y = rho, group = Genus)) +
-  geom_segment(aes(y = 0, yend = rho, xend = Genus), color = "# translated comment
-  geom_point(aes(color = Phylum), size = 3) +  # translated comment
-  scale_color_manual(values = phylum_color) +  # translated comment
-  labs(x = "Bacteria", y = "Rho Value") +    # translated comment
-  theme_light(base_size = 14) +  # translated comment
+  geom_segment(aes(y = 0, yend = rho, xend = Genus), color = "# 00A1D5FF",size = 1.5) + .
+  geom_point(aes(color = Phylum), size = 3) +  # Point markers colored by phylum.
+  scale_color_manual(values = phylum_color) +  # Use custom phylum colors.
+  labs(x = "Bacteria", y = "Rho Value") +    # Add axis labels.
+  theme_light(base_size = 14) +  # Use the light theme with base font size 14.
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 10, color = "grey30",face = "italic"),
     axis.text.y = element_text(size = 12, color = "grey30"),
@@ -234,7 +234,7 @@ ggplot(genus_top30_mete, aes(x = reorder(Genus, rho), y = rho, group = Genus)) +
 
 
 
-## Translated comment.
+## Plot scatterplots for the two taxa most correlated with PC1.
 
 cor_plot<-cbind(metabolomics_top100_PC1[,"PC1"],gut_matrix[,c("ASV5121","ASV8746")])
 colnames(cor_plot)<-c("PC1","ASV5121","ASV8746")

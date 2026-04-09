@@ -14,7 +14,7 @@ load(
 metabolomics_object <- object_cross_section
 
 
-### Translated comment.
+### Calculatebody sitemicrobiomealpha.
 
 metabolite_annotation <- read_excel(
   "1_code/revise_code/metabolite_annotation.xlsx"
@@ -22,7 +22,7 @@ metabolite_annotation <- read_excel(
 
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
-### Translated comment.
+### Calculatebody sitemicrobiomealpha.
 
 load("3_data_analysis/gut_microbiome/data_preparation/object_cross_section")
 
@@ -58,7 +58,7 @@ gut_object <-
 library(vegan)
 shannon_div <- diversity(t(gut_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_gut <- data.frame(Sample = names(shannon_div), Shannon = shannon_div)
 
 
@@ -96,7 +96,7 @@ oral_object <-
 
 shannon_div <- diversity(t(oral_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_oral <- data.frame(Sample = names(shannon_div), Shannon = shannon_div)
 
 
@@ -139,7 +139,7 @@ skin_object <-
 
 shannon_div <- diversity(t(skin_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_skin <- data.frame(Sample = names(shannon_div), Shannon = shannon_div)
 
 
@@ -182,11 +182,11 @@ nasal_object <-
 
 shannon_div <- diversity(t(nasal_object@expression_data), index = "shannon")
 
-# Translated comment.
+# Create the results data frame.
 results_nasal <- data.frame(Sample = names(shannon_div), Shannon = shannon_div)
 
 demographic_data <- data.frame(metabolomics_object@sample_info)
-# Translated comment.
+# Mergealpha diversity.
 Sample_ID <- demographic_data[, 1:2]
 colnames(Sample_ID)[1] <- "Sample"
 
@@ -207,7 +207,7 @@ colnames(alpha_diversity) <- c("gut", "oral", "skin", "nasal")
 
 
 
-## Translated comment.
+## Extractmetabolitedata.
 
 #######adjust BMI, sex, and IRIS, ethnicity
 expression_data <-
@@ -239,32 +239,32 @@ metabolome_data <- metabolomics_temp_object@expression_data
 
 metabolome_data <- data.frame(t(metabolome_data))
 
-# Translated comment.
+# Filtershared samples.
 
 metabolome_data <- metabolome_data[rownames(alpha_diversity), ]
 
 
-# Translated comment.
+# Load required R packages.
 library(tidyverse)
 
 
 
-# Translated comment.
+# Ensure sample IDs.
 common_samples <- intersect(rownames(alpha_diversity), rownames(metabolome_data))
 if (length(common_samples) == 0) {
-  stop("两个数据集没有共同的样本ID")
+  stop("The two datasets do not share common sample IDs")
 }
-cat("共有", length(common_samples), "个样本可用于分析\n")
+cat("Shared ", length(common_samples), " samples are available for analysis\n")
 
-# Translated comment.
+# Use shared samples to filter the data.
 alpha_diversity_filtered <- alpha_diversity[common_samples, ]
 metabolome_data_filtered <- metabolome_data[common_samples, ]
 
-# Translated comment.
+# Calculatesitealphaand metabolitesSpearmancorrelation.
 sites <- colnames(alpha_diversity_filtered)
 metabolites <- colnames(metabolome_data_filtered)
 
-# Translated comment.
+# resultsdata frame.
 results <- data.frame(
   Site = character(),
   Metabolite = character(),
@@ -274,20 +274,20 @@ results <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Translated comment.
+# Calculatecorrelation.
 for (site in sites) {
   alpha_values <- alpha_diversity_filtered[[site]]
   
   for (metabolite in metabolites) {
     metabolite_values <- metabolome_data_filtered[[metabolite]]
     
-    # Translated comment.
+    # CalculateSpearmancorrelation.
     cor_test <- cor.test(alpha_values,
                          metabolite_values,
                          method = "pearson",
                          exact = FALSE)
     
-    # Translated comment.
+    # Addresultsdata frame.
     results <- rbind(
       results,
       data.frame(
@@ -296,14 +296,14 @@ for (site in sites) {
         Rho = cor_test$estimate,
         P_value = cor_test$p.value,
         Adjusted_P_value = NA,
-        # Translated comment.
+        # NA,after.
         stringsAsFactors = FALSE
       )
     )
   }
 }
 
-# Translated comment.
+# For p-valuesBH.
 results$Adjusted_P_value <- p.adjust(results$P_value, method = "BH")
 
 results <- subset(results, P_value < 0.05)
@@ -320,7 +320,7 @@ results <- merge(results,
 results <- subset(results, !(HMDB.Class == "NA"))
 
 
-# Translated comment.
+# Define.
 keep_classes <- c(
   "Benzene and substituted derivatives",
   "Carboxylic acids and derivatives",
@@ -332,7 +332,7 @@ keep_classes <- c(
   "Steroids and steroid derivatives"
 )
 
-# Translated comment.
+# in HMDB.Class"Others".
 results$HMDB.Class <- ifelse(results$HMDB.Class %in% keep_classes,
                              results$HMDB.Class,
                              "Others")
@@ -509,7 +509,7 @@ ggsave(p1,
 
 library(ggpubr)
 
-# Translated comment.
+# Plotwhether microbesmetabolitesRho.
 
 plot_microbial_source_data <- plot_data
 
@@ -546,20 +546,20 @@ p <-
     alpha = 0.7
   ) +
   scale_fill_manual(values = c("#3d95d2", "#f16147")) +
-  scale_color_manual(values = c("black", "black", "black")) + # translated comment
-  ggtitle("") + # translated comment
+  scale_color_manual(values = c("black", "black", "black")) + # Setscatter plotcolors.
+  ggtitle("") + # Set the overall title.
   theme_bw() + theme(
     legend.position = "none",
-    # Translated comment.
+    # Hide the legend.
     axis.text.x = element_text(colour = "black", size =
                                  14, "Helvetica"),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.text.y = element_text(size = 14, family = "Helvetica"),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.title.y = element_text(size = 14, family = "Helvetica"),
-    # Translated comment.
+    # Set y-axis title text properties.
     axis.title.x = element_text(size = 14, family = "Helvetica"),
-    # Translated comment.
+    # Set x-axis title text properties.
     plot.title = element_text(
       size = 15,
       face = "bold",
@@ -567,7 +567,7 @@ p <-
       hjust = 0.5
     )
   ) +
-  ylab("Absolute correlation") + xlab("Microbial source") + # translated comment
+  ylab("Absolute correlation") + xlab("Microbial source") + # Set x- and y-axis titles.
   stat_compare_means()
 p
 ggsave(p,
@@ -576,7 +576,7 @@ ggsave(p,
        height = 6)
 
 
-## Translated comment.
+## Plotbody siterho.
 
 # Ridge plot (mountain plot) of Rho values by microbiome site
 library(ggplot2)
@@ -683,40 +683,40 @@ ggsave(p1,
        width = 8,
        height = 6)
 
-# Translated comment.
+# Summarizemetabolitesbar chart.
 
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# Read the data.
+# data"metabolite_annotation.csv"in.
+# If data,.
 data <- metabolite_annotation
 
 
 
-# Translated comment.
+# Process(NA).
 data <- subset(data, !(HMDB.Class == "NA"))
 
-# Translated comment.
+# Load.
 library(ggplot2)
 library(dplyr)
 library(RColorBrewer)
 library(forcats)
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# data frame:.
+# 1. metabolite_annotation - metabolite data.
+# 2. plot_data - sitemetabolite data.
 
-# Translated comment.
+# Step 1: Processmetabolite data.
 total_data <- metabolite_annotation
 total_data <- subset(total_data, !(HMDB.Class == "NA"))
 
-# Translated comment.
+# Summarize.
 class_summary <- total_data %>%
-  dplyr::count(HMDB.Class) %>%  # translated comment
+  dplyr::count(HMDB.Class) %>%  # dpcountcount.
   mutate(total = sum(n), percentage = n / total * 100) %>%
   arrange(desc(percentage))
 
-# Translated comment.
+# 7,"Others".
 top_n <- 7
 if (nrow(class_summary) > top_n) {
   top_classes <- class_summary[1:top_n, ]
@@ -729,66 +729,66 @@ if (nrow(class_summary) > top_n) {
   class_summary <- rbind(top_classes, others)
 }
 
-# Translated comment.
+# Add"Site","Total".
 class_summary <- class_summary %>%
   mutate(Site = "Total")
 
-# Translated comment.
-print(names(class_summary))  # translated comment
+# EnsureSiteAdd.
+print(names(class_summary))  # Checkcolumn nameswhether Site.
 
-# Translated comment.
+# Step 2: Processsitemetabolite data.
 site_data <- plot_data
 site_data$Site <- tolower(site_data$Site)
 expected_sites <- c("gut", "oral", "skin", "nasal")
 site_data <- site_data %>% filter(Site %in% expected_sites)
 
-# Translated comment.
+# Extractdatain ,sitedatain .
 important_classes <- class_summary$HMDB.Class
 if ("Others" %in% important_classes) {
   important_classes <- important_classes[important_classes != "Others"]
 }
 
-# Translated comment.
+# Summarizesite.
 site_class_summary <- site_data %>%
   dplyr::group_by(Site, HMDB.Class) %>%
   dplyr::summarise(count = n(), .groups = "drop") %>%
   dplyr::group_by(Site) %>%
   dplyr::mutate(total = sum(count), percentage = count / total * 100)
 
-# Translated comment.
+# Processsitedata,Ensure.
 site_class_final <- site_class_summary %>%
-  # Translated comment.
+  # whether .
   mutate(is_important = HMDB.Class %in% important_classes) %>%
   group_by(Site) %>%
-  # Translated comment.
+  # For site,"Others".
   mutate(HMDB.Class = if_else(is_important, HMDB.Class, "Others")) %>%
-  # Translated comment.
+  # Summarize"Others".
   group_by(Site, HMDB.Class) %>%
   dplyr::summarise(percentage = sum(percentage), .groups = "drop")
 
-# Translated comment.
+# Checkresults.
 print("site_class_final structure:")
 print(str(site_class_final))
 print("site_class_final first few rows:")
 print(head(site_class_final))
 
-# Translated comment.
+# If results,.
 if (ncol(site_class_final) < 3 ||
     !"Site" %in% names(site_class_final)) {
-  print("使用替代方法重新计算site_class_final")
+  print("Recompute site_class_final with an alternative method")
   
-  # Translated comment.
+  # : Checkin results.
   site_data_with_important <- site_class_summary %>%
     mutate(is_important = HMDB.Class %in% important_classes)
   
   print("Intermediate data:")
   print(head(site_data_with_important))
   
-  # Translated comment.
+  # Remove incomplete cases.
   site_data_reclassified <- site_data_with_important %>%
     mutate(HMDB.Class_new = ifelse(is_important, as.character(HMDB.Class), "Others"))
   
-  # Translated comment.
+  # Remove incomplete cases.
   site_class_final <- site_data_reclassified %>%
     group_by(Site, HMDB.Class_new) %>%
     summarise(percentage = sum(percentage), .groups = "drop") %>%
@@ -798,43 +798,43 @@ if (ncol(site_class_final) < 3 ||
   print(head(site_class_final))
 }
 
-# Translated comment.
-# Translated comment.
+# Step 3: Mergesitedata.
+# Checkdata frame.
 print("class_summary columns:")
 print(names(class_summary))
 print("site_class_final columns:")
 print(names(site_class_final))
 
-# Translated comment.
+# Ensuredata framecolumn names.
 class_summary_selected <- class_summary %>%
   dplyr::select(Site, HMDB.Class, percentage)
 site_class_selected <- site_class_final %>%
   dplyr::select(Site, HMDB.Class, percentage)
 
-# Translated comment.
+# Mergedata.
 combined_data <- rbind(class_summary_selected, site_class_selected)
 
-# Translated comment.
+# Ensure"Others"legendin after.
 combined_data$HMDB.Class <- fct_relevel(as.factor(combined_data$HMDB.Class), "Others", after = Inf)
 
-# Translated comment.
+# SetSite,"Total".
 combined_data$Site <- factor(combined_data$Site, levels = c("Total", expected_sites))
 
-# Translated comment.
+# colors.
 unique_classes <- levels(combined_data$HMDB.Class)
 num_colors <- length(unique_classes)
 
-# Translated comment.
+# Use.
 if (num_colors <= 8) {
   colors <- brewer.pal(max(3, num_colors), "Set1")
 } else if (num_colors <= 12) {
   colors <- brewer.pal(max(3, num_colors), "Paired")
 } else {
-  # Translated comment.
+  # colors.
   colors <- c(brewer.pal(8, "Set1"),
               brewer.pal(8, "Set2"),
               brewer.pal(8, "Set3"))
-  # Translated comment.
+  # If ,Usecolors.
   if (length(colors) < num_colors) {
     colors <- colorRampPalette(colors)(num_colors)
   } else {
@@ -842,40 +842,40 @@ if (num_colors <= 8) {
   }
 }
 
-# Translated comment.
+# If 6colors.
 if (length(colors) >= 6) {
   colors <- colors[-6]
 }
 
-# Translated comment.
+# colors.
 print(paste("Length of colors:", length(colors)))
 print(paste("Length of unique_classes:", length(unique_classes)))
 
-# Translated comment.
+# Ensurecolors.
 if (length(colors) != length(unique_classes)) {
-  # Translated comment.
+  # If colors,Addcolors.
   if (length(colors) < length(unique_classes)) {
     additional_colors_needed <- length(unique_classes) - length(colors)
     additional_colors <- colorRampPalette(colors)(additional_colors_needed)
     colors <- c(colors, additional_colors)
   }
-  # Translated comment.
+  # If colors,colors.
   else {
     colors <- colors[1:length(unique_classes)]
   }
 }
 
-# Translated comment.
+# Check.
 print(paste("Adjusted length of colors:", length(colors)))
 
-# Translated comment.
+# Ensure"Others"Use.
 if ("Others" %in% unique_classes) {
-  names(colors) <- unique_classes  # translated comment
-  colors["Others"] <- "# translated comment
+  names(colors) <- unique_classes  # Remove incomplete cases.
+  colors["Others"] <- "# 999999" .
 }
 combined_data$Site <- factor(combined_data$Site,
                              levels = c("Total", "gut", "oral", "skin", "nasal"))
-# Translated comment.
+# Createbar chart.
 p <- ggplot(combined_data, aes(x = Site, y = percentage, fill = HMDB.Class)) +
   geom_bar(stat = "identity", position = "stack") +
   scale_fill_manual(values = colors) +
@@ -888,8 +888,8 @@ p <- ggplot(combined_data, aes(x = Site, y = percentage, fill = HMDB.Class)) +
         legend.position = "right") +
   scale_y_continuous(breaks = seq(0, 100, 10))
 
-# Translated comment.
-# Translated comment.
+# Addlabels().
+# Calculate.
 label_data <- combined_data %>%
   dplyr::group_by(Site) %>%
   dplyr::arrange(desc(HMDB.Class)) %>%
@@ -900,7 +900,7 @@ label_data <- combined_data %>%
   ) %>%
   dplyr::ungroup()
 
-# Translated comment.
+# Addlabels(>=5%).
 label_threshold <- 2
 p <- p +
   geom_text(
@@ -914,7 +914,7 @@ p <- p +
     color = "white"
   )
 
-# Translated comment.
+# Settheme.
 p <-
 p + theme(
   axis.text.x = element_text(
@@ -942,49 +942,49 @@ ggsave(p,
        width = 10,
        height = 6)
 
-# Translated comment.
+# Load.
 library(dplyr)
 library(tidyr)
 library(reshape2)
 library(ggplot2)
 library(RColorBrewer)
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# Usesite_class_finalAnalyze.
+# ,EnsureTotalsitedatain.
+# If ,Add.
 
-# Translated comment.
+# Checkdatain site.
 print(unique(site_class_final$Site))
 
-# Translated comment.
-# Translated comment.
+# 1. data.
+# Createsite.
 chi_square_test <- function(site1, site2, data) {
-  # Translated comment.
+  # Extractsitedata.
   site_data <- data %>%
     filter(Site %in% c(site1, site2))
   
-  # Translated comment.
-  # Translated comment.
+  # dataConvert,.
+  # Usecount.
   contingency_table <- site_data %>%
     dplyr::select(Site, HMDB.Class, percentage) %>%
     spread(key = Site,
            value = percentage,
-           fill = 0)  # translated comment
+           fill = 0)  # Use0.
   
-  # Translated comment.
+  # CheckConvertaftercounts.
   print(paste("Contingency table for", site1, "vs", site2))
   print(contingency_table)
   
-  # Translated comment.
+  # HMDB.Class,counts.
   freq_table <- contingency_table %>%
     select(-HMDB.Class) %>%
     as.matrix()
   
-  # Translated comment.
+  # Remove incomplete cases.
   chi_test <- tryCatch({
     chisq.test(freq_table)
   }, error = function(e) {
-    # Translated comment.
+    # If (counts),ReturnNA.
     warning(paste(
       "Error in chi-square test for",
       site1,
@@ -1000,7 +1000,7 @@ chi_square_test <- function(site1, site2, data) {
     ))
   })
   
-  # Translated comment.
+  # Returnp-values.
   return(
     list(
       site1 = site1,
@@ -1012,15 +1012,15 @@ chi_square_test <- function(site1, site2, data) {
   )
 }
 
-# Translated comment.
+# 2. Getsite.
 sites <- unique(site_class_final$Site)
 site_pairs <- expand.grid(site1 = sites,
                           site2 = sites,
                           stringsAsFactors = FALSE)
-# Translated comment.
+# and .
 site_pairs <- site_pairs %>% filter(site1 != site2)
 
-# Translated comment.
+# 3. for .
 results <- list()
 for (i in 1:nrow(site_pairs)) {
   pair <- site_pairs[i, ]
@@ -1029,7 +1029,7 @@ for (i in 1:nrow(site_pairs)) {
   results[[i]] <- result
 }
 
-# Translated comment.
+# 4. resultsConvertdata frame.
 result_df <- do.call(rbind, lapply(results, function(x) {
   data.frame(
     site1 = x$site1,
@@ -1041,44 +1041,44 @@ result_df <- do.call(rbind, lapply(results, function(x) {
   )
 }))
 
-# Translated comment.
+# results.
 print(result_df)
 
-# Translated comment.
+# 5. Createp-valuesmatrixheatmap.
 p_value_matrix <- matrix(NA, length(sites), length(sites))
 rownames(p_value_matrix) <- sites
 colnames(p_value_matrix) <- sites
 
-# Translated comment.
+# matrix.
 for (i in 1:nrow(result_df)) {
   row_idx <- which(sites == result_df$site1[i])
   col_idx <- which(sites == result_df$site2[i])
   p_value_matrix[row_idx, col_idx] <- result_df$p_value[i]
 }
 
-# Translated comment.
+# For 1(and ).
 diag(p_value_matrix) <- 1
 
-# Translated comment.
-# Translated comment.
+# 6. Createheatmap.
+# Convertmatrixggplot.
 p_value_long <- melt(p_value_matrix)
 names(p_value_long) <- c("Site1", "Site2", "p_value")
 
-# Translated comment.
+# Addsignificance.
 p_value_long$significance <- "NS"
 p_value_long$significance[p_value_long$p_value < 0.05] <- "*"
 p_value_long$significance[p_value_long$p_value < 0.01] <- "**"
 p_value_long$significance[p_value_long$p_value < 0.001] <- "***"
-# Translated comment.
+# NACalculate.
 p_value_long$significance[is.na(p_value_long$p_value)] <- "NA"
 
-# Translated comment.
+# Createheatmap,-log10Convertp-values.
 p_value_long$neg_log_p <- -log10(p_value_long$p_value)
-# Translated comment.
+# NAInf0.
 p_value_long$neg_log_p[is.na(p_value_long$neg_log_p) |
                          is.infinite(p_value_long$neg_log_p)] <- 0
 
-# Translated comment.
+# Createheatmap.
 p <- ggplot(p_value_long, aes(x = Site2, y = Site1, fill = neg_log_p)) +
   geom_tile(color = "white") +
   geom_text(aes(label = significance),
@@ -1108,7 +1108,7 @@ p <- ggplot(p_value_long, aes(x = Site2, y = Site1, fill = neg_log_p)) +
   labs(title = "", x = "", y = "") +
   coord_fixed()
 
-# Translated comment.
+# 7. heatmap.
 
 
 p
@@ -1118,7 +1118,7 @@ ggsave(p,
        width = 5,
        height = 5)
 
-# Translated comment.
+# 8. Createsignificance.
 significance_summary <- result_df %>%
   mutate(
     significance = case_when(
@@ -1133,14 +1133,14 @@ significance_summary <- result_df %>%
   select(comparison, p_value, statistic, df, significance) %>%
   arrange(p_value)
 
-# Translated comment.
+# Remove incomplete cases.
 print(significance_summary)
 
 
 
 ######revise
 
-# Translated comment.
+# Remove incomplete cases.
 library(vegan)
 library(tidyverse)
 
@@ -1149,7 +1149,7 @@ rare_list <- rarecurve(
   step   = 200,
   sample = min(rowSums(otu_table)),
   label  = FALSE,
-  draw   = FALSE   # translated comment
+  draw   = FALSE   # ⭐ .
 )
 
 
@@ -1175,7 +1175,7 @@ ggplot(rare_df, aes(Reads, Species, group = Sample)) +
   )
 
 
-# Translated comment.
+# Load required R packages.
 library(tidyverse)
 library(boot)
 
@@ -1185,22 +1185,22 @@ boot_cor <- function(data, indices, x_col, y_col) {
   cor(d[[x_col]], d[[y_col]], method = "pearson", use = "complete.obs")
 }
 
-# Translated comment.
+# Ensure sample IDs.
 common_samples <- intersect(rownames(alpha_diversity), rownames(metabolome_data))
 if (length(common_samples) == 0) {
-  stop("两个数据集没有共同的样本ID")
+  stop("The two datasets do not share common sample IDs")
 }
-cat("共有", length(common_samples), "个样本可用于分析\n")
+cat("Shared ", length(common_samples), " samples are available for analysis\n")
 
-# Translated comment.
+# Use shared samples to filter the data.
 alpha_diversity_filtered <- alpha_diversity[common_samples, ]
 metabolome_data_filtered <- metabolome_data[common_samples, ]
 
-# Translated comment.
+# Calculatesitealphaand metabolitesPearsoncorrelationBootstrap 95% CI.
 sites <- colnames(alpha_diversity_filtered)
 metabolites <- colnames(metabolome_data_filtered)
 
-# Translated comment.
+# resultsdata frame.
 results <- data.frame(
   Site = character(),
   Metabolite = character(),
@@ -1212,37 +1212,37 @@ results <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Translated comment.
-n_bootstrap <- 1000  # translated comment
-set.seed(123)  # translated comment
+# SetBootstrap.
+n_bootstrap <- 1000  # Bootstrap.
+set.seed(123)  # Setrandom seedresultsreproducible.
 
-# Translated comment.
-cat("开始计算相关性和Bootstrap 95% CI...\n")
+# Calculate correlations and bootstrap confidence intervals.
+cat("Starting correlation analysis and bootstrap 95% CI estimation...\n")
 
 for (site in sites) {
-  cat("处理位点:", site, "\n")
+  cat("Processing site:", site, "\n")
   
   for (metabolite in metabolites) {
-    # Translated comment.
+    # data.
     temp_data <- data.frame(
       alpha = alpha_diversity_filtered[[site]],
       metabolite = metabolome_data_filtered[[metabolite]]
     )
     
-    # Translated comment.
+    # Remove incomplete cases.
     temp_data <- temp_data[complete.cases(temp_data), ]
     
     if (nrow(temp_data) < 3) {
-      warning(paste("样本数不足:", site, "-", metabolite))
+      warning(paste("Insufficient sample size:", site, "-", metabolite))
       next
     }
     
-    # Translated comment.
+    # CalculatePearsoncorrelation.
     cor_test <- cor.test(temp_data$alpha,
                          temp_data$metabolite,
                          method = "pearson")
     
-    # Translated comment.
+    # BootstrapCalculate95% CI.
     boot_results <- boot(
       data = temp_data,
       statistic = boot_cor,
@@ -1251,14 +1251,14 @@ for (site in sites) {
       y_col = "metabolite"
     )
     
-    # Translated comment.
+    # Calculate95% CI(Usepercentile).
     boot_ci <- boot.ci(boot_results, type = "perc", conf = 0.95)
     
-    # Translated comment.
+    # ExtractCI.
     ci_lower <- boot_ci$percent[4]
     ci_upper <- boot_ci$percent[5]
     
-    # Translated comment.
+    # Addresultsdata frame.
     results <- rbind(
       results,
       data.frame(
@@ -1275,15 +1275,15 @@ for (site in sites) {
   }
 }
 
-cat("计算完成!\n")
+cat("Calculation completed!\n")
 
-# Translated comment.
+# For p-valuesBH.
 results$Adjusted_P_value <- p.adjust(results$P_value, method = "BH")
 
-# Translated comment.
+# Filtersignificantresults.
 results_significant <- subset(results, P_value < 0.05)
 
-# Translated comment.
+# Addmetabolitesannotations.
 results_significant <- merge(
   results_significant,
   metabolite_annotation[, c("variable_id",
@@ -1295,10 +1295,10 @@ results_significant <- merge(
   all.x = TRUE
 )
 
-# Translated comment.
+# HMDB.ClassNA.
 results_significant <- subset(results_significant, !(HMDB.Class == "NA"))
 
-# Translated comment.
+# Saveresults.
 write.csv(results, 
           "correlation_results_with_bootstrap_CI.csv", 
           row.names = FALSE)
@@ -1307,28 +1307,28 @@ write.csv(results_significant,
           "correlation_results_significant_with_bootstrap_CI.csv", 
           row.names = FALSE)
 
-# Translated comment.
-cat("\n=== 结果摘要 ===\n")
-cat("总共测试的相关性对数:", nrow(results), "\n")
-cat("显著相关性数量 (P < 0.05):", nrow(results_significant), "\n")
-cat("\n各位点显著相关性数量:\n")
+# results.
+cat("\n=== Result summary ===\n")
+cat("Total number of tested correlations:", nrow(results), "\n")
+cat("Number of significant correlations (P < 0.05):", nrow(results_significant), "\n")
+cat("\nNumber of significant correlations by site:\n")
 print(table(results_significant$Site))
 
-# Translated comment.
-cat("\n前10个显著结果:\n")
+# results.
+cat("\nTop 10 significant results:\n")
 print(head(results_significant[order(results_significant$P_value), ], 10))
 
-# Translated comment.
+# : correlationforest plot.
 library(ggplot2)
 
-# Translated comment.
+# sitetop 10significantresults.
 top_results <- results_significant %>%
   group_by(Site) %>%
   arrange(P_value) %>%
   slice_head(n = 10) %>%
   ungroup()
 
-# Translated comment.
+# Createforest plot.
 p_forest <- ggplot(top_results, 
                    aes(x = Rho, 
                        y = reorder(paste(Site, HMDB.Name, sep = " - "), Rho),
@@ -1362,11 +1362,11 @@ ggsave(p_forest,
        width = 10,
        height = 8)
 
-cat("\n分析完成! 结果已保存。\n")
+cat("\nAnalysis complete. Results have been saved.\n")
 
-# Translated comment.
+# ===== UseBootstrap CIresultsPlot =====.
 
-# Translated comment.
+# Define.
 keep_classes <- c(
   "Benzene and substituted derivatives",
   "Carboxylic acids and derivatives",
@@ -1378,9 +1378,9 @@ keep_classes <- c(
   "Steroids and steroid derivatives"
 )
 
-# Translated comment.
+# Plotdata.
 plot_data <- results_significant %>%
-  # Translated comment.
+  # in HMDB.Class"Others".
   dplyr::mutate(
     HMDB.Class = ifelse(HMDB.Class %in% keep_classes, HMDB.Class, "Others"),
     # Transform p-values for better visualization
@@ -1550,40 +1550,40 @@ ggsave(p1,
        width = 10,
        height = 6)
 
-cat("\n带有Bootstrap CI的相关性图已保存!\n")
+cat("\nThe correlation plot with bootstrap CI has been saved!\n")
 
 
 
 
 rownames(sample_info)<-sample_info$sample_id
-# Translated comment.
+# Load required R packages.
 library(tidyverse)
 library(boot)
 library(broom)
 
-# Translated comment.
+# ===== Part 1: Spearmancorrelation analysis(for ) =====.
 
-cat("=== 开始Spearman相关性分析 ===\n")
+cat("=== Starting Spearman correlation analysis ===\n")
 
-# Translated comment.
+# Ensure sample IDs.
 common_samples <- intersect(rownames(alpha_diversity), rownames(metabolome_data))
 if (length(common_samples) == 0) {
-  stop("两个数据集没有共同的样本ID")
+  stop("The two datasets do not share common sample IDs")
 }
-cat("共有", length(common_samples), "个样本可用于分析\n")
+cat("Shared ", length(common_samples), " samples are available for analysis\n")
 
-# Translated comment.
+# Use shared samples to filter the data.
 alpha_diversity_filtered <- alpha_diversity[common_samples, ]
 metabolome_data_filtered <- metabolome_data[common_samples, ]
 
-# Translated comment.
+# Getvariables.
 sample_info_filtered <- sample_info[common_samples, ]
 
-# Translated comment.
+# Calculatesitealphaand metabolitesSpearmancorrelation.
 sites <- colnames(alpha_diversity_filtered)
 metabolites <- colnames(metabolome_data_filtered)
 
-# Translated comment.
+# Spearmanresults.
 results_spearman <- data.frame(
   Site = character(),
   Metabolite = character(),
@@ -1592,13 +1592,13 @@ results_spearman <- data.frame(
   stringsAsFactors = FALSE
 )
 
-cat("计算Spearman相关性...\n")
+cat("Calculating Spearman correlations...\n")
 for (site in sites) {
   for (metabolite in metabolites) {
     alpha_values <- alpha_diversity_filtered[[site]]
     metabolite_values <- metabolome_data_filtered[[metabolite]]
     
-    # Translated comment.
+    # CalculateSpearmancorrelation.
     cor_test <- cor.test(alpha_values, metabolite_values, 
                          method = "spearman", exact = FALSE)
     
@@ -1615,25 +1615,25 @@ for (site in sites) {
   }
 }
 
-# Translated comment.
+# BH.
 results_spearman$Adjusted_P_spearman <- p.adjust(results_spearman$P_value_spearman, 
                                                  method = "BH")
 
-cat("Spearman分析完成!\n\n")
+cat("Spearman analysis completed!\n\n")
 
-# Translated comment.
+# ===== Part 2: regression modelAnalyze(variables) =====.
 
-cat("=== 开始回归模型分析 (控制协变量) ===\n")
+cat("=== Starting regression model analysis (with covariate adjustment) ===\n")
 
 # Bootstrap function for regression coefficient
 boot_reg <- function(data, indices, formula_str) {
   d <- data[indices, ]
   model <- lm(as.formula(formula_str), data = d)
-  # Translated comment.
+  # Returnalpha diversity.
   coef(model)["alpha_div"]
 }
 
-# Translated comment.
+# Regressionresults.
 results_regression <- data.frame(
   Site = character(),
   Metabolite = character(),
@@ -1645,17 +1645,17 @@ results_regression <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Translated comment.
+# SetBootstrap.
 n_bootstrap <- 1000
 set.seed(123)
 
-cat("开始回归分析并计算Bootstrap 95% CI...\n")
+cat("Starting regression analysis and bootstrap 95% CI estimation...\n")
 
 for (site in sites) {
-  cat("处理位点:", site, "\n")
+  cat("Processing site:", site, "\n")
   
   for (metabolite in metabolites) {
-    # Translated comment.
+    # regressiondata.
     reg_data <- data.frame(
       metabolite_value = metabolome_data_filtered[[metabolite]],
       alpha_div = alpha_diversity_filtered[[site]],
@@ -1665,29 +1665,29 @@ for (site in sites) {
       ethnicity = sample_info_filtered$Ethnicity
     )
     
-    # Translated comment.
+    # Remove incomplete cases.
     reg_data <- reg_data[complete.cases(reg_data), ]
     
     if (nrow(reg_data) < 10) {
-      warning(paste("样本数不足:", site, "-", metabolite))
+      warning(paste("Insufficient sample size:", site, "-", metabolite))
       next
     }
     
-    # Translated comment.
+    # regression model(age,sex,bmi,ethnicity).
     model <- lm(metabolite_value ~ alpha_div + age + sex + bmi + ethnicity, 
                 data = reg_data)
     
-    # Translated comment.
+    # Extractresults.
     model_summary <- summary(model)
     coef_table <- coef(model_summary)
     
-    # Translated comment.
+    # Getalpha_div.
     if ("alpha_div" %in% rownames(coef_table)) {
       beta <- coef_table["alpha_div", "Estimate"]
       se <- coef_table["alpha_div", "Std. Error"]
       p_value <- coef_table["alpha_div", "Pr(>|t|)"]
       
-      # Translated comment.
+      # BootstrapCalculate95% CI.
       formula_str <- "metabolite_value ~ alpha_div + age + sex + bmi + ethnicity"
       
       boot_results <- tryCatch({
@@ -1701,7 +1701,7 @@ for (site in sites) {
       })
       
       if (!is.null(boot_results)) {
-        # Translated comment.
+        # Calculate95% CI.
         boot_ci <- boot.ci(boot_results, type = "perc", conf = 0.95)
         ci_lower <- boot_ci$percent[4]
         ci_upper <- boot_ci$percent[5]
@@ -1710,7 +1710,7 @@ for (site in sites) {
         ci_upper <- NA
       }
       
-      # Translated comment.
+      # Addresults.
       results_regression <- rbind(
         results_regression,
         data.frame(
@@ -1728,24 +1728,24 @@ for (site in sites) {
   }
 }
 
-# Translated comment.
+# BH.
 results_regression$Adjusted_P_regression <- p.adjust(results_regression$P_value_regression, 
                                                      method = "BH")
 
-cat("回归分析完成!\n\n")
+cat("Regression analysis completed!\n\n")
 
-# Translated comment.
+# ===== Part 3: Mergefor results =====.
 
-cat("=== 合并和对比结果 ===\n")
+cat("=== Merging and comparing results ===\n")
 
-# Translated comment.
+# Mergeresults.
 results_combined <- full_join(
   results_spearman,
   results_regression,
   by = c("Site", "Metabolite")
 )
 
-# Translated comment.
+# Addmetabolitesannotations.
 results_combined <- merge(
   results_combined,
   metabolite_annotation[, c("variable_id", "HMDB.Name", "HMDB.Class", 
@@ -1755,23 +1755,23 @@ results_combined <- merge(
   all.x = TRUE
 )
 
-# Translated comment.
+# Filterin at least significantresults.
 results_combined_sig <- results_combined %>%
   filter(P_value_spearman < 0.05 | P_value_regression < 0.05) %>%
   filter(!is.na(HMDB.Class) & HMDB.Class != "NA")
 
-# Translated comment.
+# Add.
 results_combined_sig <- results_combined_sig %>%
   mutate(
-    # Translated comment.
+    # (whether ).
     direction_consistent = sign(Rho_spearman) == sign(Beta),
-    # Translated comment.
+    # significant.
     both_significant = (P_value_spearman < 0.05) & (P_value_regression < 0.05),
-    # Translated comment.
+    # Spearmansignificant.
     only_spearman_sig = (P_value_spearman < 0.05) & (P_value_regression >= 0.05),
-    # Translated comment.
+    # regressionsignificant.
     only_regression_sig = (P_value_spearman >= 0.05) & (P_value_regression < 0.05),
-    # Translated comment.
+    # Remove incomplete cases.
     consistency_type = case_when(
       both_significant & direction_consistent ~ "Both significant & consistent",
       both_significant & !direction_consistent ~ "Both significant but inconsistent",
@@ -1781,27 +1781,27 @@ results_combined_sig <- results_combined_sig %>%
     )
   )
 
-# Translated comment.
+# Saveresults.
 write.csv(results_combined_sig, 
           "correlation_comparison_spearman_vs_regression.csv", 
           row.names = FALSE)
 
-# Translated comment.
-cat("\n=== 结果统计 ===\n")
-cat("总共比较的关联数:", nrow(results_combined_sig), "\n\n")
+# Summarize.
+cat("\n=== Result statistics ===\n")
+cat("Total number of associations compared:", nrow(results_combined_sig), "\n\n")
 
 consistency_table <- table(results_combined_sig$consistency_type)
 print(consistency_table)
 
-cat("\n方向一致性比例:", 
+cat("\nDirectional consistency ratio:", 
     round(mean(results_combined_sig$direction_consistent, na.rm = TRUE) * 100, 2), "%\n")
 
-# Translated comment.
+# ===== Part 4: for  =====.
 
 library(ggplot2)
 library(ggrepel)
 
-# Translated comment.
+# 1. Spearman Rho vs Regression Betascatter plot.
 p_scatter <- ggplot(results_combined_sig, 
                     aes(x = Rho_spearman, y = Beta, color = consistency_type)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
@@ -1832,7 +1832,7 @@ ggsave(p_scatter,
        width = 10,
        height = 8)
 
-# Translated comment.
+# 2. sitefor .
 p_facet <- ggplot(results_combined_sig, 
                   aes(x = Rho_spearman, y = Beta, color = both_significant)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
@@ -1859,7 +1859,7 @@ ggsave(p_facet,
        width = 10,
        height = 8)
 
-# Translated comment.
+# 3. bar chart.
 consistency_summary <- results_combined_sig %>%
   group_by(Site, consistency_type) %>%
   summarise(count = n(), .groups = "drop")
@@ -1890,7 +1890,7 @@ ggsave(p_bar,
        width = 10,
        height = 6)
 
-# Translated comment.
+# 4. p-valuesfor .
 p_pvalue <- ggplot(results_combined_sig,
                    aes(x = -log10(P_value_spearman), 
                        y = -log10(P_value_regression),
@@ -1918,12 +1918,12 @@ ggsave(p_pvalue,
        width = 8,
        height = 8)
 
-# Translated comment.
+# 5. correlationheatmap - Spearmancorrelation coefficient.
 cor_methods <- cor(results_combined_sig$Rho_spearman, 
                    results_combined_sig$Beta, 
                    use = "complete.obs", 
                    method = "spearman")
 
-cat("\n两种方法结果的Spearman相关系数:", round(cor_methods, 3), "\n")
+cat("\nSpearman correlation between the two methods:", round(cor_methods, 3), "\n")
 
-cat("\n分析完成! 所有结果和图表已保存。\n")
+cat("\nAnalysis complete. All results and figures have been saved.\n")

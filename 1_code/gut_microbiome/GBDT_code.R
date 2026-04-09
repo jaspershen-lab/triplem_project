@@ -1,28 +1,28 @@
-# Translated comment.
-library(gbm)         # translated comment
-library(caret)       # translated comment
-library(dplyr)       # translated comment
-library(foreach)     # translated comment
-library(doParallel)  # translated comment
-library(progress)    # translated comment
+# Load packages.
+library(gbm)         # GBDT.
+library(caret)
+library(dplyr)       # Process the data.
+library(foreach)     # ParallelCalculate.
+library(doParallel)  # Parallelafter.
+library(progress)
 
-# Translated comment.
+# Preprocess_datacalculate_r2.
 
 preprocess_data <- function(microbiome_data, metabolite_data) {
-  # Translated comment.
+  # Getsample IDs.
   micro_samples <- colnames(microbiome_data)
   meta_samples <- colnames(metabolite_data)
   
-  # Translated comment.
+  # Checksample IDs.
   message("Initial sample counts:")
   message(sprintf("Microbiome samples: %d", length(micro_samples)))
   message(sprintf("Metabolite samples: %d", length(meta_samples)))
   
-  # Translated comment.
+  # samples.
   common_samples <- intersect(micro_samples, meta_samples)
   message(sprintf("Common samples: %d", length(common_samples)))
   
-  # Translated comment.
+  # Extractsamplesdata.
   microbiome_matched <- microbiome_data[, common_samples]
   metabolite_matched <- metabolite_data[, common_samples]
   
@@ -36,27 +36,27 @@ preprocess_data <- function(microbiome_data, metabolite_data) {
 calculate_r2 <- function(actual, predicted) {
   1 - sum((actual - predicted)^2) / sum((actual - mean(actual))^2)
 }
-# Translated comment.
+# single_cv,Add.
 single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
-  # Translated comment.
+  # If ,Setrandom seed.
   if(!is.null(seed)) {
     set.seed(seed)
   }
   
-  # Translated comment.
+  # Createfold.
   fold_ids <- sample(rep(1:n_folds, length.out = length(y)))
   all_predictions <- numeric(length(y))
   
   for(fold in 1:n_folds) {
-    # Translated comment.
+
     test_idx <- which(fold_ids == fold)
     train_idx <- which(fold_ids != fold)
     
-    # Translated comment.
+    # data.
     train_data <- data.frame(X[train_idx, , drop = FALSE])
     train_data$target <- y[train_idx]
     
-    # Translated comment.
+
     model <- gbm(
       target ~ .,
       data = train_data,
@@ -68,7 +68,7 @@ single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
       verbose = FALSE
     )
     
-    # Translated comment.
+
     test_data <- data.frame(X[test_idx, , drop = FALSE])
     all_predictions[test_idx] <- predict(model, test_data, n.trees = gbdt_params$n.trees)
   }
@@ -76,30 +76,30 @@ single_cv <- function(X, y, n_folds = 5, gbdt_params, seed = NULL) {
   return(calculate_r2(y, all_predictions))
 }
 
-# Translated comment.
+# Addanalyze_metabolite_ev.
 analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NULL, seed = 42) {
-  # Translated comment.
+  # Set.
   set.seed(seed)
   
-  # Translated comment.
-  n_boots <- 100  # translated comment
-  n_folds <- 10    # translated comment
+  # Set.
+  n_boots <- 100  # Set100bootstrap.
+  n_folds <- 10    # 5.
   
-  # Translated comment.
+  # Setparallel.
   if(is.null(n_cores)) {
     n_cores <- detectCores() - 1
   }
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
   
-  # Translated comment.
+  # Data preprocessing.
   processed_data <- preprocess_data(microbiome_data, metabolite_data)
   
-  # Translated comment.
-  X <- t(processed_data$microbiome)  # translated comment
-  Y <- t(processed_data$metabolite)  # translated comment
+  # Transposedata.
+  X <- t(processed_data$microbiome)  # Samples × features.
+  Y <- t(processed_data$metabolite)  # Samples × metabolites.
   
-  # Translated comment.
+
   message("\nData dimensions:")
   message(sprintf("Features (microbes): %d", ncol(X)))
   message(sprintf("Samples: %d", nrow(X)))
@@ -107,7 +107,7 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
   message(sprintf("Using %d cores", n_cores))
   message(sprintf("Random seed: %d", seed))
   
-  # Translated comment.
+  # GBDT.
   gbdt_params <- list(
     n.trees = 50,          
     interaction.depth = 10,
@@ -117,49 +117,49 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
     train.fraction = 0.8
   )
   
-  # Translated comment.
+  # parallel.
   clusterExport(cl, c("single_cv", "calculate_r2"), envir = environment())
   
-  # Translated comment.
+  # results.
   results <- list()
   
-  # Translated comment.
+  # Set.
   pb <- progress_bar$new(
     format = "[:bar] :percent | Metabolite :current/:total | Elapsed: :elapsed | ETA: :eta",
     total = ncol(Y)
   )
   
-  # Translated comment.
+  # For metabolitesAnalyze.
   for(i in 1:ncol(Y)) {
     start_time <- Sys.time()
     
-    # Translated comment.
+    # Getmetabolite data.
     current_y <- Y[, i]
     
-    # Translated comment.
+    # ParallelBootstrap,EnsureUsereproducible.
     boot_r2s <- foreach(b = 1:n_boots,
                         .combine = 'c',
                         .packages = c("gbm", "caret")) %dopar% {
-                          # Translated comment.
+                          # bootstrapSetreproducible.
                           local_seed <- seed * 1000 + b + i * n_boots
                           
-                          # Translated comment.
+
                           set.seed(local_seed)
                           boot_idx <- sample(1:nrow(X), nrow(X), replace = TRUE)
                           boot_X <- X[boot_idx, , drop = FALSE]
                           boot_y <- current_y[boot_idx]
                           
-                          # Translated comment.
+
                           single_cv(boot_X, boot_y, n_folds, gbdt_params, seed = local_seed)
                         }
     
-    # Translated comment.
+    # CalculateSummarize.
     mean_r2 <- mean(boot_r2s)
     ci <- quantile(boot_r2s, probs = c(0.025, 0.975))
     t_stat <- mean_r2 / (sd(boot_r2s) / sqrt(n_boots))
     p_value <- 2 * pt(-abs(t_stat), df = n_boots - 1)
     
-    # Translated comment.
+    # results.
     results[[i]] <- list(
       metabolite = colnames(Y)[i],
       mean_r2 = mean_r2,
@@ -169,20 +169,20 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
       all_r2s = boot_r2s
     )
     
-    # Translated comment.
+
     pb$tick()
     
-    # Translated comment.
+    # results.
     end_time <- Sys.time()
     time_taken <- difftime(end_time, start_time, units = "mins")
     message(sprintf("\nMetabolite %d/%d (%s): R² = %.3f (95%% CI: %.3f-%.3f, p = %.3e) Time: %.2f mins", 
                     i, ncol(Y), colnames(Y)[i], mean_r2, ci[1], ci[2], p_value, time_taken))
   }
   
-  # Translated comment.
+  # Stop the parallel cluster.
   stopCluster(cl)
   
-  # Translated comment.
+  # Organize the results into a data frame.
   summary_df <- do.call(rbind, lapply(results, function(x) {
     data.frame(
       metabolite = x$metabolite,
@@ -200,17 +200,17 @@ analyze_metabolite_ev <- function(microbiome_data, metabolite_data, n_cores = NU
   ))
 }
 
-# Translated comment.
+# Plot_ev_results.
 
-# Translated comment.
+# Results.
 plot_ev_results <- function(results) {
   library(ggplot2)
   
-  # Translated comment.
+  # data.
   plot_data <- results$summary %>%
     arrange(desc(r2_mean))
   
-  # Translated comment.
+  # 1. significancemetabolites.
   p1 <- ggplot(plot_data, aes(x = r2_mean)) +
     geom_histogram(bins = 30, fill = "steelblue", color = "white") +
     theme_minimal() +
@@ -218,7 +218,7 @@ plot_ev_results <- function(results) {
          x = "R²",
          y = "Count")
   
-  # Translated comment.
+  # 2. Top 20metabolitesR-squared.
   p2 <- plot_data %>%
     head(20) %>%
     ggplot(aes(x = reorder(metabolite, r2_mean), y = r2_mean)) +
@@ -230,7 +230,7 @@ plot_ev_results <- function(results) {
          x = "Metabolite",
          y = "R² (with 95% CI)")
   
-  # Translated comment.
+  # 3. .
   p3 <- ggplot(plot_data, 
                aes(x = r2_mean, y = -log10(p_value))) +
     geom_point(alpha = 0.6) +

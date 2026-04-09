@@ -145,7 +145,7 @@ library(dplyr)
 library(tidyr)
 library(cowplot)
 
-# Translated comment.
+# metabolitesin .
 data <- four_site_GBDT_R2 %>%
   mutate(
     Dominant_Factor = case_when(
@@ -156,12 +156,12 @@ data <- four_site_GBDT_R2 %>%
     )
   )
 
-# Translated comment.
+# Calculatemetabolites R-squared ,main after R-squared descending ordersort.
 data <- data %>%
   mutate(Total_R2 = gut + oral + skin + nasal) %>%
   arrange(Dominant_Factor, desc(Total_R2))
 
-# Translated comment.
+# Convert ggplot Plot.
 data_long <- data %>%
   pivot_longer(
     cols = c("gut", "oral", "skin", "nasal"),
@@ -169,7 +169,7 @@ data_long <- data %>%
     values_to = "R_squared"
   )
 
-# Translated comment.
+# Plotbar chart.
 ggplot(data_long, aes(
   x = factor(metabolite, levels = data$metabolite),
   y = R_squared,
@@ -229,7 +229,7 @@ ggsave(
   height = 10
 )
 
-## Translated comment.
+## PlotsiteR250samples.
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
 oral_GBDT_results <- readRDS("../../3_data_analysis/oral_microbiome/GBDT/cross_section/oral_GBDT_results")
 skin_GBDT_results <- readRDS("../../3_data_analysis/skin_microbiome/GBDT/cross_section/skin_GBDT_results")
@@ -260,9 +260,9 @@ colnames(four_site_GBDT_R2) <- c("metabolite", "gut", "oral", "skin", "nasal")
 library(tidyverse)
 library(ggplot2)
 
-# Translated comment.
+# Getbody site50metabolites.
 metabolite_analysis <- function(four_site_GBDT_R2) {
-  # Translated comment.
+  # Getbody site50data.
   gut_data <- four_site_GBDT_R2 %>%
     top_n(50, gut) %>%
     select(metabolite, gut) %>%
@@ -287,7 +287,7 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
     mutate(Site = "nasal", Value = nasal) %>%
     select(metabolite, Site, Value)
   
-  # Translated comment.
+  # Mergedata.
   combined_data <- bind_rows(gut_data, oral_data, skin_data, nasal_data)
   
   
@@ -300,13 +300,13 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
       mean = mean(Value),
       sd = sd(Value),
       count = length(Value),
-      # Translated comment.
+      # Use length()  n().
       se = sd(Value) / sqrt(length(Value))
     )
   
   
   ggplot() +
-    # Translated comment.
+    # Addbar chart.
     geom_bar(
       data = summary_stats,
       aes(x = Site, y = mean, fill = Site),
@@ -314,7 +314,7 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
       width = 0.6,
       alpha = 1
     ) +
-    # Translated comment.
+    # Add.
     geom_errorbar(data = summary_stats,
                   aes(
                     x = Site,
@@ -322,16 +322,16 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
                     ymax = mean + se
                   ),
                   width = 0.2) +
-    # Translated comment.
+    # Add.
     geom_quasirandom(
       data = combined_data,
       aes(x = Site, y = Value),
       alpha = 0.8,
       width = 0.2
     ) +
-    # Translated comment.
+    # Setcolors.
     scale_fill_manual(values = body_site_color) +
-    # Translated comment.
+    # Sety.
     scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +
     theme(
@@ -343,12 +343,12 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
         hjust = 1,
         family = "Helvetica"
       ) ,
-      # Translated comment.
+      # Rotate x-axis labels if group names are long.
       axis.ticks.length = unit(0.25, "cm"),
-      # Translated comment.
-      axis.ticks = element_line(linewidth = 0.8)  # translated comment
+      # Increase tick length.
+      axis.ticks = element_line(linewidth = 0.8)  # Increase tick line width.
     ) +
-    # Translated comment.
+    # Setaxis labels.
     xlab("") +
     ylab("R2")
   
@@ -361,98 +361,98 @@ metabolite_analysis <- function(four_site_GBDT_R2) {
 ## p-cresol and  PAGln
 
 
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
-# Translated comment.
+# : Getmetabolitesand correlation.
+# :.
+# - metabolite_name: Analyzemetabolites.
+# - model_dir: Save.
+# - microbiome_data: microbiome datamatrix,features(OTU/ASV),sample names.
+# - metabolite_data: metabolitesdatamatrix,metabolites,sample names.
+# - plot_results: whether .
 get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_NEG_RPLC",
                                                   model_dir = "models",
                                                   microbiome_data,
                                                   metabolite_data,
                                                   plot_results = TRUE) {
-  # Translated comment.
+  # Load required packages.
   library(dplyr)
   library(ggplot2)
   library(gbm)
   
-  # Translated comment.
+  # 1: Checkwhether .
   model_file <- file.path(model_dir, paste0(make.names(metabolite_name), "_model.rds"))
   if (!file.exists(model_file)) {
-    stop(sprintf("模型文件 %s 不存在，请检查代谢物名称和模型目录", model_file))
+    stop(sprintf("Model file %s does not exist. Please check the metabolite name and model directory.", model_file))
   }
   
-  # Translated comment.
+  # 2: Load.
   model_info <- readRDS(model_file)
-  message(sprintf("成功加载模型: %s", model_file))
+  message(sprintf("Model loaded successfully: %s", model_file))
   
-  # Translated comment.
+  # 3: data preprocessing (ensure sample alignment).
   micro_samples <- colnames(microbiome_data)
   meta_samples <- colnames(metabolite_data)
   common_samples <- intersect(micro_samples, meta_samples)
   
-  message(sprintf("可用样本数: %d", length(common_samples)))
+  message(sprintf("Available sample count: %d", length(common_samples)))
   
   microbiome_matched <- microbiome_data[, common_samples]
   metabolite_matched <- metabolite_data[, common_samples]
   
-  # Translated comment.
-  # Translated comment.
+  # 4: data.
+  # - Getmetabolites.
   metabolite_idx <- which(rownames(metabolite_matched) == metabolite_name)
   if (length(metabolite_idx) == 0) {
-    # Translated comment.
+
     possible_matches <- grep(metabolite_name, rownames(metabolite_matched), value = TRUE)
     if (length(possible_matches) > 0) {
-      message("未找到完全匹配的代谢物名称，但找到了以下可能的匹配：")
+      message("No exact metabolite name match was found, but these possible matches were found:")
       for (i in 1:min(5, length(possible_matches))) {
         message(sprintf("%d. %s", i, possible_matches[i]))
       }
       if (length(possible_matches) > 5) {
-        message(sprintf("...及其他 %d 个可能的匹配", length(possible_matches) - 5))
+        message(sprintf("...and %d more possible matches", length(possible_matches) - 5))
       }
       
-      # Translated comment.
-      message(sprintf("使用第一个匹配项 '%s' 进行分析...", possible_matches[1]))
+      # whether Use.
+      message(sprintf("Using the first match '%s' for analysis...", possible_matches[1]))
       metabolite_name <- possible_matches[1]
       metabolite_idx <- which(rownames(metabolite_matched) == metabolite_name)
     } else {
-      # Translated comment.
-      message("代谢物数据中的一些行名（供参考）：")
+      # metabolite datain row names.
+      message("Some row names from the metabolite data for reference:")
       print(head(rownames(metabolite_matched), 10))
-      stop(sprintf("在代谢物数据中找不到 %s", metabolite_name))
+      stop(sprintf("Could not find %s in the metabolite data", metabolite_name))
     }
   }
   
-  # Translated comment.
+  # - Extractmetabolites.
   observed_values <- as.numeric(metabolite_matched[metabolite_idx, ])
   
-  # Translated comment.
-  X <- t(microbiome_matched) # translated comment
+  # - microbiome data.
+  X <- t(microbiome_matched) # Transposesamples.
   
-  # Translated comment.
+  # 5: Usein features.
   selected_features <- model_info$selected_features
   
-  # Translated comment.
+  # Checkfeatureswhether datain.
   missing_features <- selected_features[!selected_features %in% colnames(X)]
   if (length(missing_features) > 0) {
-    warning(sprintf("有 %d 个模型特征在当前数据中不存在，这可能影响预测质量", length(missing_features)))
-    message("缺失的前几个特征：")
+    warning(sprintf("%d model features are missing in the current data, which may affect prediction quality", length(missing_features)))
+    message("First few missing features:")
     print(head(missing_features))
-    # Translated comment.
+    # Usefeatures.
     selected_features <- selected_features[selected_features %in% colnames(X)]
   }
   
   if (length(selected_features) > 0) {
-    message(sprintf("使用 %d 个选定特征进行预测", length(selected_features)))
+    message(sprintf("Predicting with %d selected features", length(selected_features)))
     X_selected <- X[, selected_features, drop = FALSE]
   } else {
-    warning("没有可用的特征用于预测，将使用所有特征")
+    warning("No selected features are available for prediction; all features will be used")
     X_selected <- X
   }
   
-  # Translated comment.
+  # 6: Use.
   prediction_data <- as.data.frame(X_selected)
   predicted_values <- as.numeric(
     predict(
@@ -462,27 +462,27 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
     )
   )
   
-  # Translated comment.
-  # Translated comment.
+  # 7: Calculatecorrelation.
+  # Checkdata.
   if (!is.numeric(observed_values)) {
-    warning("观察值不是数值类型，尝试强制转换")
+    warning("Observed values are not numeric; attempting coercion")
     observed_values <- as.numeric(observed_values)
   }
   
   if (!is.numeric(predicted_values)) {
-    warning("预测值不是数值类型，尝试强制转换")
+    warning("Predicted values are not numeric; attempting coercion")
     predicted_values <- as.numeric(predicted_values)
   }
   
-  # Translated comment.
+  # Checkwhether NA.
   if (any(is.na(observed_values)) || any(is.na(predicted_values))) {
     valid_idx <- which(!is.na(observed_values) &
                          !is.na(predicted_values))
     if (length(valid_idx) == 0) {
-      stop("所有样本都包含NA值，无法计算相关性")
+      stop("All samples contain NA values; correlation cannot be calculated")
     }
     warning(sprintf(
-      "发现 %d 个NA值，将使用 %d 个有效样本计算相关性",
+      "Found %d NA values; correlation will be computed with %d valid samples",
       length(observed_values) - length(valid_idx),
       length(valid_idx)
     ))
@@ -497,11 +497,11 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
   p_value <- correlation_test$p.value
   r_squared <- r_value^2
   
-  message(sprintf("相关系数 (r): %.4f", r_value))
-  message(sprintf("决定系数 (R²): %.4f", r_squared))
-  message(sprintf("p-值: %.6e", p_value))
+  message(sprintf("Correlation coefficient (r): %.4f", r_value))
+  message(sprintf("Coefficient of determination (R-squared): %.4f", r_squared))
+  message(sprintf("p-value: %.6e", p_value))
   
-  # Translated comment.
+  # 8: Create.
   if (plot_results) {
     results_df <- data.frame(Observed = observed_values,
                              Predicted = predicted_values,
@@ -520,15 +520,15 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
       ) +
       theme_minimal() +
       labs(
-        title = sprintf("代谢物 %s 的观察值 vs 预测值", metabolite_name),
+        title = sprintf("Observed vs predicted values for metabolite %s", metabolite_name),
         subtitle = sprintf("r = %.3f, R² = %.3f, p = %.3e", r_value, r_squared, p_value),
-        x = "观察值",
-        y = "预测值"
+        x = "Observed",
+        y = "Predicted"
       )
     
     print(p)
     
-    # Translated comment.
+    # Create:  vs .
     results_df$Residuals <- results_df$Observed - results_df$Predicted
     
     p_residual <- ggplot(results_df, aes(x = Predicted, y = Residuals)) +
@@ -540,18 +540,18 @@ get_metabolite_prediction_correlation <- function(metabolite_name = "M187T125_2_
                   formula = y ~ x,
                   color = "blue") +
       theme_minimal() +
-      labs(title = "残差 vs 预测值", x = "预测值", y = "残差")
+      labs(title = "Residuals vs Predicted", x = "Predicted", y = "Residuals")
     
     print(p_residual)
     
-    # Translated comment.
+    # Saveresults.
     result_plots <- list(scatter_plot = p, residual_plot = p_residual)
   } else {
     result_plots <- NULL
   }
   
-  # Translated comment.
-  # Translated comment.
+  # 9: Returnresults.
+  # Createresultsdata frame.
   results_df <- data.frame(
     Sample = common_samples,
     Observed = observed_values,
@@ -606,15 +606,15 @@ plot <-
   stat_cor(method = "spearman") +
   theme(
     legend.position = "none",
-    # Translated comment.
+    # Hide the legend.
     axis.text.x = element_text(colour = "black", size = 14),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.text.y = element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.title.y = element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set y-axis title text properties.
     axis.title.x = element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set x-axis title text properties.
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
   ) + xlab("Observed p-cresol") + ylab("Predicted  p-cresol")
 plot
@@ -656,15 +656,15 @@ plot <-
   stat_cor(method = "spearman") +
   theme(
     legend.position = "none",
-    # Translated comment.
+    # Hide the legend.
     axis.text.x = element_text(colour = "black", size = 14),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.text.y = element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set x-axis tick label text properties.
     axis.title.y = element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set y-axis title text properties.
     axis.title.x = element_text(size = 14, face = "plain"),
-    # Translated comment.
+    # Set x-axis title text properties.
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
   ) + xlab("Observed PAGln") + ylab("Predicted  PAGln")
 
@@ -689,7 +689,7 @@ metabolite_annotation <- read_excel(
   "3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
 )
 setwd("1_code/4_site_merge/")
-## Translated comment.
+## 814metabolitesheatmap.
 
 
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
@@ -733,7 +733,7 @@ metabolite_annotation <- read_excel(
   "3_data_analysis/plasma_metabolomics/data_preparation/metabolite/variable_info_metabolome_HMDB_class.xlsx"
 )
 setwd("1_code/4_site_merge/")
-## Translated comment.
+## 814metabolitesheatmap.
 
 
 gut_GBDT_results <- readRDS("../../3_data_analysis/gut_microbiome/GBDT/cross_section/gut_GBDT_results")
@@ -769,27 +769,27 @@ four_site_GBDT_R2[four_site_GBDT_R2 < 0.05] <- 0
 four_site_GBDT_R2 <- four_site_GBDT_R2[rowSums(four_site_GBDT_R2) > 0, ]
 
 
-# Translated comment.
+# Load the required packages.
 library(dplyr)
 library(ggplot2)
 library(stats)
 
 metabolite_class_enrichment <- function(significant_metabolites,
-                                        # Translated comment.
+                                        # Significantmetabolites.
                                         all_metabolites_df,
-                                        # Translated comment.
+                                        # metabolitesclassdata frame.
                                         class_column,
-                                        # Translated comment.
+                                        # Classcolumn names.
                                         metabolite_column,
-                                        # Translated comment.
+                                        # MetabolitesID/column names.
                                         alpha = 0.05) {
-  # Translated comment.
+  # Getmetabolites.
   N <- nrow(all_metabolites_df)
   
-  # Translated comment.
+  # Getsignificantmetabolites.
   n <- length(significant_metabolites)
   
-  # Translated comment.
+  # For classAnalyze.
   results <- all_metabolites_df %>%
     dplyr::group_by(!!sym(class_column)) %>%
     dplyr::summarise(
@@ -799,7 +799,7 @@ metabolite_class_enrichment <- function(significant_metabolites,
     mutate(
       Expected_by_chance = (Total_in_class * n) / N,
       Fold_enrichment = (Significant_in_class / n) / (Total_in_class / N),
-      # Translated comment.
+      # Calculatep-values.
       P_value = phyper(
         Significant_in_class - 1,
         Total_in_class,
@@ -809,10 +809,10 @@ metabolite_class_enrichment <- function(significant_metabolites,
       ) * 0.6
     )
   
-  # Translated comment.
+  # FDR correction.
   results$FDR <- p.adjust(results$P_value, method = "BH")
   
-  # Translated comment.
+  # p-valuessort.
   results <- results %>% arrange(P_value)
   
   return(results)
@@ -906,7 +906,7 @@ results_all <- subset(
   )
 )
 
-# Translated comment.
+# CreateAdddata frame.
 stars_data <- data.frame(
   site = c("gut", "gut", "skin", "oral", "nasal"),
   HMDB.Class = c(
@@ -917,30 +917,30 @@ stars_data <- data.frame(
     "Carboxylic acids and derivatives"
   ),
   Significant_in_class = NA,
-  # Translated comment.
+  # datain Extract.
   label = "*"
 )
 
-# Translated comment.
-# Translated comment.
+# ydatasetin Extract.
+# For ,for y(Significant_in_class).
 for (i in 1:nrow(stars_data)) {
   row_match <- results_all[results_all$site == stars_data$site[i] &
                              results_all$HMDB.Class == stars_data$HMDB.Class[i], ]
   
   if (nrow(row_match) > 0) {
-    # Translated comment.
-    stars_data$Significant_in_class[i] <- row_match$Significant_in_class[1] * 1.05  # translated comment
+    # Get,Add.
+    stars_data$Significant_in_class[i] <- row_match$Significant_in_class[1] * 1.05  # 5%.
   }
 }
 
 
-# Translated comment.
+# ,sitevariablesConvert.
 results_all$site <- factor(results_all$site, levels = c("gut", "oral", "skin", "nasal"))
 
-# Translated comment.
+# for stars_dataProcess(if Usestars_data).
 stars_data$site <- factor(stars_data$site, levels = c("gut", "oral", "skin", "nasal"))
 
-# Translated comment.
+# afterPlot.
 class_level <-
   results_all %>%
   dplyr::filter(site == "gut") %>%
@@ -954,9 +954,9 @@ plot <-
   ggplot(results_all, aes(x = HMDB.Class, y = Significant_in_class)) +
   geom_bar(stat = "identity", aes(fill = site), color = "black") +
   theme_bw() +
-  facet_wrap( ~ site, nrow = 1) +  # translated comment
+  facet_wrap( ~ site, nrow = 1) +
   coord_flip() +
-  # Translated comment.
+  # Add(if Usestars_data).
   geom_text(
     data = stars_data,
     aes(x = HMDB.Class, y = Significant_in_class, label = label),

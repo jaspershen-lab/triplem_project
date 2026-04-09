@@ -112,7 +112,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## Translated comment.
+## Compute correlations between all genera and metabolomics PC1.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -125,25 +125,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# Translated comment.
-# Translated comment.
+# Assume 'metabolomics_pc' and 'gut_pc' are your data frames and have been set correctly.
+# Ensure the two data frames use the same samples (row names) in the same order.
 
-# Translated comment.
+# Convert the data frames to matrices for correlation analysis.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# Translated comment.
+# Convert the results to a data frame.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -154,7 +154,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# Translated comment.
+# Select the top 100 metabolites.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -175,14 +175,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -200,7 +200,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # translated comment
+  mutate(abs_rho = abs(rho)) %>% # Create an absolute-value column.
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -324,7 +324,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## Translated comment.
+## Compute correlations between all genera and metabolomics PC1.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -337,25 +337,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# Translated comment.
-# Translated comment.
+# Assume 'metabolomics_pc' and 'gut_pc' are your data frames and have been set correctly.
+# Ensure the two data frames use the same samples (row names) in the same order.
 
-# Translated comment.
+# Convert the data frames to matrices for correlation analysis.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# Translated comment.
+# Convert the results to a data frame.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -366,7 +366,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# Translated comment.
+# Select the top 100 metabolites.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -387,14 +387,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -412,7 +412,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # translated comment
+  mutate(abs_rho = abs(rho)) %>% # Create an absolute-value column.
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -536,7 +536,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## Translated comment.
+## Compute correlations between all genera and metabolomics PC1.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -549,25 +549,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# Translated comment.
-# Translated comment.
+# Assume 'metabolomics_pc' and 'gut_pc' are your data frames and have been set correctly.
+# Ensure the two data frames use the same samples (row names) in the same order.
 
-# Translated comment.
+# Convert the data frames to matrices for correlation analysis.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# Translated comment.
+# Convert the results to a data frame.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -578,7 +578,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# Translated comment.
+# Select the top 100 metabolites.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -599,14 +599,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -624,7 +624,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # translated comment
+  mutate(abs_rho = abs(rho)) %>% # Create an absolute-value column.
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -748,7 +748,7 @@ metabolomics_pca_object <-
   activate_mass_dataset(what = "variable_info") %>%
   massstat::run_pca()
 
-## Translated comment.
+## Compute correlations between all genera and metabolomics PC1.
 metabolomics_pc<-t(metabolomics_temp_object@expression_data)
 gut_pc<-t(gut_temp_object@expression_data)
 
@@ -761,25 +761,25 @@ metabolomics_pc<-metabolomics_pc[share_index,]
 gut_pc<-gut_pc[share_index,]
 
 
-# Translated comment.
-# Translated comment.
+# Assume 'metabolomics_pc' and 'gut_pc' are your data frames and have been set correctly.
+# Ensure the two data frames use the same samples (row names) in the same order.
 
-# Translated comment.
+# Convert the data frames to matrices for correlation analysis.
 metabolomics_matrix <- as.matrix(metabolomics_pc)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
-# Translated comment.
+# Convert the results to a data frame.
 
 
 cor_values[p_values > 0.05] <- 0
@@ -790,7 +790,7 @@ cor_values_filtered <- cor_values_filtered[, colSums(cor_values_filtered) != 0]
 
 
 
-# Translated comment.
+# Select the top 100 metabolites.
 num_count<-apply(cor_values_filtered, 2, function(x) length(which(x != 0)))%>%sort(decreasing = TRUE)%>%data.frame()
 metabolomics_top100<-rownames(num_count)[1:100]
 
@@ -811,14 +811,14 @@ metabolomics_top100_PC1<-metabolomics_top100_PC1[share_index,]
 metabolomics_matrix <- as.matrix(metabolomics_top100_PC1)
 gut_matrix <- as.matrix(gut_pc)
 
-# Translated comment.
+# Calculate the correlation matrix.
 correlation_results <- apply(metabolomics_matrix, 2, function(metabolite) {
   apply(gut_matrix, 2, function(species) {
     cor.test(metabolite, species, method = "spearman")
   })
 })
 
-# Translated comment.
+# Extract correlation coefficients and p-values.
 cor_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$estimate))
 p_values <- sapply(correlation_results, function(x) sapply(x, function(y) y$p.value))
 
@@ -836,7 +836,7 @@ colnames(genus_top20_mete)<-c("rho","p_val")
 
 genus_top20_mete <- genus_top20_mete %>% rownames_to_column("row_name")
 genus_top30_mete <- genus_top20_mete %>%
-  mutate(abs_rho = abs(rho)) %>% # translated comment
+  mutate(abs_rho = abs(rho)) %>% # Create an absolute-value column.
   arrange(desc(abs_rho))
 
 genus_top30_mete<-merge(genus_top30_mete,gut_temp_object@variable_info,by.x="row_name",by.y="variable_id")
@@ -866,7 +866,7 @@ all_genus<-merge(all_genus,nasal_cor_PC1[,c("abs_rho","Genus")],by.x="all_genus"
 colnames(all_genus)<-c("Genus","gut","oral","skin","nasal")
 
 
-# Translated comment.
+# Filter0taxa.
 
 
 all_genus[is.na(all_genus)] <- 0

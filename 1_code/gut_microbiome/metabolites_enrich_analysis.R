@@ -39,15 +39,15 @@ compound_list<-hmdb_pathway@compound_list
 
 
 
-# Translated comment.
+# Filter HMDB.ID .
 selected_hmdb_ids <- metabolite_annotation$HMDB.ID
 
-# Translated comment.
+# Filter compound_list in  data.frame .
 filtered_compound_list <- lapply(compound_list, function(df) {
   df[df$HMDB.ID %in% selected_hmdb_ids, ]
 })
 
-# Translated comment.
+# ViewFilterresults.
 filtered_compound_list
 
 hmdb_pathway@compound_list<-filtered_compound_list

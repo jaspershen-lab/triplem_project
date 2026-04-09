@@ -81,11 +81,11 @@ select_significant_metabolites <- function(gut_microbiome, metabolome,
 #' @param selection_results Results from select_significant_metabolites function
 #' @param metabolomics_class Data frame containing metabolite class information
 plot_metabolite_selection <- function(selection_results, metabolomics_class) {
-  # Translated comment.
+  # CreatemetabolitesIDfor .
   id_to_name <- setNames(metabolomics_class$Compound.name, 
                          rownames(metabolomics_class))
   
-  # Translated comment.
+  # Addmetabolitesresultsdata frame.
   results_df <- selection_results$all_results
   results_df$compound_name <- id_to_name[results_df$metabolite]
   
@@ -101,7 +101,7 @@ plot_metabolite_selection <- function(selection_results, metabolomics_class) {
     geom_vline(xintercept = 0.3, linetype = "dashed", color = "red") +
     ggrepel::geom_text_repel(
       data = head(results_df[order(-results_df$n_sig_cors),], 10),
-      aes(label = compound_name),  # translated comment
+      aes(label = compound_name),  # Usecompound_namemetabolite.
       size = 3,
       box.padding = 0.5,
       force = 10,
@@ -260,14 +260,14 @@ library(ggrepel)
 #' @param metabolomics_class Data frame containing metabolite information
 #' @param sites Names of body sites in order: (+,+), (-,+), (-,-), (+,-)
 plot_quadrant_metabolite_selection <- function(selection_results_list, metabolomics_class, sites) {
-  # Translated comment.
+  # CreatemetabolitesIDfor .
   id_to_name <- setNames(metabolomics_class$Compound.name, 
                          rownames(metabolomics_class))
   
-  # Translated comment.
+  # Create an empty data frame to store all results.
   plot_data <- data.frame()
   
-  # Translated comment.
+  # Processbody sitedata.
   for(i in seq_along(sites)) {
     site <- sites[i]
     temp_data <- selection_results_list[[site]]$all_results
@@ -275,22 +275,22 @@ plot_quadrant_metabolite_selection <- function(selection_results_list, metabolom
     temp_data$site <- site
     temp_data$selected <- temp_data$n_sig_cors > 0
     
-    # Translated comment.
-    if(i == 1) {  # translated comment
+    # Setcoordinates.
+    if(i == 1) {
       temp_data$plot_x <- abs(temp_data$max_cor)
       temp_data$plot_y <- temp_data$n_sig_cors
-    } else if(i == 2) {  # translated comment
+    } else if(i == 2) {
       temp_data$plot_x <- -abs(temp_data$max_cor)
       temp_data$plot_y <- temp_data$n_sig_cors
-    } else if(i == 3) {  # translated comment
+    } else if(i == 3) {
       temp_data$plot_x <- -abs(temp_data$max_cor)
       temp_data$plot_y <- -temp_data$n_sig_cors
-    } else {  # translated comment
+    } else {
       temp_data$plot_x <- abs(temp_data$max_cor)
       temp_data$plot_y <- -temp_data$n_sig_cors
     }
     
-    # Translated comment.
+    # body sitetop 10metabolites.
     temp_data$is_top10 <- FALSE
     temp_data$is_top10[order(-temp_data$n_sig_cors)[1:10]] <- TRUE
     
@@ -345,7 +345,7 @@ plot_quadrant_metabolite_selection <- function(selection_results_list, metabolom
 }
 
 
-# Translated comment.
+# body siteresults.
 selection_results_list <- list(
   "Gut" = gut_result,
   "Oral" = oral_result,
@@ -353,10 +353,10 @@ selection_results_list <- list(
   "Nasal" = nasal_result
 )
 
-# Translated comment.
+# Definebody site.
 sites <- c("Gut", "Oral", "Skin", "Nasal")
 
-# Translated comment.
+# Plotbody site.
 p <- plot_quadrant_metabolite_selection(
   selection_results_list = selection_results_list,
   metabolomics_class = metabolomics_class,
